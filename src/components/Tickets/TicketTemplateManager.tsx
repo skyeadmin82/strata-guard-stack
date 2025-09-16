@@ -80,7 +80,7 @@ export const TicketTemplateManager: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTemplates((data || []) as TicketTemplate[]);
+      setTemplates((data || []) as unknown as TicketTemplate[]);
     } catch (error) {
       console.error('Error fetching templates:', error);
       toast({
@@ -145,7 +145,7 @@ export const TicketTemplateManager: React.FC = () => {
 
       if (error) throw error;
 
-      setTemplates([data as TicketTemplate, ...templates]);
+      setTemplates([data as unknown as TicketTemplate, ...templates]);
       setIsAddDialogOpen(false);
       setNewTemplate({
         name: '',
@@ -193,7 +193,7 @@ export const TicketTemplateManager: React.FC = () => {
 
       if (error) throw error;
 
-      setTemplates(templates.map(t => t.id === editingTemplate.id ? data as TicketTemplate : t));
+      setTemplates(templates.map(t => t.id === editingTemplate.id ? data as unknown as TicketTemplate : t));
       setEditingTemplate(null);
 
       toast({
