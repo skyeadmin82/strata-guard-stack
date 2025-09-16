@@ -8355,6 +8355,12 @@ export type Database = {
         Args: { client_uuid: string; email_address: string }
         Returns: boolean
       }
+      trigger_recurring_invoice_generation: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          request_id: number
+        }[]
+      }
       user_has_role: {
         Args: { _role: Database["public"]["Enums"]["user_role"] }
         Returns: boolean
