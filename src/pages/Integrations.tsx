@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 
 // Import integration components
-import PSAMigration from '@/components/Integrations/PSAMigration';
+import PSAMigration from '@/components/integrations/PSAMigration';
 import { useIntegrations } from '@/hooks/useIntegrations';
 
 export default function Integrations() {
