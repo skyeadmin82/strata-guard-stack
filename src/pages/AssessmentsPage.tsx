@@ -7,9 +7,27 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, ClipboardCheck, TrendingUp, Award, Building2 } from 'lucide-react';
+import { useAssessmentReporting } from '@/hooks/useAssessmentReporting';
+import { AssessmentRiskMatrix } from '@/components/Assessments/AssessmentRiskMatrix';
+import { AssessmentSchedulingDialog } from '@/components/Assessments/AssessmentSchedulingDialog';
+import { AssessmentComparison } from '@/components/Assessments/AssessmentComparison';
+import { ActionItemsManager } from '@/components/Assessments/ActionItemsManager';
+import { 
+  Search, 
+  Plus, 
+  ClipboardCheck, 
+  TrendingUp, 
+  Award, 
+  Building2, 
+  Calendar,
+  FileText,
+  BarChart3,
+  Lightbulb,
+  Download
+} from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Assessment {
@@ -32,7 +50,13 @@ export const AssessmentsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [showSchedulingDialog, setShowSchedulingDialog] = useState(false);
+  const [clients, setClients] = useState<Array<{id: string, name: string}>>([]);
+  const [templates, setTemplates] = useState<Array<{id: string, name: string, category?: string}>>([]);
+  const [activeTab, setActiveTab] = useState('overview');
+  
   const { toast } = useToast();
+  const { generateReport, exportReport, isGenerating, isExporting } = useAssessmentReporting();
 
   const fetchAssessments = async () => {
     try {
@@ -47,14 +71,24 @@ export const AssessmentsPage = () => {
       if (clientsResult.error) throw clientsResult.error;
       if (templatesResult.error) throw templatesResult.error;
 
-      // Manually join the data
+      // Manually join the data and transform to match Assessment interface
       const assessmentsWithRelations = assessmentsResult.data?.map(assessment => ({
         ...assessment,
         clients: clientsResult.data?.find(client => client.id === assessment.client_id) || null,
-        assessment_templates: templatesResult.data?.find(template => template.id === assessment.template_id) || null
+        assessment_templates: templatesResult.data?.find(template => template.id === assessment.template_id) || null,
+        // Transform to match Assessment interface
+        assessed_by: assessment.assessor_id || '',
+        assessment_type: 'general' as const,
+        title: `Assessment ${assessment.id}`,
+        description: 'IT Security Assessment',
+        overall_score: assessment.total_score || 0,
+        findings: [],
+        recommendations: []
       })) || [];
 
-      setAssessments(assessmentsWithRelations as unknown as Assessment[]);
+      setAssessments(assessmentsWithRelations as Assessment[]);
+      setClients(clientsResult.data || []);
+      setTemplates(templatesResult.data || []);
     } catch (error) {
       console.error('Error fetching assessments:', error);
       toast({
@@ -101,6 +135,32 @@ export const AssessmentsPage = () => {
     ? assessments.reduce((sum, assessment) => sum + (assessment.percentage_score || 0), 0) / assessments.length
     : 0;
 
+  const handleGeneratePDFReport = async (assessmentId: string) => {
+    const result = await generateReport(assessmentId);
+    if (result.success && result.reportId) {
+      const exportResult = await exportReport(result.reportId, 'pdf');
+      if (exportResult.success && exportResult.data) {
+        const url = URL.createObjectURL(exportResult.data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = exportResult.filename || 'assessment-report.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    }
+  };
+
+  const handleExportComparison = (comparisonData: any) => {
+    const dataStr = JSON.stringify(comparisonData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `assessment-comparison-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -122,10 +182,16 @@ export const AssessmentsPage = () => {
             <h1 className="text-3xl font-bold">Assessments</h1>
             <p className="text-muted-foreground">Monitor client assessments and scores</p>
           </div>
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Assessment
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowSchedulingDialog(true)}>
+              <Calendar className="w-4 h-4 mr-2" />
+              Schedule
+            </Button>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              New Assessment
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -177,142 +243,241 @@ export const AssessmentsPage = () => {
           </Card>
         </div>
 
-        {/* Filters */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Client Assessments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-4 mb-6">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search assessments..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8"
-                  />
-                </div>
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        {/* Enhanced Assessment Views */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="risk-matrix">Risk Matrix</TabsTrigger>
+            <TabsTrigger value="comparison">Compare</TabsTrigger>
+            <TabsTrigger value="action-items">Action Items</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
+          </TabsList>
 
-            {/* Assessments Table */}
-            {filteredAssessments.length > 0 ? (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Client</TableHead>
-                      <TableHead>Assessment Type</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Score</TableHead>
-                      <TableHead>Progress</TableHead>
-                      <TableHead>Started</TableHead>
-                      <TableHead>Completed</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAssessments.map((assessment) => (
-                      <TableRow 
-                        key={assessment.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => {
-                          // Primary action: View assessment details
-                          console.log('View assessment:', assessment.id);
-                        }}
-                      >
-                        <TableCell>
-                          <div className="flex items-center">
-                            <Building2 className="w-4 h-4 mr-2 text-muted-foreground" />
-                            {assessment.clients?.name || 'Unknown Client'}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {assessment.assessment_templates?.name || 'Unknown Template'}
-                            </div>
-                            {assessment.assessment_templates?.category && (
-                              <div className="text-sm text-muted-foreground">
-                                {assessment.assessment_templates.category}
+          <TabsContent value="overview">{/* Original table content will go here */}
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Client Assessments</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-4 mb-6">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search assessments..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-8"
+                      />
+                    </div>
+                  </div>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Assessments Table */}
+                {filteredAssessments.length > 0 ? (
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Client</TableHead>
+                          <TableHead>Assessment Type</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Score</TableHead>
+                          <TableHead>Progress</TableHead>
+                          <TableHead>Started</TableHead>
+                          <TableHead>Completed</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredAssessments.map((assessment) => (
+                          <TableRow 
+                            key={assessment.id}
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => {
+                              // Primary action: View assessment details
+                              console.log('View assessment:', assessment.id);
+                            }}
+                          >
+                            <TableCell>
+                              <div className="flex items-center">
+                                <Building2 className="w-4 h-4 mr-2 text-muted-foreground" />
+                                {assessment.clients?.name || 'Unknown Client'}
                               </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={getStatusColor(assessment.status)}>
-                            {assessment.status?.replace('_', ' ').toUpperCase()}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {assessment.status === 'completed' ? (
-                            <div className="flex items-center space-x-2">
-                              <span className={`font-medium ${getScoreColor(assessment.percentage_score || 0)}`}>
-                                {assessment.percentage_score || 0}%
-                              </span>
-                              <span className="text-sm text-muted-foreground">
-                                ({assessment.total_score}/{assessment.max_possible_score})
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {assessment.status === 'completed' ? (
-                            <Progress value={100} className="w-20" />
-                          ) : assessment.status === 'in_progress' ? (
-                            <Progress value={50} className="w-20" />
-                          ) : (
-                            <Progress value={0} className="w-20" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {assessment.started_at ? 
-                            format(new Date(assessment.started_at), 'MMM dd, yyyy') : '-'
-                          }
-                        </TableCell>
-                        <TableCell>
-                          {assessment.completed_at ? 
-                            format(new Date(assessment.completed_at), 'MMM dd, yyyy') : '-'
-                          }
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <ClipboardCheck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No assessments found</h3>
-                <p className="text-muted-foreground mb-4">
-                  {searchTerm || statusFilter !== 'all' 
-                    ? 'No assessments match your current filters'
-                    : 'Get started by creating your first assessment'
-                  }
-                </p>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Assessment
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">
+                                  {assessment.assessment_templates?.name || 'Unknown Template'}
+                                </div>
+                                {assessment.assessment_templates?.category && (
+                                  <div className="text-sm text-muted-foreground">
+                                    {assessment.assessment_templates.category}
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={getStatusColor(assessment.status)}>
+                                {assessment.status?.replace('_', ' ').toUpperCase()}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {assessment.status === 'completed' ? (
+                                <div className="flex items-center space-x-2">
+                                  <span className={`font-medium ${getScoreColor(assessment.percentage_score || 0)}`}>
+                                    {assessment.percentage_score || 0}%
+                                  </span>
+                                  <span className="text-sm text-muted-foreground">
+                                    ({assessment.total_score}/{assessment.max_possible_score})
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {assessment.status === 'completed' ? (
+                                <Progress value={100} className="w-20" />
+                              ) : assessment.status === 'in_progress' ? (
+                                <Progress value={50} className="w-20" />
+                              ) : (
+                                <Progress value={0} className="w-20" />
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {assessment.started_at ? 
+                                format(new Date(assessment.started_at), 'MMM dd, yyyy') : '-'
+                              }
+                            </TableCell>
+                            <TableCell>
+                              {assessment.completed_at ? 
+                                format(new Date(assessment.completed_at), 'MMM dd, yyyy') : '-'
+                              }
+                            </TableCell>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleGeneratePDFReport(assessment.id)}
+                                disabled={isGenerating || isExporting}
+                              >
+                                <FileText className="w-4 h-4 mr-1" />
+                                PDF
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <ClipboardCheck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No assessments found</h3>
+                    <p className="text-muted-foreground mb-4">
+                      {searchTerm || statusFilter !== 'all' 
+                        ? 'No assessments match your current filters'
+                        : 'Get started by creating your first assessment'
+                      }
+                    </p>
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Assessment
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="risk-matrix">
+            <AssessmentRiskMatrix
+              assessments={filteredAssessments}
+              onAssessmentClick={(assessment) => {
+                console.log('View assessment from risk matrix:', assessment.id);
+              }}
+            />
+          </TabsContent>
+
+          <TabsContent value="comparison">
+            <AssessmentComparison
+              assessments={filteredAssessments}
+              onExportComparison={handleExportComparison}
+            />
+          </TabsContent>
+
+          <TabsContent value="action-items">
+            <ActionItemsManager
+              assessments={filteredAssessments}
+              onActionItemUpdate={(actionItems) => {
+                console.log('Action items updated:', actionItems.length);
+              }}
+            />
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <Card>
+              <CardHeader>
+                <CardTitle>Assessment Reports</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredAssessments.map((assessment) => (
+                    <Card key={assessment.id} className="p-4">
+                      <div className="space-y-3">
+                        <div>
+                          <h4 className="font-medium">{assessment.clients?.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {assessment.assessment_templates?.name}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleGeneratePDFReport(assessment.id)}
+                            disabled={isGenerating || isExporting}
+                          >
+                            <FileText className="w-4 h-4 mr-1" />
+                            {isGenerating ? 'Generating...' : 'PDF Report'}
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Scheduling Dialog */}
+        <AssessmentSchedulingDialog
+          open={showSchedulingDialog}
+          onOpenChange={setShowSchedulingDialog}
+          clients={clients}
+          templates={templates}
+          onScheduled={() => {
+            toast({
+              title: "Assessment Scheduled",
+              description: "Assessment has been scheduled successfully.",
+            });
+          }}
+        />
       </div>
     </DashboardLayout>
   );
