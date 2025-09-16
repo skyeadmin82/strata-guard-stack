@@ -6890,16 +6890,23 @@ export type Database = {
           commission_structure: Json | null
           conversion_rate: number | null
           created_at: string | null
+          current_lead_count: number | null
           deals_closed: number | null
           email: string
           first_name: string
+          hire_date: string | null
           id: string
           last_activity_at: string | null
           last_name: string
           lead_assignment_enabled: boolean | null
           max_active_leads: number | null
+          max_leads: number | null
           onboarded_at: string | null
+          performance_score: number | null
           phone: string | null
+          quota_annual: number | null
+          quota_monthly: number | null
+          quota_quarterly: number | null
           specializations: string[] | null
           status: string | null
           tenant_id: string
@@ -6918,16 +6925,23 @@ export type Database = {
           commission_structure?: Json | null
           conversion_rate?: number | null
           created_at?: string | null
+          current_lead_count?: number | null
           deals_closed?: number | null
           email: string
           first_name: string
+          hire_date?: string | null
           id?: string
           last_activity_at?: string | null
           last_name: string
           lead_assignment_enabled?: boolean | null
           max_active_leads?: number | null
+          max_leads?: number | null
           onboarded_at?: string | null
+          performance_score?: number | null
           phone?: string | null
+          quota_annual?: number | null
+          quota_monthly?: number | null
+          quota_quarterly?: number | null
           specializations?: string[] | null
           status?: string | null
           tenant_id: string
@@ -6946,16 +6960,23 @@ export type Database = {
           commission_structure?: Json | null
           conversion_rate?: number | null
           created_at?: string | null
+          current_lead_count?: number | null
           deals_closed?: number | null
           email?: string
           first_name?: string
+          hire_date?: string | null
           id?: string
           last_activity_at?: string | null
           last_name?: string
           lead_assignment_enabled?: boolean | null
           max_active_leads?: number | null
+          max_leads?: number | null
           onboarded_at?: string | null
+          performance_score?: number | null
           phone?: string | null
+          quota_annual?: number | null
+          quota_monthly?: number | null
+          quota_quarterly?: number | null
           specializations?: string[] | null
           status?: string | null
           tenant_id?: string
@@ -7119,6 +7140,7 @@ export type Database = {
           email: string | null
           estimated_value: number | null
           first_contact_at: string | null
+          follow_up_date: string | null
           id: string
           industry: string | null
           interested_services: string[] | null
@@ -7149,6 +7171,7 @@ export type Database = {
           email?: string | null
           estimated_value?: number | null
           first_contact_at?: string | null
+          follow_up_date?: string | null
           id?: string
           industry?: string | null
           interested_services?: string[] | null
@@ -7179,6 +7202,7 @@ export type Database = {
           email?: string | null
           estimated_value?: number | null
           first_contact_at?: string | null
+          follow_up_date?: string | null
           id?: string
           industry?: string | null
           interested_services?: string[] | null
@@ -9235,7 +9259,22 @@ export type Database = {
         | "completed"
         | "failed"
         | "expired"
+      deal_stage:
+        | "qualification"
+        | "needs_analysis"
+        | "proposal"
+        | "negotiation"
+        | "closed_won"
+        | "closed_lost"
       file_scan_status: "pending" | "scanning" | "clean" | "infected" | "error"
+      lead_status:
+        | "new"
+        | "contacted"
+        | "qualified"
+        | "proposal"
+        | "negotiation"
+        | "closed_won"
+        | "closed_lost"
       lockout_reason:
         | "failed_attempts"
         | "security_violation"
@@ -9507,7 +9546,24 @@ export const Constants = {
         "failed",
         "expired",
       ],
+      deal_stage: [
+        "qualification",
+        "needs_analysis",
+        "proposal",
+        "negotiation",
+        "closed_won",
+        "closed_lost",
+      ],
       file_scan_status: ["pending", "scanning", "clean", "infected", "error"],
+      lead_status: [
+        "new",
+        "contacted",
+        "qualified",
+        "proposal",
+        "negotiation",
+        "closed_won",
+        "closed_lost",
+      ],
       lockout_reason: [
         "failed_attempts",
         "security_violation",
