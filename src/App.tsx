@@ -10,6 +10,11 @@ import { SessionTimeoutWarning } from "@/components/ErrorRecovery/SessionTimeout
 import Index from "./pages/Index";
 import { AuthPage } from "./pages/AuthPage";
 import { ClientsPage } from "./pages/ClientsPage";
+import { UsersPage } from "./pages/UsersPage";
+import { TicketsPage } from "./pages/TicketsPage";
+import { MonitoringPage } from "./pages/MonitoringPage";
+import { SettingsPage } from "./pages/SettingsPage";
+import { HelpPage } from "./pages/HelpPage";
 import NotFound from "./pages/NotFound";
 import { useMemo } from "react";
 
@@ -38,6 +43,11 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/clients" element={<ClientsPage />} />
+                  <Route path="/users" element={<UsersPage />} />
+                  <Route path="/tickets" element={<TicketsPage />} />
+                  <Route path="/monitoring" element={<MonitoringPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/help" element={<HelpPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
