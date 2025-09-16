@@ -40,16 +40,22 @@ export const ProposalsPage = () => {
 
   const fetchProposals = async () => {
     try {
-      const { data, error } = await supabase
-        .from('proposals')
-        .select(`
-          *,
-          clients!client_id(name)
-        `)
-        .order('created_at', { ascending: false });
+      // Fetch proposals and clients separately since there are no FK constraints
+      const [proposalsResult, clientsResult] = await Promise.all([
+        supabase.from('proposals').select('*').order('created_at', { ascending: false }),
+        supabase.from('clients').select('id, name')
+      ]);
 
-      if (error) throw error;
-      setProposals((data as unknown as Proposal[]) || []);
+      if (proposalsResult.error) throw proposalsResult.error;
+      if (clientsResult.error) throw clientsResult.error;
+
+      // Manually join the data
+      const proposalsWithClients = proposalsResult.data?.map(proposal => ({
+        ...proposal,
+        clients: clientsResult.data?.find(client => client.id === proposal.client_id) || null
+      })) || [];
+
+      setProposals(proposalsWithClients as unknown as Proposal[]);
     } catch (error) {
       console.error('Error fetching proposals:', error);
       toast({

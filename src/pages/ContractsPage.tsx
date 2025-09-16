@@ -37,16 +37,22 @@ export const ContractsPage = () => {
 
   const fetchContracts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('contracts')
-        .select(`
-          *,
-          clients!client_id(name)
-        `)
-        .order('created_at', { ascending: false });
+      // Fetch contracts and clients separately since there are no FK constraints
+      const [contractsResult, clientsResult] = await Promise.all([
+        supabase.from('contracts').select('*').order('created_at', { ascending: false }),
+        supabase.from('clients').select('id, name')
+      ]);
 
-      if (error) throw error;
-      setContracts((data as unknown as Contract[]) || []);
+      if (contractsResult.error) throw contractsResult.error;
+      if (clientsResult.error) throw clientsResult.error;
+
+      // Manually join the data
+      const contractsWithClients = contractsResult.data?.map(contract => ({
+        ...contract,
+        clients: clientsResult.data?.find(client => client.id === contract.client_id) || null
+      })) || [];
+
+      setContracts(contractsWithClients as unknown as Contract[]);
     } catch (error) {
       console.error('Error fetching contracts:', error);
       toast({

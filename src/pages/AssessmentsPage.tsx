@@ -36,17 +36,25 @@ export const AssessmentsPage = () => {
 
   const fetchAssessments = async () => {
     try {
-      const { data, error } = await supabase
-        .from('assessments')
-        .select(`
-          *,
-          clients!client_id(name),
-          assessment_templates!template_id(name, category)
-        `)
-        .order('created_at', { ascending: false });
+      // Fetch data separately since there are no FK constraints
+      const [assessmentsResult, clientsResult, templatesResult] = await Promise.all([
+        supabase.from('assessments').select('*').order('created_at', { ascending: false }),
+        supabase.from('clients').select('id, name'),
+        supabase.from('assessment_templates').select('id, name, category')
+      ]);
 
-      if (error) throw error;
-      setAssessments((data as unknown as Assessment[]) || []);
+      if (assessmentsResult.error) throw assessmentsResult.error;
+      if (clientsResult.error) throw clientsResult.error;
+      if (templatesResult.error) throw templatesResult.error;
+
+      // Manually join the data
+      const assessmentsWithRelations = assessmentsResult.data?.map(assessment => ({
+        ...assessment,
+        clients: clientsResult.data?.find(client => client.id === assessment.client_id) || null,
+        assessment_templates: templatesResult.data?.find(template => template.id === assessment.template_id) || null
+      })) || [];
+
+      setAssessments(assessmentsWithRelations as unknown as Assessment[]);
     } catch (error) {
       console.error('Error fetching assessments:', error);
       toast({
