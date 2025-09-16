@@ -65,19 +65,22 @@ export const AssessmentsPage = () => {
       if (clientsResult.error) throw clientsResult.error;
       if (templatesResult.error) throw templatesResult.error;
 
-      // Manually join the data and transform to match Assessment interface
+      // Manually join the data and properly map to Assessment interface
       const assessmentsWithRelations = assessmentsResult.data?.map(assessment => ({
         ...assessment,
         clients: clientsResult.data?.find(client => client.id === assessment.client_id) || null,
         assessment_templates: templatesResult.data?.find(template => template.id === assessment.template_id) || null,
-        // Transform to match Assessment interface from database types
-        assessed_by: assessment.assessor_id || '',
+        // Properly map database fields to interface
+        assessed_by: assessment.assessor_id || assessment.created_by || 'System',
         assessment_type: 'general' as const,
-        title: `Assessment ${assessment.id}`,
-        description: 'IT Security Assessment',
+        title: assessment.assessment_templates?.name ? 
+          `${assessment.assessment_templates.name} - ${assessment.clients?.name || 'Client'}` : 
+          `Assessment for ${assessment.clients?.name || 'Client'}`,
+        description: assessment.assessment_templates?.description || 
+          `${assessment.assessment_templates?.category || 'General'} assessment completed on ${format(new Date(assessment.completed_at || assessment.created_at), 'MMM dd, yyyy')}`,
         overall_score: assessment.total_score || 0,
-        findings: [],
-        recommendations: []
+        findings: [], // TODO: Load from assessment_responses
+        recommendations: [] // TODO: Load from assessment_opportunities
       })) || [];
 
       setAssessments(assessmentsWithRelations as AssessmentWithRelations[]);
