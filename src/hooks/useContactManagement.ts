@@ -85,9 +85,13 @@ export const useContactManagement = (clientId: string) => {
       const { data: currentUser } = await supabase.auth.getUser();
       const { data: userProfile } = await supabase
         .from('users')
-        .select('tenant_id')
+        .select('tenant_id, id')
         .eq('auth_user_id', currentUser.user?.id)
         .single();
+
+      if (!userProfile) {
+        throw new Error('User profile not found');
+      }
 
       // If setting as primary, first remove primary status from others
       if (contactData.is_primary) {
@@ -104,8 +108,9 @@ export const useContactManagement = (clientId: string) => {
         title: contactData.title?.trim() || null,
         department: contactData.department?.trim() || null,
         notes: contactData.notes?.trim() || null,
-        tenant_id: userProfile?.tenant_id,
-        created_by: currentUser.user?.id,
+        tenant_id: userProfile.tenant_id,
+        // Use the users table ID (which the foreign key references)
+        created_by: userProfile.id,
       };
 
       const { data, error } = await supabase
