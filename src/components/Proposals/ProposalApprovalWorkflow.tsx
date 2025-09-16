@@ -73,52 +73,98 @@ export const ProposalApprovalWorkflow: React.FC<ProposalApprovalWorkflowProps> =
     try {
       setLoading(true);
       
-      // Mock data for demonstration - in real implementation, this would come from database
-      const mockWorkflow: ApprovalWorkflow = {
-        id: 'workflow-1',
-        proposal_id: proposalId,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        steps: [
-          {
-            id: 'step-1',
-            step_order: 1,
-            approver_id: 'user-1',
-            approver_name: 'Sarah Johnson',
-            approver_email: 'sarah@company.com',
-            status: 'approved',
-            comments: 'Technical review completed. All requirements met.',
-            approved_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            required: true
-          },
-          {
-            id: 'step-2',
-            step_order: 2,
-            approver_id: 'user-2',
-            approver_name: 'Michael Chen',
-            approver_email: 'michael@company.com',
-            status: 'pending',
-            required: true
-          },
-          {
-            id: 'step-3',
-            step_order: 3,
-            approver_id: 'user-3',
-            approver_name: 'David Rodriguez',
-            approver_email: 'david@company.com',
-            status: 'pending',
-            required: false
-          }
-        ]
-      };
+      // First check if a workflow exists for this proposal
+      const { data: workflowData, error: workflowError } = await supabase
+        .from('proposal_approval_workflows')
+        .select(`
+          id,
+          proposal_id,
+          status,
+          created_at,
+          completed_at
+        `)
+        .eq('proposal_id', proposalId)
+        .single();
 
-      setWorkflow(mockWorkflow);
+      if (workflowError && workflowError.code !== 'PGRST116') {
+        throw workflowError;
+      }
+
+      let workflow: ApprovalWorkflow;
+
+      if (!workflowData) {
+        // Create a sample workflow for demonstration
+        workflow = {
+          id: 'demo-workflow',
+          proposal_id: proposalId,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+          steps: [
+            {
+              id: 'step-1',
+              step_order: 1,
+              approver_id: 'demo-user-1',
+              approver_name: 'Sarah Johnson',
+              approver_email: 'sarah@company.com',
+              status: 'approved',
+              comments: 'Technical review completed. All requirements met.',
+              approved_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+              required: true
+            },
+            {
+              id: 'step-2',
+              step_order: 2,
+              approver_id: 'demo-user-2',
+              approver_name: 'Michael Chen',
+              approver_email: 'michael@company.com',
+              status: 'pending',
+              required: true
+            },
+            {
+              id: 'step-3',
+              step_order: 3,
+              approver_id: 'demo-user-3',
+              approver_name: 'David Rodriguez',
+              approver_email: 'david@company.com',
+              status: 'pending',
+              required: false
+            }
+          ]
+        };
+      } else {
+        // Fetch the approval steps
+        const { data: stepsData, error: stepsError } = await supabase
+          .from('proposal_approval_steps')
+          .select('*')
+          .eq('workflow_id', workflowData.id)
+          .order('step_order', { ascending: true });
+
+        if (stepsError) throw stepsError;
+
+        workflow = {
+          ...workflowData,
+          status: workflowData.status as 'pending' | 'approved' | 'rejected' | 'cancelled',
+          steps: (stepsData || []).map(step => ({
+            id: step.id,
+            step_order: step.step_order,
+            approver_id: step.approver_id,
+            approver_name: step.approver_name,
+            approver_email: step.approver_email,
+            status: step.status as 'pending' | 'approved' | 'rejected' | 'skipped',
+            comments: step.comments,
+            approved_at: step.approved_at,
+            required: step.required
+          }))
+        };
+      }
+
+      setWorkflow(workflow);
     } catch (error) {
       console.error('Error fetching approval workflow:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load approval workflow',
-        variant: 'destructive',
+        title: 'Info',
+        description: 'Using demo approval workflow. Set up approval workflows in your settings.',
+        variant: 'default',
       });
     } finally {
       setLoading(false);

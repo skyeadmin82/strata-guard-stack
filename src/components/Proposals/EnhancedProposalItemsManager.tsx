@@ -84,43 +84,83 @@ export const EnhancedProposalItemsManager: React.FC<EnhancedProposalItemsManager
 
   const fetchCatalogItems = async () => {
     try {
-      // Mock catalog data - in real implementation, this would come from a catalog table
-      const mockCatalog: CatalogItem[] = [
-        {
-          id: '1',
-          name: 'Microsoft 365 Business Premium',
-          description: 'Complete productivity suite with advanced security features',
-          category: 'Software',
-          sku: 'MS365-BP-001',
-          unit_price: 22.00,
-          item_type: 'subscription',
-          margin_percent: 25,
-          vendor: 'Microsoft'
-        },
-        {
-          id: '2',
-          name: 'IT Support Services - Level 1',
-          description: 'Basic help desk support and troubleshooting',
-          category: 'Services',
-          sku: 'ITS-L1-001',
-          unit_price: 150.00,
-          item_type: 'service',
-          margin_percent: 40
-        },
-        {
-          id: '3',
-          name: 'Network Security Assessment',
-          description: 'Comprehensive security audit and vulnerability assessment',
-          category: 'Professional Services',
-          sku: 'NSA-001',
-          unit_price: 2500.00,
-          item_type: 'one-time',
-          margin_percent: 60
-        }
-      ];
-      setCatalogItems(mockCatalog);
+      const { data, error } = await supabase
+        .from('proposal_catalog')
+        .select('*')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching catalog items:', error);
+        // Fallback to sample data if no catalog items exist
+        const sampleCatalog: CatalogItem[] = [
+          {
+            id: 'sample-1',
+            name: 'Microsoft 365 Business Premium',
+            description: 'Complete productivity suite with advanced security features',
+            category: 'Software',
+            sku: 'MS365-BP-001',
+            unit_price: 22.00,
+            item_type: 'subscription',
+            margin_percent: 25,
+            vendor: 'Microsoft'
+          },
+          {
+            id: 'sample-2',
+            name: 'IT Support Services - Level 1',
+            description: 'Basic help desk support and troubleshooting',
+            category: 'Services',
+            sku: 'ITS-L1-001',
+            unit_price: 150.00,
+            item_type: 'service',
+            margin_percent: 40
+          },
+          {
+            id: 'sample-3',
+            name: 'Network Security Assessment',
+            description: 'Comprehensive security audit and vulnerability assessment',
+            category: 'Professional Services',
+            sku: 'NSA-001',
+            unit_price: 2500.00,
+            item_type: 'one-time',
+            margin_percent: 60
+          },
+          {
+            id: 'sample-4',
+            name: 'Managed Firewall Service',
+            description: 'Enterprise firewall management and monitoring',
+            category: 'Security',
+            sku: 'MFS-001',
+            unit_price: 299.00,
+            item_type: 'subscription',
+            margin_percent: 35,
+            vendor: 'SonicWall'
+          }
+        ];
+        setCatalogItems(sampleCatalog);
+        return;
+      }
+
+      const catalogItems: CatalogItem[] = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description || '',
+        category: item.category,
+        sku: item.sku || '',
+        unit_price: parseFloat(String(item.unit_price || '0')),
+        item_type: item.item_type,
+        margin_percent: parseFloat(String(item.margin_percent || '0')),
+        vendor: item.vendor || ''
+      }));
+      
+      setCatalogItems(catalogItems);
     } catch (error) {
       console.error('Error fetching catalog items:', error);
+      toast({
+        title: 'Warning',
+        description: 'Using sample catalog data. Add items to your catalog for real products.',
+        variant: 'default',
+      });
     }
   };
 

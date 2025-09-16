@@ -5663,6 +5663,94 @@ export type Database = {
         }
         Relationships: []
       }
+      proposal_approval_steps: {
+        Row: {
+          approved_at: string | null
+          approver_email: string
+          approver_id: string
+          approver_name: string
+          comments: string | null
+          created_at: string
+          id: string
+          required: boolean | null
+          status: string
+          step_order: number
+          tenant_id: string
+          workflow_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_email: string
+          approver_id: string
+          approver_name: string
+          comments?: string | null
+          created_at?: string
+          id?: string
+          required?: boolean | null
+          status?: string
+          step_order: number
+          tenant_id: string
+          workflow_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approver_email?: string
+          approver_id?: string
+          approver_name?: string
+          comments?: string | null
+          created_at?: string
+          id?: string
+          required?: boolean | null
+          status?: string
+          step_order?: number
+          tenant_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_approval_steps_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_approval_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_approval_workflows: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          proposal_id: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          proposal_id: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          proposal_id?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_approval_workflows_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposal_approvals: {
         Row: {
           approval_level: number | null
@@ -5719,6 +5807,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      proposal_catalog: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          item_type: string
+          margin_percent: number | null
+          name: string
+          sku: string | null
+          tenant_id: string
+          unit_price: number
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          item_type: string
+          margin_percent?: number | null
+          name: string
+          sku?: string | null
+          tenant_id: string
+          unit_price?: number
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          item_type?: string
+          margin_percent?: number | null
+          name?: string
+          sku?: string | null
+          tenant_id?: string
+          unit_price?: number
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: []
       }
       proposal_comments: {
         Row: {

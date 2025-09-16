@@ -217,6 +217,16 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* NEW FEATURES BANNER */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-semibold text-blue-800">✨ Enhanced Features Available</span>
+            </div>
+            <p className="text-xs text-blue-600">
+              • Browse product catalog • Percentage-based tax rates • Standard payment terms • Enhanced item management
+            </p>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="title">Title *</Label>
@@ -303,7 +313,7 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
             </div>
             
             <div>
-              <Label htmlFor="tax_rate">Tax Rate (%)</Label>
+              <Label htmlFor="tax_rate">Tax Rate (%) ✨ New</Label>
               <Input
                 id="tax_rate"
                 type="number"
@@ -313,6 +323,7 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
                 value={formData.tax_amount}
                 onChange={(e) => setFormData({ ...formData, tax_amount: e.target.value })}
                 placeholder="0.0"
+                className="border-blue-200 focus:border-blue-400"
               />
             </div>
             
@@ -351,9 +362,9 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="payment_terms">Payment Terms</Label>
+            <Label htmlFor="payment_terms">Payment Terms ✨ New</Label>
             <Select value={formData.payment_terms} onValueChange={(value) => setFormData({ ...formData, payment_terms: value })}>
-              <SelectTrigger>
+              <SelectTrigger className="border-blue-200 focus:border-blue-400">
                 <SelectValue placeholder="Select payment terms" />
               </SelectTrigger>
               <SelectContent>
@@ -371,12 +382,16 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
             </Select>
           </div>
 
-          {/* Proposal Items */}
-          <EnhancedProposalItemsManager
-            items={proposalItems}
-            onItemsChange={setProposalItems}
-            currency={formData.currency}
-          />
+          {/* Enhanced Proposal Items Manager - NEW ENTERPRISE FEATURE */}
+          <div className="border-2 border-dashed border-blue-300 rounded-lg p-1 bg-gradient-to-r from-blue-50 to-purple-50">
+            <div className="bg-white rounded-lg">
+              <EnhancedProposalItemsManager
+                items={proposalItems}
+                onItemsChange={setProposalItems}
+                currency={formData.currency}
+              />
+            </div>
+          </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>

@@ -154,7 +154,10 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
           <TabsList className="grid w-full grid-cols-5 shrink-0">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="tracking">Tracking</TabsTrigger>
-            <TabsTrigger value="approvals">Approvals</TabsTrigger>
+            <TabsTrigger value="approvals" className="relative">
+              Approvals
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            </TabsTrigger>
             <TabsTrigger value="signatures">Signatures</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
