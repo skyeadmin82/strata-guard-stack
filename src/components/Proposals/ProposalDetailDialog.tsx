@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProposalESignature } from './ProposalESignature';
 import { ProposalTracking } from './ProposalTracking';
 import { ProposalPDFGenerator } from './ProposalPDFGenerator';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { Edit, Download, Send, Eye, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -48,6 +50,7 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
   onEdit
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const { toast } = useToast();
 
   if (!proposal) return null;
 
@@ -79,8 +82,38 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
   };
 
   const handleSend = async () => {
-    // TODO: Implement email sending
-    console.log('Send proposal:', proposal.id);
+    if (!proposal.clients?.email) {
+      toast({
+        title: 'Error',
+        description: 'Client email not found. Please add an email address to the client record.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-proposal-email', {
+        body: {
+          proposalId: proposal.id,
+          recipientEmail: proposal.clients.email,
+          recipientName: proposal.clients.name,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Proposal sent successfully',
+      });
+    } catch (error) {
+      console.error('Error sending proposal:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to send proposal. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (

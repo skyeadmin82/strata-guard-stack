@@ -208,7 +208,21 @@ export const ProposalESignature: React.FC<ProposalESignatureProps> = ({
 
       if (error) throw error;
 
-      // TODO: Send email notification
+      // Send email notification for signature request
+      try {
+        await supabase.functions.invoke('send-proposal-email', {
+          body: {
+            proposalId: proposalId,
+            recipientEmail: signerEmail,
+            recipientName: signerName || 'Client',
+            subject: `Signature Required: ${proposalTitle}`,
+            customMessage: 'Your electronic signature is required to proceed with this proposal. Please click the link below to review and sign the document.',
+          },
+        });
+      } catch (emailError) {
+        console.warn('Failed to send signature request email:', emailError);
+      }
+
       toast({
         title: 'Success',
         description: 'Signature request sent successfully',
