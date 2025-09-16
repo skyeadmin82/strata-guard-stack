@@ -24,6 +24,7 @@ import {
   DollarSign,
   Mail,
   TestTube,
+  Rocket,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -69,6 +70,11 @@ const navigationItems = [
     title: 'Testing',
     url: '/testing',
     icon: TestTube,
+  },
+  {
+    title: 'Launch',
+    url: '/launch',
+    icon: Rocket,
   },
   {
     title: 'Monitoring',
