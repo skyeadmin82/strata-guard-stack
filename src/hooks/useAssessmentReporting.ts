@@ -346,24 +346,6 @@ export const useAssessmentReporting = () => {
     }
   }, []);
 
-  const exportHTML = useCallback(async (reportData: ReportData): Promise<ExportResult> => {
-    try {
-      const htmlContent = generateHTMLReport(reportData);
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      
-      return {
-        success: true,
-        data: blob,
-        filename: `assessment-report-${Date.now()}.html`
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: `HTML export failed: ${error.message}`
-      };
-    }
-  }, []);
-
   const generateHTMLReport = useCallback((reportData: ReportData): string => {
     const { assessment, template, summary, recommendations } = reportData;
     
@@ -417,6 +399,25 @@ export const useAssessmentReporting = () => {
     </html>
     `;
   }, []);
+
+  const exportHTML = useCallback(async (reportData: ReportData): Promise<ExportResult> => {
+    try {
+      const htmlContent = generateHTMLReport(reportData);
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      
+      return {
+        success: true,
+        data: blob,
+        filename: `assessment-report-${Date.now()}.html`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `HTML export failed: ${error.message}`
+      };
+    }
+  }, [generateHTMLReport]);
+
 
   const exportPDF = useCallback(async (reportData: ReportData): Promise<ExportResult> => {
     try {
