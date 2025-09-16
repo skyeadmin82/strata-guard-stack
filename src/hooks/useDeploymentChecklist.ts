@@ -272,7 +272,7 @@ export const useDeploymentChecklist = () => {
         type: 'development',
         status: 'unknown',
         config: {
-          supabase_url: process.env.SUPABASE_URL || '',
+          supabase_url: import.meta.env.VITE_SUPABASE_URL || '',
           environment: 'development'
         },
         healthChecks: [
@@ -292,7 +292,7 @@ export const useDeploymentChecklist = () => {
         type: 'staging',
         status: 'unknown',
         config: {
-          supabase_url: process.env.SUPABASE_URL || '',
+          supabase_url: import.meta.env.VITE_SUPABASE_URL || '',
           environment: 'staging'
         },
         healthChecks: [
@@ -312,7 +312,7 @@ export const useDeploymentChecklist = () => {
         type: 'production',
         status: 'unknown',
         config: {
-          supabase_url: process.env.SUPABASE_URL || '',
+          supabase_url: import.meta.env.VITE_SUPABASE_URL || '',
           environment: 'production'
         },
         healthChecks: [
