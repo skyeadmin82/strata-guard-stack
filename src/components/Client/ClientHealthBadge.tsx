@@ -23,9 +23,9 @@ export const ClientHealthBadge: React.FC<ClientHealthBadgeProps> = ({
   size = 'md'
 }) => {
   const getHealthColor = (score: number) => {
-    if (score >= 80) return 'bg-success text-success-foreground';
-    if (score >= 60) return 'bg-warning text-warning-foreground';
-    return 'bg-destructive text-destructive-foreground';
+    if (score >= 80) return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
+    if (score >= 60) return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
+    return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
   };
 
   const getHealthIcon = (score: number) => {
@@ -54,8 +54,8 @@ export const ClientHealthBadge: React.FC<ClientHealthBadgeProps> = ({
   return (
     <div className="flex items-center gap-2">
       <Badge 
-        className={`${getHealthColor(healthScore)} ${badgeSize} flex items-center gap-1`}
-        variant="secondary"
+        className={`${getHealthColor(healthScore)} ${badgeSize} flex items-center gap-1 border`}
+        variant="outline"
       >
         <HealthIcon className={iconSize} />
         <span>{healthScore}%</span>

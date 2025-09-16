@@ -48,6 +48,7 @@ import {
 import { ClientHealthBadge } from './ClientHealthBadge';
 import { ClientStatsCard } from './ClientStatsCard';
 import { ClientActivityTimeline } from './ClientActivityTimeline';
+import { ClientSummaryStats } from './ClientSummaryStats';
 import { useEnhancedClientManagement } from '@/hooks/useEnhancedClientManagement';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -371,25 +372,26 @@ export const EnhancedClientsTable: React.FC<EnhancedClientsTableProps> = ({
                             />
                           </TableCell>
                           
-                          <TableCell onClick={() => onEditClient(client)}>
-                            <div>
-                              <div className="font-medium">{client.name}</div>
-                              {client.website && (
-                                <div className="flex items-center text-sm text-muted-foreground mt-1">
-                                  <Globe className="h-3 w-3 mr-1" />
-                                  <a 
-                                    href={client.website} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="hover:underline"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {client.website.replace(/^https?:\/\//, '')}
-                                  </a>
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
+                           <TableCell>
+                             <div>
+                               <div className="font-medium">{client.name}</div>
+                               {client.website && (
+                                 <div className="flex items-center text-sm text-muted-foreground mt-1">
+                                   <Globe className="h-3 w-3 mr-1" />
+                                   <a 
+                                     href={client.website.startsWith('http') ? client.website : `https://${client.website}`} 
+                                     target="_blank" 
+                                     rel="noopener noreferrer"
+                                     className="hover:underline"
+                                     onClick={(e) => e.stopPropagation()}
+                                     aria-label={`Visit ${client.name} website`}
+                                   >
+                                     {client.website.replace(/^https?:\/\//, '')}
+                                   </a>
+                                 </div>
+                               )}
+                             </div>
+                           </TableCell>
 
                           <TableCell>
                             {stats ? (
@@ -526,18 +528,11 @@ export const EnhancedClientsTable: React.FC<EnhancedClientsTableProps> = ({
               </div>
 
               {/* Summary Stats */}
-              <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-                <div>
-                  Showing {clients.length} clients
-                  {selectedClients.size > 0 && (
-                    <span> • {selectedClients.size} selected</span>
-                  )}
-                </div>
-                <div className="flex gap-4">
-                  <span>Health Score Avg: {Math.round(Array.from(clientStats.values()).reduce((sum, s) => sum + s.health_score, 0) / Math.max(clientStats.size, 1))}%</span>
-                  <span>Active Contracts: {Array.from(clientStats.values()).reduce((sum, s) => sum + s.active_contracts, 0)}</span>
-                </div>
-              </div>
+              <ClientSummaryStats 
+                clientCount={clients.length}
+                selectedCount={selectedClients.size}
+                clientStats={clientStats}
+              />
             </>
           )}
         </CardContent>
@@ -556,26 +551,26 @@ export const EnhancedClientsTable: React.FC<EnhancedClientsTableProps> = ({
           </DialogHeader>
           
           {selectedClientForDetails && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Stats Column */}
-              <div>
-                {clientStats.has(selectedClientForDetails) ? (
-                  <ClientStatsCard stats={clientStats.get(selectedClientForDetails)!} />
-                ) : (
-                  <Alert>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      No statistics available for this client.
-                    </AlertDescription>
-                  </Alert>
-                )}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" role="tabpanel" aria-label="Client details">
+                {/* Stats Column */}
+                <div role="region" aria-label="Client statistics">
+                  {clientStats.has(selectedClientForDetails) ? (
+                    <ClientStatsCard stats={clientStats.get(selectedClientForDetails)!} />
+                  ) : (
+                    <Alert>
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        No statistics available for this client.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+                
+                {/* Timeline Column */}
+                <div role="region" aria-label="Client activity timeline">
+                  <ClientActivityTimeline clientId={selectedClientForDetails} />
+                </div>
               </div>
-              
-              {/* Timeline Column */}
-              <div>
-                <ClientActivityTimeline clientId={selectedClientForDetails} />
-              </div>
-            </div>
           )}
         </DialogContent>
       </Dialog>

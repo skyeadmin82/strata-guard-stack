@@ -129,6 +129,15 @@ export const useEnhancedClientManagement = () => {
     data?: Record<string, any>
   ) => {
     try {
+      // Get current tenant_id 
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('auth_user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (userError) throw userError;
+
       const { error } = await supabase
         .from('client_activities')
         .insert({
@@ -137,7 +146,7 @@ export const useEnhancedClientManagement = () => {
           activity_title: title,
           activity_description: description,
           activity_data: data || {},
-          tenant_id: '' // Will be set by RLS
+          tenant_id: userData.tenant_id
         });
 
       if (error) throw error;

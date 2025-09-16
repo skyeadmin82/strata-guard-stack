@@ -12,6 +12,8 @@ All colors MUST be HSL.
   --production-env: 142 76% 36%; /* Green */
   --warning: 38 92% 50%; /* Amber */
   --success: 142 76% 36%; /* Green */
+  --success-foreground: 0 0% 100%;
+  --warning-foreground: 222.2 84% 4.9%;
   
   /* Enterprise Theme Colors - Indigo Primary */
   --enterprise-primary: 243 79% 57%; /* #4F46E5 Indigo */
