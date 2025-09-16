@@ -77,8 +77,10 @@ async function refreshAccessToken(refreshToken: string): Promise<QuickBooksToken
   return await response.json();
 }
 
-async function makeQuickBooksRequest(endpoint: string, accessToken: string, companyId: string, method = 'GET', body?: any) {
-  const baseUrl = 'https://sandbox-quickbooks.api.intuit.com';
+async function makeQuickBooksRequest(endpoint: string, accessToken: string, companyId: string, environment = 'sandbox', method = 'GET', body?: any) {
+  const baseUrl = environment === 'production' 
+    ? 'https://quickbooks.api.intuit.com' 
+    : 'https://sandbox-quickbooks.api.intuit.com';
   const url = `${baseUrl}/v3/company/${companyId}/${endpoint}`;
   
   const headers: Record<string, string> = {
@@ -264,6 +266,98 @@ Deno.serve(async (req) => {
     const method = req.method;
     
     console.log(`QuickBooks Integration: ${method} ${path}`);
+    
+    // Handle action-based requests from frontend
+    if (method === 'POST' && path === '/') {
+      const { action, config, connectionId, syncType } = await req.json();
+      
+      // Generate OAuth URL
+      if (action === 'get_auth_url') {
+        try {
+          const state = crypto.randomUUID();
+          const scope = 'com.intuit.quickbooks.accounting';
+          const environment = config?.environment === 'production' ? 'appcenter.intuit.com' : 'developer.intuit.com';
+          
+          // Use config values or fallback to environment variables
+          const clientId = config?.clientId || QB_CLIENT_ID;
+          const redirectUri = config?.webhookUrl || QB_REDIRECT_URI || `${url.origin}/oauth/callback`;
+          
+          if (!clientId) {
+            return new Response(
+              JSON.stringify({ error: 'QuickBooks Client ID not configured' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          
+          const authUrl = `https://appcenter.intuit.com/connect/oauth2?` +
+            `client_id=${encodeURIComponent(clientId)}&` +
+            `scope=${encodeURIComponent(scope)}&` +
+            `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+            `response_type=code&` +
+            `access_type=offline&` +
+            `state=${state}`;
+          
+          return new Response(
+            JSON.stringify({ auth_url: authUrl, state }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+          
+        } catch (error) {
+          console.error('Error generating auth URL:', error);
+          return new Response(
+            JSON.stringify({ error: 'Failed to generate auth URL' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+      
+      // Handle sync action
+      if (action === 'sync') {
+        if (!connectionId) {
+          return new Response(
+            JSON.stringify({ error: 'Connection ID required' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        try {
+          let result;
+          
+          switch (syncType || 'customers') {
+            case 'customers':
+              result = await syncCustomers(connectionId);
+              break;
+            default:
+              throw new Error(`Unsupported sync type: ${syncType}`);
+          }
+          
+          return new Response(
+            JSON.stringify(result),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+          
+        } catch (error) {
+          console.error('Sync error:', error);
+          return new Response(
+            JSON.stringify({ error: error.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+      
+      // Handle disconnect action
+      if (action === 'disconnect') {
+        return new Response(
+          JSON.stringify({ success: true, message: 'Disconnected successfully' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ error: `Unknown action: ${action}` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     // OAuth callback handler
     if (path === '/oauth/callback' && method === 'GET') {
