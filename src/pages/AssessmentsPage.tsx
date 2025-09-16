@@ -16,6 +16,7 @@ import { AssessmentSchedulingDialog } from '@/components/Assessments/AssessmentS
 import { AssessmentComparison } from '@/components/Assessments/AssessmentComparison';
 import { ActionItemsManager } from '@/components/Assessments/ActionItemsManager';
 import { AssessmentDetailDialog } from '@/components/Assessments/AssessmentDetailDialog';
+import { AssessmentCreateDialog } from '@/components/Assessments/AssessmentCreateDialog';
 import { Assessment } from '@/types/database';
 import { 
   Search, 
@@ -43,6 +44,7 @@ export const AssessmentsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showSchedulingDialog, setShowSchedulingDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState<AssessmentWithRelations | null>(null);
   const [clients, setClients] = useState<Array<{id: string, name: string}>>([]);
@@ -193,7 +195,7 @@ export const AssessmentsPage = () => {
               <Calendar className="w-4 h-4 mr-2" />
               Schedule
             </Button>
-            <Button>
+            <Button onClick={() => setShowCreateDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               New Assessment
             </Button>
@@ -474,6 +476,21 @@ export const AssessmentsPage = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Create Assessment Dialog */}
+        <AssessmentCreateDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+          clients={clients}
+          templates={templates}
+          onAssessmentCreated={() => {
+            fetchAssessments();
+            toast({
+              title: "Assessment Created",
+              description: "New assessment has been created successfully.",
+            });
+          }}
+        />
 
         {/* Scheduling Dialog */}
         <AssessmentSchedulingDialog
