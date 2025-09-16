@@ -48,9 +48,6 @@ interface Ticket {
   status: 'draft' | 'submitted' | 'in_review' | 'approved' | 'rejected' | 'in_progress' | 'pending_client' | 'resolved' | 'closed';
   category?: string;
   ticket_number: string;
-  estimated_hours?: number;
-  actual_hours?: number;
-  due_date?: string;
   resolved_at?: string;
   created_at: string;
   updated_at: string;
@@ -75,8 +72,7 @@ export const TicketsTable: React.FC = () => {
     description: '',
     priority: 'medium' as Ticket['priority'],
     category: 'other',
-    client_id: '',
-    estimated_hours: 1
+    client_id: ''
   });
 
   const fetchTickets = async () => {
@@ -149,8 +145,7 @@ export const TicketsTable: React.FC = () => {
         description: '',
         priority: 'medium',
         category: 'other',
-        client_id: '',
-        estimated_hours: 1
+        client_id: ''
       });
       
       toast({
@@ -375,18 +370,6 @@ export const TicketsTable: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="hours" className="text-right">Est. Hours</Label>
-                <Input
-                  id="hours"
-                  type="number"
-                  value={newTicket.estimated_hours}
-                  onChange={(e) => setNewTicket({ ...newTicket, estimated_hours: parseInt(e.target.value) || 1 })}
-                  className="col-span-3"
-                  min="1"
-                  max="100"
-                />
-              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
@@ -426,12 +409,6 @@ export const TicketsTable: React.FC = () => {
                       <div className="text-xs text-muted-foreground line-clamp-2">
                         {ticket.description}
                       </div>
-                      {ticket.estimated_hours && (
-                        <div className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {ticket.estimated_hours}h estimated
-                        </div>
-                      )}
                     </div>
                   </TableCell>
                   <TableCell>

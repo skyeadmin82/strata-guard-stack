@@ -26,6 +26,9 @@ import {
   TestTube,
   Rocket,
   Zap,
+  FileText,
+  ClipboardCheck,
+  FileCheck,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -51,6 +54,21 @@ const navigationItems = [
     title: 'Tickets',
     url: '/tickets',
     icon: Ticket,
+  },
+  {
+    title: 'Contracts',
+    url: '/contracts',
+    icon: FileText,
+  },
+  {
+    title: 'Assessments',
+    url: '/assessments',
+    icon: ClipboardCheck,
+  },
+  {
+    title: 'Proposals',
+    url: '/proposals',
+    icon: FileCheck,
   },
   {
     title: 'Email Marketing',
