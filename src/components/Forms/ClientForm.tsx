@@ -133,7 +133,50 @@ export const ClientForm: React.FC<ClientFormProps> = ({
       setIsDirty(false);
       clearErrors();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      let errorMessage = 'An unexpected error occurred';
+      
+      if (error instanceof Error) {
+        const message = error.message.toLowerCase();
+        
+        // Handle specific database constraint errors
+        if (message.includes('not-null constraint') || message.includes('null value')) {
+          if (message.includes('name')) {
+            errorMessage = 'Company name is required and cannot be empty.';
+          } else {
+            errorMessage = 'A required field is missing. Please check all required fields marked with *.';
+          }
+        } else if (message.includes('unique constraint') || message.includes('duplicate')) {
+          if (message.includes('name')) {
+            errorMessage = 'A client with this company name already exists.';
+          } else if (message.includes('email')) {
+            errorMessage = 'A client with this email address already exists.';
+          } else {
+            errorMessage = 'This client information already exists in the system.';
+          }
+        } else if (message.includes('check constraint') || message.includes('invalid')) {
+          if (message.includes('company_size')) {
+            errorMessage = 'Please select a valid company size from the dropdown.';
+          } else if (message.includes('status')) {
+            errorMessage = 'Please select a valid status from the dropdown.';
+          } else if (message.includes('email')) {
+            errorMessage = 'Please enter a valid email address format.';
+          } else if (message.includes('phone')) {
+            errorMessage = 'Please enter a valid phone number format.';
+          } else if (message.includes('website')) {
+            errorMessage = 'Please enter a valid website URL starting with http:// or https://.';
+          } else {
+            errorMessage = 'One or more fields contain invalid data. Please check your entries.';
+          }
+        } else if (message.includes('permission') || message.includes('access')) {
+          errorMessage = 'You do not have permission to perform this action.';
+        } else if (message.includes('network') || message.includes('connection')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else {
+          // For other errors, provide a more helpful generic message
+          errorMessage = 'Unable to save client. Please verify all fields are completed correctly and try again.';
+        }
+      }
+      
       setSubmitError(errorMessage);
     }
   };
