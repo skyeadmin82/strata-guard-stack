@@ -27,7 +27,7 @@ export const useSystemMonitoring = () => {
 
   const createMonitor = useCallback(async (monitorConfig: Partial<SystemMonitor>) => {
     if (!tenantId) {
-      console.warn('Tenant not loaded, skipping monitor creation');
+      console.info('Tenant not yet loaded, deferring monitor creation...');
       return null;
     }
 
@@ -68,8 +68,9 @@ export const useSystemMonitoring = () => {
 
   const runSystemCheck = useCallback(async () => {
     if (!tenantId) {
-      console.warn('Tenant not loaded, skipping system check');
-      return null;
+      // ✅ FIXED: Better handling when tenant is not loaded - don't show warning
+      console.info('Tenant not yet loaded, deferring system check...');
+      return { success: false, error: 'Tenant not loaded', deferred: true };
     }
 
     setIsMonitoring(true);
@@ -336,7 +337,7 @@ export const useSystemMonitoring = () => {
 
   const acknowledgeAlert = useCallback(async (alertId: string) => {
     if (!tenantId) {
-      console.warn('Tenant not loaded, cannot acknowledge alert');
+      console.info('Tenant not yet loaded, cannot acknowledge alert');
       return { success: false, error: 'Tenant not loaded' };
     }
 
@@ -366,7 +367,7 @@ export const useSystemMonitoring = () => {
 
   const resolveAlert = useCallback(async (alertId: string, resolutionNotes?: string) => {
     if (!tenantId) {
-      console.warn('Tenant not loaded, cannot resolve alert');
+      console.info('Tenant not yet loaded, cannot resolve alert');
       return { success: false, error: 'Tenant not loaded' };
     }
 

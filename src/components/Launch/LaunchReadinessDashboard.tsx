@@ -784,8 +784,8 @@ export const LaunchReadinessDashboard: React.FC = () => {
               <CardContent>
                 <div className="text-sm space-y-1">
                   <div>Loading: {uxReport.loadingExperience.standardized ? 'Standardized' : 'Not standardized'}</div>
-                  <div>Errors: {uxReport.errorHandling.totalErrorTypes} types</div>
-                  <div>A11y: {uxReport.accessibility.complianceScore}% compliant</div>
+                  <div>Errors: {uxReport.errorHandling.totalErrorTypes} types handled</div>
+                  <div>A11y: {uxReport.accessibility.complianceScore}% compliant ({uxReport.accessibility.criticalIssues} critical)</div>
                 </div>
               </CardContent>
             </Card>

@@ -32,28 +32,37 @@ const SystemDashboard: React.FC = () => {
   const [selectedAlert, setSelectedAlert] = useState<any>(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
 
-  // Auto-run initial health check on mount
+  // ✅ FIXED: Auto-run initial health check with better error handling
   useEffect(() => {
-    if (!dashboard) {
-      runSystemCheck();
-    }
+    const initializeHealthCheck = async () => {
+      if (!dashboard) {
+        try {
+          await runSystemCheck();
+        } catch (error) {
+          console.error('Initial health check failed:', error);
+          // Don't show error toast on initial load, just log it
+        }
+      }
+    };
+    
+    initializeHealthCheck();
   }, [dashboard, runSystemCheck]);
 
   const getHealthColor = (status: 'healthy' | 'warning' | 'critical') => {
     switch (status) {
-      case 'healthy': return 'text-green-600';
-      case 'warning': return 'text-yellow-600';
-      case 'critical': return 'text-red-600';
-      default: return 'text-gray-600';
+      case 'healthy': return 'text-success';
+      case 'warning': return 'text-yellow-600 dark:text-yellow-400';
+      case 'critical': return 'text-destructive';
+      default: return 'text-muted-foreground';
     }
   };
 
   const getHealthIcon = (status: 'healthy' | 'warning' | 'critical') => {
     switch (status) {
-      case 'healthy': return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'warning': return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
-      case 'critical': return <AlertTriangle className="h-5 w-5 text-red-600" />;
-      default: return <Clock className="h-5 w-5 text-gray-600" />;
+      case 'healthy': return <CheckCircle className="h-5 w-5 text-success" />;
+      case 'warning': return <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />;
+      case 'critical': return <AlertTriangle className="h-5 w-5 text-destructive" />;
+      default: return <Clock className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
@@ -194,7 +203,7 @@ const SystemDashboard: React.FC = () => {
             <Card>
               <CardContent className="flex items-center justify-center h-32">
                 <div className="text-center">
-                  <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <CheckCircle className="h-8 w-8 text-success mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">No active alerts</p>
                 </div>
               </CardContent>
@@ -203,9 +212,9 @@ const SystemDashboard: React.FC = () => {
             <div className="space-y-3">
               {dashboard.activeAlerts.map((alert) => (
                 <Alert key={alert.id} className={`border-l-4 ${
-                  alert.alert_level === 'critical' ? 'border-l-red-500' :
-                  alert.alert_level === 'warning' ? 'border-l-yellow-500' :
-                  'border-l-blue-500'
+                  alert.alert_level === 'critical' ? 'border-l-destructive' :
+                  alert.alert_level === 'warning' ? 'border-l-yellow-500 dark:border-l-yellow-400' :
+                  'border-l-primary'
                 }`}>
                   <AlertTriangle className="h-4 w-4" />
                   <div className="flex-1">
