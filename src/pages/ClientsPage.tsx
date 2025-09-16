@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { EnhancedClientsTable } from '@/components/Client/EnhancedClientsTable';
 
 export const ClientsPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -72,19 +73,10 @@ export const ClientsPage: React.FC = () => {
           </div>
 
           <ErrorBoundary>
-            <ClientsTable
-              clients={clients}
-              loading={loading}
-              error={error}
-              pagination={pagination}
+            <EnhancedClientsTable
               onCreateClient={handleCreateClient}
               onEditClient={handleEditClient}
               onDeleteClient={deleteClient}
-              onSearch={searchClients}
-              onFilterStatus={setStatusFilter}
-              onFilterIndustry={setIndustryFilter}
-              onPageChange={changePage}
-              onRefresh={refreshClients}
             />
           </ErrorBoundary>
 
