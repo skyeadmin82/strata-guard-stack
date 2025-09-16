@@ -81,7 +81,7 @@ export const ActionItemsManager: React.FC<ActionItemsManagerProps> = ({
         .from('action_items')
         .select(`
           *,
-          assessments:assessment_id(id, clients:client_id(name))
+          assessments:assessment_id(id, clients!assessments_client_id_fkey(name))
         `)
         .order('created_at', { ascending: false });
 

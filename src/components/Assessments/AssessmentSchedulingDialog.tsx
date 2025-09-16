@@ -165,7 +165,7 @@ export const AssessmentSchedulingDialog: React.FC<AssessmentSchedulingDialogProp
         .from('scheduled_assessments')
         .select(`
           *,
-          clients:client_id(name),
+          clients!scheduled_assessments_client_id_fkey(name),
           assessment_templates:template_id(name)
         `)
         .order('scheduled_date', { ascending: true })

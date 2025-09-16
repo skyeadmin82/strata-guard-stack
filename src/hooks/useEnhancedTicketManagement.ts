@@ -79,8 +79,8 @@ export const useEnhancedTicketManagement = () => {
         .from('support_tickets')
         .select(`
           *,
-          clients:client_id(id, name),
-          contacts:contact_id(id, first_name, last_name)
+          clients!support_tickets_client_id_fkey(id, name),
+          contacts!support_tickets_contact_id_fkey(id, first_name, last_name)
         `)
         .order('created_at', { ascending: false });
 
@@ -144,8 +144,8 @@ export const useEnhancedTicketManagement = () => {
         } as any)
         .select(`
           *,
-          clients:client_id(id, name),
-          contacts:contact_id(id, first_name, last_name)
+          clients!support_tickets_client_id_fkey(id, name),
+          contacts!support_tickets_contact_id_fkey(id, first_name, last_name)
         `)
         .single();
 
@@ -192,8 +192,8 @@ export const useEnhancedTicketManagement = () => {
         .eq('id', ticketId)
         .select(`
           *,
-          clients:client_id(id, name),
-          contacts:contact_id(id, first_name, last_name)
+          clients!support_tickets_client_id_fkey(id, name),
+          contacts!support_tickets_contact_id_fkey(id, first_name, last_name)
         `)
         .single();
 

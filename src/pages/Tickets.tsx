@@ -99,7 +99,7 @@ export default function Tickets() {
         .from('support_tickets')
         .select(`
           *,
-          clients:client_id(name)
+          clients!support_tickets_client_id_fkey(name)
         `)
         .order('created_at', { ascending: false });
 
@@ -157,7 +157,7 @@ export default function Tickets() {
         })
         .select(`
           *,
-          clients:client_id(name)
+          clients!support_tickets_client_id_fkey(name)
         `)
         .single();
 
