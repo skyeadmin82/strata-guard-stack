@@ -15,6 +15,7 @@ import { AssessmentRiskMatrix } from '@/components/Assessments/AssessmentRiskMat
 import { AssessmentSchedulingDialog } from '@/components/Assessments/AssessmentSchedulingDialog';
 import { AssessmentComparison } from '@/components/Assessments/AssessmentComparison';
 import { ActionItemsManager } from '@/components/Assessments/ActionItemsManager';
+import { AssessmentDetailDialog } from '@/components/Assessments/AssessmentDetailDialog';
 import { Assessment } from '@/types/database';
 import { 
   Search, 
@@ -42,6 +43,8 @@ export const AssessmentsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showSchedulingDialog, setShowSchedulingDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [selectedAssessment, setSelectedAssessment] = useState<AssessmentWithRelations | null>(null);
   const [clients, setClients] = useState<Array<{id: string, name: string}>>([]);
   const [templates, setTemplates] = useState<Array<{id: string, name: string, category?: string}>>([]);
   const [activeTab, setActiveTab] = useState('overview');
@@ -295,12 +298,12 @@ export const AssessmentsPage = () => {
                       </TableHeader>
                       <TableBody>
                         {filteredAssessments.map((assessment) => (
-                          <TableRow 
+                           <TableRow 
                             key={assessment.id}
                             className="cursor-pointer hover:bg-muted/50"
                             onClick={() => {
-                              // Primary action: View assessment details
-                              console.log('View assessment:', assessment.id);
+                              setSelectedAssessment(assessment);
+                              setShowDetailDialog(true);
                             }}
                           >
                             <TableCell>
@@ -399,7 +402,11 @@ export const AssessmentsPage = () => {
             <AssessmentRiskMatrix
               assessments={filteredAssessments}
               onAssessmentClick={(assessment) => {
-                console.log('View assessment from risk matrix:', assessment.id);
+                const fullAssessment = filteredAssessments.find(a => a.id === assessment.id);
+                if (fullAssessment) {
+                  setSelectedAssessment(fullAssessment);
+                  setShowDetailDialog(true);
+                }
               }}
             />
           </TabsContent>
@@ -468,6 +475,16 @@ export const AssessmentsPage = () => {
               description: "Assessment has been scheduled successfully.",
             });
           }}
+        />
+
+        {/* Assessment Detail Dialog */}
+        <AssessmentDetailDialog
+          open={showDetailDialog}
+          onOpenChange={setShowDetailDialog}
+          assessment={selectedAssessment}
+          clientName={selectedAssessment?.clients?.name}
+          templateName={selectedAssessment?.assessment_templates?.name}
+          onExportReport={handleGeneratePDFReport}
         />
       </div>
     </DashboardLayout>
