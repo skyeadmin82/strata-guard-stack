@@ -381,7 +381,10 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
               <CardContent className="space-y-3">
                 {isEditing ? (
                   <div>
-                    <Label>Client</Label>
+                    <Label>Client *</Label>
+                    <div className="text-xs text-muted-foreground mb-2">
+                      Current: {ticket.clients?.name || 'Unknown Client'}
+                    </div>
                     <Select value={editForm.client_id} onValueChange={handleClientChange}>
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select client" />
@@ -389,15 +392,33 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
                       <SelectContent>
                         {clients.map((client) => (
                           <SelectItem key={client.id} value={client.id}>
-                            {client.name}
+                            <div className="flex items-center justify-between w-full">
+                              <span>{client.name}</span>
+                              {client.id === ticket.client_id && (
+                                <span className="text-xs text-muted-foreground ml-2">(Current)</span>
+                              )}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      ⚠️ Changing the client will reset the contact selection
+                    </div>
                   </div>
                 ) : (
                   <div>
-                    <p className="font-medium">{ticket.clients?.name || 'Unknown Client'}</p>
+                    <div className="space-y-2">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Company</Label>
+                        <p className="font-medium">{ticket.clients?.name || 'Unknown Client'}</p>
+                      </div>
+                      {ticket.clients?.name && (
+                        <div className="text-xs text-muted-foreground">
+                          Client ID: {ticket.client_id}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -414,6 +435,12 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
                 {isEditing ? (
                   <div>
                     <Label>Contact</Label>
+                    <div className="text-xs text-muted-foreground mb-2">
+                      {ticket.contacts 
+                        ? `Current: ${ticket.contacts.first_name} ${ticket.contacts.last_name}`
+                        : 'No contact currently assigned'
+                      }
+                    </div>
                     <Select value={editForm.contact_id || "none"} onValueChange={(value) => setEditForm(prev => ({ ...prev, contact_id: value === "none" ? "" : value }))}>
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select contact" />
@@ -422,22 +449,38 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
                         <SelectItem value="none">No contact selected</SelectItem>
                         {contacts.map((contact) => (
                           <SelectItem key={contact.id} value={contact.id}>
-                            {contact.first_name} {contact.last_name}
+                            <div className="flex items-center justify-between w-full">
+                              <span>{contact.first_name} {contact.last_name}</span>
+                              {contact.id === ticket.contact_id && (
+                                <span className="text-xs text-muted-foreground ml-2">(Current)</span>
+                              )}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {contacts.length === 0 && editForm.client_id && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        No contacts available for selected client
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div>
                     {ticket.contacts ? (
-                      <div>
-                        <p className="font-medium">
-                          {ticket.contacts.first_name} {ticket.contacts.last_name}
-                        </p>
+                      <div className="space-y-2">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Primary Contact</Label>
+                          <p className="font-medium">
+                            {ticket.contacts.first_name} {ticket.contacts.last_name}
+                          </p>
+                        </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">No contact assigned</p>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Contact</Label>
+                        <p className="text-sm text-muted-foreground">No contact assigned</p>
+                      </div>
                     )}
                   </div>
                 )}
