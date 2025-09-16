@@ -13,6 +13,7 @@ import {
   Download
 } from 'lucide-react';
 import { useFinancialManagement } from '@/hooks/useFinancialManagement';
+import { RecurringInvoiceManager } from '@/components/Financial/RecurringInvoiceManager';
 import { format } from 'date-fns';
 
 export const FinancialDashboard: React.FC = () => {
@@ -168,9 +169,10 @@ export const FinancialDashboard: React.FC = () => {
 
       {/* Financial Data Tables */}
       <Tabs defaultValue="invoices" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="invoices">Invoices ({invoices.length})</TabsTrigger>
           <TabsTrigger value="payments">Payments ({payments.length})</TabsTrigger>
+          <TabsTrigger value="recurring">Recurring</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
         
@@ -261,6 +263,10 @@ export const FinancialDashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="recurring" className="space-y-4">
+          <RecurringInvoiceManager />
         </TabsContent>
         
         <TabsContent value="analytics" className="space-y-4">
