@@ -49,7 +49,7 @@ export const DemoDataGenerator: React.FC = () => {
     },
     {
       id: 'contracts',
-      label: 'Generate Contracts (10)',
+      label: 'Generate Contracts (3)',
       description: 'Creating active contracts with different values and terms',
       progress: 0,
       status: 'pending'
@@ -365,21 +365,45 @@ export const DemoDataGenerator: React.FC = () => {
       throw new Error(`Failed to fetch clients: ${clientsError.message}`);
     }
 
-    const { data: templates, error: templatesError } = await supabase
+    // First, ensure we have an assessment template
+    let template;
+    const { data: existingTemplates, error: templatesError } = await supabase
       .from('assessment_templates')
-      .select('id, name');
+      .select('id, name')
+      .limit(1);
 
     if (templatesError) {
       throw new Error(`Failed to fetch assessment templates: ${templatesError.message}`);
     }
 
+    if (!existingTemplates || existingTemplates.length === 0) {
+      // Create a default assessment template
+      const { data: newTemplate, error: createError } = await supabase
+        .from('assessment_templates')
+        .insert({
+          name: 'IT Infrastructure Assessment',
+          description: 'Comprehensive assessment of IT infrastructure and security posture',
+          category: 'IT Assessment',
+          status: 'active',
+          max_score: 100,
+          passing_score: 70,
+          estimated_duration: 45,
+          tenant_id: profile?.tenant_id,
+          created_by: profile?.id
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        throw new Error(`Failed to create assessment template: ${createError.message}`);
+      }
+      template = newTemplate;
+    } else {
+      template = existingTemplates[0];
+    }
+
     // Select 5 clients for completed assessments
     const selectedClients = clients?.slice(0, 5) || [];
-    const template = templates?.[0];
-
-    if (!template) {
-      throw new Error('No assessment template available');
-    }
 
     for (let i = 0; i < selectedClients.length; i++) {
       const client = selectedClients[i];
@@ -444,14 +468,9 @@ export const DemoDataGenerator: React.FC = () => {
           discount_amount: Math.round(totalAmount * 0.05),
           final_amount: Math.round(totalAmount * 1.03),
           valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          created_date: createdDate.toISOString().split('T')[0],
           sent_date: status !== 'draft' ? createdDate.toISOString() : null,
           viewed_date: status === 'viewed' ? new Date(createdDate.getTime() + 24 * 60 * 60 * 1000).toISOString() : null,
           view_count: status === 'viewed' ? Math.floor(Math.random() * 5) + 1 : 0,
-          tracking_pixel_id: crypto.randomUUID(),
-          validation_errors: [],
-          generation_errors: [],
-          delivery_errors: [],
           client_id: client.id,
           tenant_id: profile?.tenant_id
         });
@@ -480,9 +499,15 @@ export const DemoDataGenerator: React.FC = () => {
         const activityDate = new Date(date);
         activityDate.setHours(Math.floor(Math.random() * 24), Math.floor(Math.random() * 60));
         
+        const activityTypes = ['login', 'view_client', 'create_ticket', 'update_contract', 'run_assessment'];
+        const activityNames = ['User Login', 'View Client', 'Create Ticket', 'Update Contract', 'Run Assessment'];
+        const randomIndex = Math.floor(Math.random() * activityTypes.length);
+        
         activities.push({
-          action: ['login', 'view_client', 'create_ticket', 'update_contract', 'run_assessment'][Math.floor(Math.random() * 5)],
-          resource_type: ['user', 'client', 'ticket', 'contract', 'assessment'][Math.floor(Math.random() * 5)],
+          activity_type: activityTypes[randomIndex],
+          activity_name: activityNames[randomIndex],
+          session_id: crypto.randomUUID(),
+          occurred_at: activityDate.toISOString(),
           created_at: activityDate.toISOString(),
           tenant_id: profile?.tenant_id,
           user_id: profile?.id
@@ -557,16 +582,24 @@ export const DemoDataGenerator: React.FC = () => {
 
       toast({
         title: "Demo Data Generated Successfully!",
-        description: "Generated 23 clients, 50+ contacts, 50 tickets, 10 contracts, 5 assessments, and 3 proposals with 30 days of activity data",
+        description: "Generated 23 clients, 50+ contacts, 50 tickets, 3 contracts, 5 assessments, and 3 proposals with 30 days of activity data",
       });
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Demo data generation failed:', error);
       
       // Mark current step as failed
       const currentStep = steps.find(step => step.status === 'running');
       if (currentStep) {
         updateStepStatus(currentStep.id, 'error', 0, errorMessage);
+      } else {
+        // If no step is running, mark the last step as failed
+        const lastStepIndex = steps.findIndex(step => step.status === 'completed');
+        if (lastStepIndex >= 0 && lastStepIndex < steps.length - 1) {
+          const nextStep = steps[lastStepIndex + 1];
+          updateStepStatus(nextStep.id, 'error', 0, errorMessage);
+        }
       }
 
       // Add to retry queue
@@ -579,7 +612,7 @@ export const DemoDataGenerator: React.FC = () => {
 
       toast({
         title: "Generation Failed",
-        description: "Demo data generation failed but has been added to retry queue",
+        description: `Demo data generation failed: ${errorMessage}`,
         variant: "destructive",
       });
     } finally {
@@ -591,14 +624,19 @@ export const DemoDataGenerator: React.FC = () => {
     try {
       setIsGenerating(true);
       
-      // Delete in reverse order of dependencies
-      await supabase.from('user_activity_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('proposals').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('assessments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('contracts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('support_tickets').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('contacts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('clients').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      // Delete in reverse order of dependencies using tenant_id filter
+      const tenantId = profile?.tenant_id;
+      if (!tenantId) {
+        throw new Error('No tenant ID available');
+      }
+
+      await supabase.from('user_activity_logs').delete().eq('tenant_id', tenantId);
+      await supabase.from('proposals').delete().eq('tenant_id', tenantId);
+      await supabase.from('assessments').delete().eq('tenant_id', tenantId);
+      await supabase.from('contracts').delete().eq('tenant_id', tenantId);
+      await supabase.from('support_tickets').delete().eq('tenant_id', tenantId);
+      await supabase.from('contacts').delete().eq('tenant_id', tenantId);
+      await supabase.from('clients').delete().eq('tenant_id', tenantId);
 
       toast({
         title: "Demo Data Reset",
