@@ -8326,6 +8326,10 @@ export type Database = {
         Args: { client_uuid: string }
         Returns: number
       }
+      calculate_next_billing_date: {
+        Args: { billing_date: string; frequency: string }
+        Returns: string
+      }
       calculate_sla_due_date: {
         Args:
           | {
