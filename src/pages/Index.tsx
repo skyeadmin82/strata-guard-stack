@@ -232,7 +232,7 @@ const Index = () => {
       
       return {
         date: date.toISOString().split('T')[0],
-        revenue: Math.max(dailyRevenue, Math.floor(Math.random() * 1000) + 500) // Fallback to demo data if no contracts
+        revenue: dailyRevenue // Show actual revenue, including zero when no contracts
       };
     });
     return last30Days;
@@ -485,15 +485,15 @@ const Index = () => {
           loadDashboard(retryAttempt + 1);
         }, 2000 * (retryAttempt + 1));
       } else {
-        // Fallback to demo data
-        setMetrics(demoMetrics);
-        setChartData(generateDemoCharts());
-        setActivityData(generateDemoActivity());
+        // Show error without falling back to demo data
         toast({
-          title: "Using Demo Data",
-          description: "Switched to demo data due to connection issues.",
+          title: "Connection Error",
+          description: "Unable to load dashboard data. Please refresh the page.",
           variant: "destructive",
         });
+        setMetrics([]);
+        setChartData(null);
+        setActivityData([]);
       }
     } finally {
       setLoading(false);
