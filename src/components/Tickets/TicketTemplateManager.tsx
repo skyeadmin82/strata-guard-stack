@@ -99,7 +99,6 @@ export const TicketTemplateManager: React.FC = () => {
       const { data, error } = await supabase
         .from('users')
         .select('id, first_name, last_name')
-        .eq('role', 'technician')
         .order('first_name');
 
       if (error) throw error;

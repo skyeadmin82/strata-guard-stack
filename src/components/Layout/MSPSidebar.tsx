@@ -56,6 +56,11 @@ const navigationItems = [
     icon: Ticket,
   },
   {
+    title: 'Ticket Management',
+    url: '/tickets/management',
+    icon: Settings,
+  },
+  {
     title: 'Contracts',
     url: '/contracts',
     icon: FileText,
