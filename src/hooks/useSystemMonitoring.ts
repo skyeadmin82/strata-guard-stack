@@ -73,40 +73,54 @@ export const useSystemMonitoring = () => {
     setIsMonitoring(true);
     
     try {
-      // Get all active monitors
-      const { data: monitors, error: monitorsError } = await supabase
+      // Call the edge function for comprehensive monitoring
+      const { data: checkData, error: checkError } = await supabase.functions.invoke('system-monitoring', {
+        body: { 
+          tenantId,
+          monitorType: 'all'
+        }
+      });
+
+      if (checkError) throw checkError;
+
+      const results = checkData?.results || [];
+
+      // Get all active monitors to update their status
+      const { data: monitors } = await supabase
         .from('system_monitors')
         .select('*')
         .eq('tenant_id', tenantId)
         .eq('status', 'active');
 
-      if (monitorsError) throw monitorsError;
-
-      const results = [];
-      
-      // Run checks for each monitor
+      // Update monitor statuses and create alerts
       for (const monitor of monitors || []) {
-        const checkResult = await runMonitorCheck(monitor);
-        results.push(checkResult);
+        const relevantResult = results.find((r: any) => r.monitorType === monitor.monitor_type);
+        
+        if (relevantResult) {
+          // Update monitor status
+          await supabase
+            .from('system_monitors')
+            .update({
+              last_checked_at: new Date().toISOString(),
+              status: relevantResult.passed ? 'active' : 'alerting'
+            })
+            .eq('id', monitor.id);
 
-        // Create alert if check failed
-        if (!checkResult.passed && checkResult.alertLevel !== 'info') {
-          await createAlert(monitor, checkResult);
+          // Create alert if check failed
+          if (!relevantResult.passed && relevantResult.alertLevel !== 'info') {
+            await createAlert(monitor, relevantResult);
+          }
         }
-
-        // Update monitor status
-        await supabase
-          .from('system_monitors')
-          .update({
-            last_checked_at: new Date().toISOString(),
-            status: checkResult.passed ? 'active' : 'alerting'
-          })
-          .eq('id', monitor.id);
       }
 
       // Generate dashboard data
       const dashboardData = await generateDashboard(results);
       setDashboard(dashboardData);
+
+      toast({
+        title: "System Check Complete",
+        description: `Ran ${results.length} checks. ${results.filter((r: any) => !r.passed).length} issues found.`,
+      });
 
       return { success: true, results };
 

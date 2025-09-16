@@ -32,6 +32,13 @@ const SystemDashboard: React.FC = () => {
   const [selectedAlert, setSelectedAlert] = useState<any>(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
 
+  // Auto-run initial health check on mount
+  useEffect(() => {
+    if (!dashboard) {
+      runSystemCheck();
+    }
+  }, [dashboard, runSystemCheck]);
+
   const getHealthColor = (status: 'healthy' | 'warning' | 'critical') => {
     switch (status) {
       case 'healthy': return 'text-green-600';
