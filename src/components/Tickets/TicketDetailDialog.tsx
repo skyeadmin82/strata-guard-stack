@@ -118,7 +118,7 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
         status: ticket.status,
         category: ticket.category || '',
         client_id: ticket.client_id,
-        contact_id: ticket.contact_id || ''
+        contact_id: ticket.contact_id || "none"
       });
       fetchClients();
       if (ticket.client_id) {
@@ -129,7 +129,7 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
 
   // Handle client change
   const handleClientChange = (clientId: string) => {
-    setEditForm(prev => ({ ...prev, client_id: clientId, contact_id: '' }));
+    setEditForm(prev => ({ ...prev, client_id: clientId, contact_id: "none" }));
     fetchContacts(clientId);
   };
 
@@ -147,7 +147,7 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
         status: editForm.status,
         category: editForm.category || null,
         client_id: editForm.client_id,
-        contact_id: editForm.contact_id || null,
+        contact_id: editForm.contact_id === "none" ? null : editForm.contact_id,
         updated_at: new Date().toISOString()
       };
 
@@ -412,12 +412,12 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
                 {isEditing ? (
                   <div>
                     <Label>Contact</Label>
-                    <Select value={editForm.contact_id} onValueChange={(value) => setEditForm(prev => ({ ...prev, contact_id: value }))}>
+                    <Select value={editForm.contact_id || "none"} onValueChange={(value) => setEditForm(prev => ({ ...prev, contact_id: value === "none" ? "" : value }))}>
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select contact" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No contact selected</SelectItem>
+                        <SelectItem value="none">No contact selected</SelectItem>
                         {contacts.map((contact) => (
                           <SelectItem key={contact.id} value={contact.id}>
                             {contact.first_name} {contact.last_name}
