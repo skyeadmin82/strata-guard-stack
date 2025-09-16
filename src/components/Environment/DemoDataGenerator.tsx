@@ -188,7 +188,7 @@ export const DemoDataGenerator: React.FC = () => {
     const departments = ['Executive', 'Technology', 'Operations', 'Finance', 'Sales', 'Marketing', 'Human Resources', 'Administration'];
 
     let contactCount = 0;
-    const totalContacts = (clients?.length || 0) * 2.5; // Average 2-3 contacts per client
+    const totalContacts = (clients?.length || 0) * 4; // Maximum 4 contacts per client to prevent over 100%
 
     for (const client of clients || []) {
       const numContacts = Math.floor(Math.random() * 3) + 2; // 2-4 contacts per client
@@ -226,7 +226,7 @@ export const DemoDataGenerator: React.FC = () => {
         }
 
         contactCount++;
-        updateStepStatus('contacts', 'running', (contactCount / totalContacts) * 100);
+        updateStepStatus('contacts', 'running', Math.min(100, (contactCount / totalContacts) * 100));
         await new Promise(resolve => setTimeout(resolve, 50));
       }
     }
