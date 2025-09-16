@@ -41,7 +41,7 @@ export const ContractsPage = () => {
         .from('contracts')
         .select(`
           *,
-          clients(name)
+          clients!client_id(name)
         `)
         .order('created_at', { ascending: false });
 

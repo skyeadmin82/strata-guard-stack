@@ -40,8 +40,8 @@ export const AssessmentsPage = () => {
         .from('assessments')
         .select(`
           *,
-          clients(name),
-          assessment_templates(name, category)
+          clients!client_id(name),
+          assessment_templates!template_id(name, category)
         `)
         .order('created_at', { ascending: false });
 
