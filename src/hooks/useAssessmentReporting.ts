@@ -364,6 +364,60 @@ export const useAssessmentReporting = () => {
     }
   }, []);
 
+  const generateHTMLReport = useCallback((reportData: ReportData): string => {
+    const { assessment, template, summary, recommendations } = reportData;
+    
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Assessment Report - ${assessment.title}</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+            .score { font-size: 24px; color: #333; font-weight: bold; }
+            .section { margin: 20px 0; }
+            .recommendation { background: #f5f5f5; padding: 15px; margin: 10px 0; border-left: 4px solid #007cba; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Assessment Report</h1>
+            <h2>${assessment.title}</h2>
+            <p>Generated on: ${new Date().toLocaleDateString()}</p>
+        </div>
+        
+        <div class="section">
+            <h3>Summary</h3>
+            <div class="score">Overall Score: ${summary.percentage.toFixed(1)}% (${summary.totalScore}/${summary.maxScore})</div>
+            ${summary.completionTime ? `<p>Completion Time: ${summary.completionTime} minutes</p>` : ''}
+        </div>
+
+        ${Object.keys(summary.sectionsScores).length > 0 ? `
+        <div class="section">
+            <h3>Section Scores</h3>
+            ${Object.entries(summary.sectionsScores).map(([section, score]) => `
+                <p><strong>${section}:</strong> ${score.toFixed(1)}%</p>
+            `).join('')}
+        </div>` : ''}
+
+        ${recommendations.length > 0 ? `
+        <div class="section">
+            <h3>Recommendations</h3>
+            ${recommendations.map(rec => `
+                <div class="recommendation">
+                    <h4>${rec.title}</h4>
+                    <p><strong>Priority:</strong> ${rec.priority}</p>
+                    <p>${rec.description}</p>
+                    ${rec.estimatedValue ? `<p><strong>Estimated Value:</strong> $${rec.estimatedValue}</p>` : ''}
+                </div>
+            `).join('')}
+        </div>` : ''}
+    </body>
+    </html>
+    `;
+  }, []);
+
   const exportPDF = useCallback(async (reportData: ReportData): Promise<ExportResult> => {
     try {
       const { jsPDF } = await import('jspdf');
@@ -471,60 +525,6 @@ export const useAssessmentReporting = () => {
       };
     }
   }, [exportCSV]);
-
-  const generateHTMLReport = useCallback((reportData: ReportData): string => {
-    const { assessment, template, summary, recommendations } = reportData;
-    
-    return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Assessment Report - ${assessment.title}</title>
-        <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-            .score { font-size: 24px; color: #333; font-weight: bold; }
-            .section { margin: 20px 0; }
-            .recommendation { background: #f5f5f5; padding: 15px; margin: 10px 0; border-left: 4px solid #007cba; }
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <h1>Assessment Report</h1>
-            <h2>${assessment.title}</h2>
-            <p>Generated on: ${new Date().toLocaleDateString()}</p>
-        </div>
-        
-        <div class="section">
-            <h3>Summary</h3>
-            <div class="score">Overall Score: ${summary.percentage.toFixed(1)}% (${summary.totalScore}/${summary.maxScore})</div>
-            ${summary.completionTime ? `<p>Completion Time: ${summary.completionTime} minutes</p>` : ''}
-        </div>
-
-        ${Object.keys(summary.sectionsScores).length > 0 ? `
-        <div class="section">
-            <h3>Section Scores</h3>
-            ${Object.entries(summary.sectionsScores).map(([section, score]) => `
-                <p><strong>${section}:</strong> ${score.toFixed(1)}%</p>
-            `).join('')}
-        </div>` : ''}
-
-        ${recommendations.length > 0 ? `
-        <div class="section">
-            <h3>Recommendations</h3>
-            ${recommendations.map(rec => `
-                <div class="recommendation">
-                    <h4>${rec.title}</h4>
-                    <p><strong>Priority:</strong> ${rec.priority}</p>
-                    <p>${rec.description}</p>
-                    ${rec.estimatedValue ? `<p><strong>Estimated Value:</strong> $${rec.estimatedValue}</p>` : ''}
-                </div>
-            `).join('')}
-        </div>` : ''}
-    </body>
-    </html>
-    `;
-  }, []);
 
   const generateCSVReport = useCallback((reportData: ReportData): string => {
     const { responses, questions } = reportData;
