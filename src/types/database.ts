@@ -272,6 +272,213 @@ export interface Assessment {
   recovery_data?: Record<string, any>;
 }
 
+// Proposal System Types
+export interface ProposalTemplate {
+  id: string;
+  tenant_id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  template_content: Record<string, any>;
+  default_terms?: string;
+  default_validity_days: number;
+  pricing_structure: Record<string, any>;
+  required_fields: string[];
+  validation_rules: Record<string, any>;
+  is_active: boolean;
+  version: number;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Proposal {
+  id: string;
+  tenant_id: string;
+  client_id: string;
+  template_id?: string;
+  proposal_number: string;
+  title: string;
+  description?: string;
+  content: Record<string, any>;
+  status: 'draft' | 'pending_approval' | 'approved' | 'sent' | 'viewed' | 'accepted' | 'rejected' | 'expired' | 'cancelled';
+  total_amount?: number;
+  currency: 'USD' | 'EUR' | 'GBP';
+  tax_amount: number;
+  discount_amount: number;
+  final_amount?: number;
+  valid_until?: string;
+  created_date: string;
+  sent_date?: string;
+  viewed_date?: string;
+  accepted_date?: string;
+  terms_and_conditions?: string;
+  payment_terms?: string;
+  delivery_terms?: string;
+  view_count: number;
+  last_viewed_at?: string;
+  tracking_pixel_id: string;
+  validation_errors: Array<any>;
+  generation_errors: Array<any>;
+  delivery_errors: Array<any>;
+  created_by?: string;
+  updated_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProposalItem {
+  id: string;
+  tenant_id: string;
+  proposal_id: string;
+  item_order: number;
+  item_type: string;
+  name: string;
+  description?: string;
+  quantity: number;
+  unit_price: number;
+  discount_percent: number;
+  tax_percent: number;
+  total_price: number;
+  metadata: Record<string, any>;
+  created_at: string;
+}
+
+export interface ProposalVersion {
+  id: string;
+  tenant_id: string;
+  proposal_id: string;
+  version_number: number;
+  content_snapshot: Record<string, any>;
+  changes_summary?: string;
+  change_type?: string;
+  created_by?: string;
+  created_at: string;
+}
+
+export interface ProposalApproval {
+  id: string;
+  tenant_id: string;
+  proposal_id: string;
+  approver_id: string;
+  approval_level: number;
+  status: 'pending' | 'approved' | 'rejected' | 'timeout';
+  comments?: string;
+  approved_at?: string;
+  timeout_at?: string;
+  notification_sent: boolean;
+  notification_errors: Array<any>;
+  created_at: string;
+}
+
+export interface PaymentTransaction {
+  id: string;
+  tenant_id: string;
+  proposal_id: string;
+  client_id: string;
+  transaction_id?: string;
+  external_transaction_id?: string;
+  payment_method: 'credit_card' | 'debit_card' | 'bank_transfer' | 'paypal' | 'pcbancard';
+  payment_processor: string;
+  amount: number;
+  currency: 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD';
+  processing_fee: number;
+  net_amount?: number;
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'refunded';
+  initiated_at: string;
+  processed_at?: string;
+  completed_at?: string;
+  card_last_four?: string;
+  card_brand?: string;
+  card_token?: string;
+  error_code?: string;
+  error_message?: string;
+  error_details: Record<string, any>;
+  retry_count: number;
+  max_retries: number;
+  audit_trail: Record<string, any>;
+  ip_address?: string;
+  user_agent?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProposalComment {
+  id: string;
+  tenant_id: string;
+  proposal_id: string;
+  user_id?: string;
+  client_contact_id?: string;
+  parent_comment_id?: string;
+  content: string;
+  comment_type: string;
+  is_internal: boolean;
+  is_moderated: boolean;
+  moderation_status: string;
+  moderation_notes?: string;
+  attachments: Array<any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProposalSignature {
+  id: string;
+  tenant_id: string;
+  proposal_id: string;
+  signer_id?: string;
+  signer_email: string;
+  signer_name: string;
+  signature_type: 'electronic' | 'digital' | 'wet_signature' | 'api_signature';
+  signature_data?: Record<string, any>;
+  signature_image_url?: string;
+  ip_address?: string;
+  user_agent?: string;
+  location_data?: Record<string, any>;
+  verification_code?: string;
+  is_verified: boolean;
+  verification_method?: string;
+  requested_at: string;
+  signed_at?: string;
+  expires_at?: string;
+  delivery_attempts: number;
+  delivery_errors: Array<any>;
+  created_at: string;
+}
+
+export interface ProposalTracking {
+  id: string;
+  tenant_id: string;
+  proposal_id: string;
+  event_type: string;
+  event_data: Record<string, any>;
+  ip_address?: string;
+  user_agent?: string;
+  referrer?: string;
+  country?: string;
+  city?: string;
+  timezone?: string;
+  created_at: string;
+}
+
+export interface ProposalNotification {
+  id: string;
+  tenant_id: string;
+  proposal_id: string;
+  notification_type: string;
+  recipient_email: string;
+  subject: string;
+  content?: string;
+  status: string;
+  sent_at?: string;
+  delivered_at?: string;
+  opened_at?: string;
+  delivery_attempts: number;
+  last_attempt_at?: string;
+  error_message?: string;
+  error_details: Record<string, any>;
+  created_at: string;
+}
+
 export interface AssessmentResponse {
   id: string;
   tenant_id: string;

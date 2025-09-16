@@ -1076,6 +1076,102 @@ export type Database = {
           },
         ]
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          audit_trail: Json | null
+          card_brand: string | null
+          card_last_four: string | null
+          card_token: string | null
+          client_id: string
+          completed_at: string | null
+          created_at: string | null
+          currency: Database["public"]["Enums"]["currency_code"] | null
+          error_code: string | null
+          error_details: Json | null
+          error_message: string | null
+          external_transaction_id: string | null
+          id: string
+          initiated_at: string | null
+          ip_address: unknown | null
+          max_retries: number | null
+          net_amount: number | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_processor: string | null
+          processed_at: string | null
+          processing_fee: number | null
+          proposal_id: string
+          retry_count: number | null
+          status: Database["public"]["Enums"]["payment_status"] | null
+          tenant_id: string
+          transaction_id: string | null
+          updated_at: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          amount: number
+          audit_trail?: Json | null
+          card_brand?: string | null
+          card_last_four?: string | null
+          card_token?: string | null
+          client_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: Database["public"]["Enums"]["currency_code"] | null
+          error_code?: string | null
+          error_details?: Json | null
+          error_message?: string | null
+          external_transaction_id?: string | null
+          id?: string
+          initiated_at?: string | null
+          ip_address?: unknown | null
+          max_retries?: number | null
+          net_amount?: number | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_processor?: string | null
+          processed_at?: string | null
+          processing_fee?: number | null
+          proposal_id: string
+          retry_count?: number | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          tenant_id: string
+          transaction_id?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          amount?: number
+          audit_trail?: Json | null
+          card_brand?: string | null
+          card_last_four?: string | null
+          card_token?: string | null
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: Database["public"]["Enums"]["currency_code"] | null
+          error_code?: string | null
+          error_details?: Json | null
+          error_message?: string | null
+          external_transaction_id?: string | null
+          id?: string
+          initiated_at?: string | null
+          ip_address?: unknown | null
+          max_retries?: number | null
+          net_amount?: number | null
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          payment_processor?: string | null
+          processed_at?: string | null
+          processing_fee?: number | null
+          proposal_id?: string
+          retry_count?: number | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          tenant_id?: string
+          transaction_id?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       pricing_rules: {
         Row: {
           base_rate: number
@@ -1136,6 +1232,532 @@ export type Database = {
           tier_rules?: Json | null
           unit_type?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      proposal_approvals: {
+        Row: {
+          approval_level: number | null
+          approved_at: string | null
+          approver_id: string
+          comments: string | null
+          created_at: string | null
+          id: string
+          notification_errors: Json | null
+          notification_sent: boolean | null
+          proposal_id: string
+          status: Database["public"]["Enums"]["proposal_approval_status"] | null
+          tenant_id: string
+          timeout_at: string | null
+        }
+        Insert: {
+          approval_level?: number | null
+          approved_at?: string | null
+          approver_id: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          notification_errors?: Json | null
+          notification_sent?: boolean | null
+          proposal_id: string
+          status?:
+            | Database["public"]["Enums"]["proposal_approval_status"]
+            | null
+          tenant_id: string
+          timeout_at?: string | null
+        }
+        Update: {
+          approval_level?: number | null
+          approved_at?: string | null
+          approver_id?: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          notification_errors?: Json | null
+          notification_sent?: boolean | null
+          proposal_id?: string
+          status?:
+            | Database["public"]["Enums"]["proposal_approval_status"]
+            | null
+          tenant_id?: string
+          timeout_at?: string | null
+        }
+        Relationships: []
+      }
+      proposal_comments: {
+        Row: {
+          attachments: Json | null
+          client_contact_id: string | null
+          comment_type: string | null
+          content: string
+          created_at: string | null
+          id: string
+          is_internal: boolean | null
+          is_moderated: boolean | null
+          moderation_notes: string | null
+          moderation_status: string | null
+          parent_comment_id: string | null
+          proposal_id: string
+          tenant_id: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          client_contact_id?: string | null
+          comment_type?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_internal?: boolean | null
+          is_moderated?: boolean | null
+          moderation_notes?: string | null
+          moderation_status?: string | null
+          parent_comment_id?: string | null
+          proposal_id: string
+          tenant_id: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          client_contact_id?: string | null
+          comment_type?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_internal?: boolean | null
+          is_moderated?: boolean | null
+          moderation_notes?: string | null
+          moderation_status?: string | null
+          parent_comment_id?: string | null
+          proposal_id?: string
+          tenant_id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      proposal_items: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          discount_percent: number | null
+          id: string
+          item_order: number
+          item_type: string | null
+          metadata: Json | null
+          name: string
+          proposal_id: string
+          quantity: number | null
+          tax_percent: number | null
+          tenant_id: string
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          discount_percent?: number | null
+          id?: string
+          item_order: number
+          item_type?: string | null
+          metadata?: Json | null
+          name: string
+          proposal_id: string
+          quantity?: number | null
+          tax_percent?: number | null
+          tenant_id: string
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          discount_percent?: number | null
+          id?: string
+          item_order?: number
+          item_type?: string | null
+          metadata?: Json | null
+          name?: string
+          proposal_id?: string
+          quantity?: number | null
+          tax_percent?: number | null
+          tenant_id?: string
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: []
+      }
+      proposal_notifications: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          delivered_at: string | null
+          delivery_attempts: number | null
+          error_details: Json | null
+          error_message: string | null
+          id: string
+          last_attempt_at: string | null
+          notification_type: string
+          opened_at: string | null
+          proposal_id: string
+          recipient_email: string
+          sent_at: string | null
+          status: string | null
+          subject: string
+          tenant_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          delivery_attempts?: number | null
+          error_details?: Json | null
+          error_message?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          notification_type: string
+          opened_at?: string | null
+          proposal_id: string
+          recipient_email: string
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          tenant_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          delivery_attempts?: number | null
+          error_details?: Json | null
+          error_message?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          notification_type?: string
+          opened_at?: string | null
+          proposal_id?: string
+          recipient_email?: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      proposal_signatures: {
+        Row: {
+          created_at: string | null
+          delivery_attempts: number | null
+          delivery_errors: Json | null
+          expires_at: string | null
+          id: string
+          ip_address: unknown | null
+          is_verified: boolean | null
+          location_data: Json | null
+          proposal_id: string
+          requested_at: string | null
+          signature_data: Json | null
+          signature_image_url: string | null
+          signature_type: Database["public"]["Enums"]["signature_type"]
+          signed_at: string | null
+          signer_email: string
+          signer_id: string | null
+          signer_name: string
+          tenant_id: string
+          user_agent: string | null
+          verification_code: string | null
+          verification_method: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          delivery_attempts?: number | null
+          delivery_errors?: Json | null
+          expires_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_verified?: boolean | null
+          location_data?: Json | null
+          proposal_id: string
+          requested_at?: string | null
+          signature_data?: Json | null
+          signature_image_url?: string | null
+          signature_type: Database["public"]["Enums"]["signature_type"]
+          signed_at?: string | null
+          signer_email: string
+          signer_id?: string | null
+          signer_name: string
+          tenant_id: string
+          user_agent?: string | null
+          verification_code?: string | null
+          verification_method?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          delivery_attempts?: number | null
+          delivery_errors?: Json | null
+          expires_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_verified?: boolean | null
+          location_data?: Json | null
+          proposal_id?: string
+          requested_at?: string | null
+          signature_data?: Json | null
+          signature_image_url?: string | null
+          signature_type?: Database["public"]["Enums"]["signature_type"]
+          signed_at?: string | null
+          signer_email?: string
+          signer_id?: string | null
+          signer_name?: string
+          tenant_id?: string
+          user_agent?: string | null
+          verification_code?: string | null
+          verification_method?: string | null
+        }
+        Relationships: []
+      }
+      proposal_templates: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          default_terms: string | null
+          default_validity_days: number | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          pricing_structure: Json | null
+          required_fields: Json | null
+          template_content: Json
+          tenant_id: string
+          updated_at: string | null
+          validation_rules: Json | null
+          version: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          default_terms?: string | null
+          default_validity_days?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          pricing_structure?: Json | null
+          required_fields?: Json | null
+          template_content?: Json
+          tenant_id: string
+          updated_at?: string | null
+          validation_rules?: Json | null
+          version?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          default_terms?: string | null
+          default_validity_days?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          pricing_structure?: Json | null
+          required_fields?: Json | null
+          template_content?: Json
+          tenant_id?: string
+          updated_at?: string | null
+          validation_rules?: Json | null
+          version?: number | null
+        }
+        Relationships: []
+      }
+      proposal_tracking: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string | null
+          event_data: Json | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          proposal_id: string
+          referrer: string | null
+          tenant_id: string
+          timezone: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          proposal_id: string
+          referrer?: string | null
+          tenant_id: string
+          timezone?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          proposal_id?: string
+          referrer?: string | null
+          tenant_id?: string
+          timezone?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      proposal_versions: {
+        Row: {
+          change_type: string | null
+          changes_summary: string | null
+          content_snapshot: Json
+          created_at: string | null
+          created_by: string | null
+          id: string
+          proposal_id: string
+          tenant_id: string
+          version_number: number
+        }
+        Insert: {
+          change_type?: string | null
+          changes_summary?: string | null
+          content_snapshot: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          proposal_id: string
+          tenant_id: string
+          version_number: number
+        }
+        Update: {
+          change_type?: string | null
+          changes_summary?: string | null
+          content_snapshot?: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          proposal_id?: string
+          tenant_id?: string
+          version_number?: number
+        }
+        Relationships: []
+      }
+      proposals: {
+        Row: {
+          accepted_date: string | null
+          client_id: string
+          content: Json | null
+          created_at: string | null
+          created_by: string | null
+          created_date: string | null
+          currency: Database["public"]["Enums"]["currency_code"] | null
+          delivery_errors: Json | null
+          delivery_terms: string | null
+          description: string | null
+          discount_amount: number | null
+          final_amount: number | null
+          generation_errors: Json | null
+          id: string
+          last_viewed_at: string | null
+          payment_terms: string | null
+          proposal_number: string
+          sent_date: string | null
+          status: Database["public"]["Enums"]["proposal_status"] | null
+          tax_amount: number | null
+          template_id: string | null
+          tenant_id: string
+          terms_and_conditions: string | null
+          title: string
+          total_amount: number | null
+          tracking_pixel_id: string | null
+          updated_at: string | null
+          updated_by: string | null
+          valid_until: string | null
+          validation_errors: Json | null
+          view_count: number | null
+          viewed_date: string | null
+        }
+        Insert: {
+          accepted_date?: string | null
+          client_id: string
+          content?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          created_date?: string | null
+          currency?: Database["public"]["Enums"]["currency_code"] | null
+          delivery_errors?: Json | null
+          delivery_terms?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          final_amount?: number | null
+          generation_errors?: Json | null
+          id?: string
+          last_viewed_at?: string | null
+          payment_terms?: string | null
+          proposal_number: string
+          sent_date?: string | null
+          status?: Database["public"]["Enums"]["proposal_status"] | null
+          tax_amount?: number | null
+          template_id?: string | null
+          tenant_id: string
+          terms_and_conditions?: string | null
+          title: string
+          total_amount?: number | null
+          tracking_pixel_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          valid_until?: string | null
+          validation_errors?: Json | null
+          view_count?: number | null
+          viewed_date?: string | null
+        }
+        Update: {
+          accepted_date?: string | null
+          client_id?: string
+          content?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          created_date?: string | null
+          currency?: Database["public"]["Enums"]["currency_code"] | null
+          delivery_errors?: Json | null
+          delivery_terms?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          final_amount?: number | null
+          generation_errors?: Json | null
+          id?: string
+          last_viewed_at?: string | null
+          payment_terms?: string | null
+          proposal_number?: string
+          sent_date?: string | null
+          status?: Database["public"]["Enums"]["proposal_status"] | null
+          tax_amount?: number | null
+          template_id?: string | null
+          tenant_id?: string
+          terms_and_conditions?: string | null
+          title?: string
+          total_amount?: number | null
+          tracking_pixel_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          valid_until?: string | null
+          validation_errors?: Json | null
+          view_count?: number | null
+          viewed_date?: string | null
         }
         Relationships: []
       }
@@ -1260,6 +1882,19 @@ export type Database = {
         | "won"
         | "lost"
         | "cancelled"
+      payment_method:
+        | "credit_card"
+        | "debit_card"
+        | "bank_transfer"
+        | "paypal"
+        | "pcbancard"
+      payment_status:
+        | "pending"
+        | "processing"
+        | "completed"
+        | "failed"
+        | "cancelled"
+        | "refunded"
       payment_terms:
         | "net_15"
         | "net_30"
@@ -1273,6 +1908,17 @@ export type Database = {
         | "subscription"
         | "usage_based"
         | "tiered"
+      proposal_approval_status: "pending" | "approved" | "rejected" | "timeout"
+      proposal_status:
+        | "draft"
+        | "pending_approval"
+        | "approved"
+        | "sent"
+        | "viewed"
+        | "accepted"
+        | "rejected"
+        | "expired"
+        | "cancelled"
       question_type:
         | "text"
         | "number"
@@ -1288,6 +1934,11 @@ export type Database = {
         | "failed"
         | "retrying"
       response_status: "in_progress" | "completed" | "validated" | "flagged"
+      signature_type:
+        | "electronic"
+        | "digital"
+        | "wet_signature"
+        | "api_signature"
       tenant_plan: "starter" | "professional" | "enterprise"
       user_role: "admin" | "manager" | "technician"
     }
@@ -1446,6 +2097,21 @@ export const Constants = {
         "lost",
         "cancelled",
       ],
+      payment_method: [
+        "credit_card",
+        "debit_card",
+        "bank_transfer",
+        "paypal",
+        "pcbancard",
+      ],
+      payment_status: [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "cancelled",
+        "refunded",
+      ],
       payment_terms: [
         "net_15",
         "net_30",
@@ -1460,6 +2126,18 @@ export const Constants = {
         "subscription",
         "usage_based",
         "tiered",
+      ],
+      proposal_approval_status: ["pending", "approved", "rejected", "timeout"],
+      proposal_status: [
+        "draft",
+        "pending_approval",
+        "approved",
+        "sent",
+        "viewed",
+        "accepted",
+        "rejected",
+        "expired",
+        "cancelled",
       ],
       question_type: [
         "text",
@@ -1478,6 +2156,12 @@ export const Constants = {
         "retrying",
       ],
       response_status: ["in_progress", "completed", "validated", "flagged"],
+      signature_type: [
+        "electronic",
+        "digital",
+        "wet_signature",
+        "api_signature",
+      ],
       tenant_plan: ["starter", "professional", "enterprise"],
       user_role: ["admin", "manager", "technician"],
     },
