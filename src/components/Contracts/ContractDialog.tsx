@@ -83,12 +83,11 @@ export const ContractDialog = ({ open, onOpenChange, contract, mode }: ContractD
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="msp">MSP Agreement</SelectItem>
                     <SelectItem value="service">Service Agreement</SelectItem>
                     <SelectItem value="project">Project Contract</SelectItem>
                     <SelectItem value="maintenance">Maintenance Contract</SelectItem>
-                    <SelectItem value="support">Support Contract</SelectItem>
-                    <SelectItem value="consulting">Consulting Agreement</SelectItem>
+                    <SelectItem value="retainer">Retainer Agreement</SelectItem>
+                    <SelectItem value="license">License Agreement</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

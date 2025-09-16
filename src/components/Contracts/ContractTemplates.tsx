@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,9 @@ interface ContractTemplate {
   created_at: string;
 }
 
+type ContractType = 'service' | 'project' | 'maintenance' | 'retainer' | 'license';
+type PricingType = 'fixed' | 'hourly' | 'subscription' | 'usage_based' | 'tiered';
+
 export const ContractTemplates = () => {
   const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,9 +33,9 @@ export const ContractTemplates = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    contract_type: 'msp',
+    contract_type: 'service' as ContractType,
     template_content: '',
-    default_pricing_type: 'fixed'
+    default_pricing_type: 'fixed' as PricingType
   });
   const { toast } = useToast();
 
@@ -67,7 +70,7 @@ export const ContractTemplates = () => {
     setFormData({
       name: '',
       description: '',
-      contract_type: 'msp',
+      contract_type: 'service',
       template_content: '',
       default_pricing_type: 'fixed'
     });
@@ -79,7 +82,7 @@ export const ContractTemplates = () => {
     setFormData({
       name: template.name,
       description: template.description || '',
-      contract_type: template.contract_type,
+      contract_type: template.contract_type as ContractType,
       template_content: template.template_content,
       default_pricing_type: 'fixed' // Default since it's not in the existing data
     });
@@ -88,6 +91,20 @@ export const ContractTemplates = () => {
 
   const handleSaveTemplate = async () => {
     try {
+      // Get current user's tenant_id
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
+      const { data: profile } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('auth_user_id', userData.user.id)
+        .single();
+
+      if (!profile) {
+        throw new Error('User profile not found');
+      }
+
       if (editingTemplate) {
         // Update existing template
         const { error } = await supabase
@@ -116,7 +133,8 @@ export const ContractTemplates = () => {
             description: formData.description,
             contract_type: formData.contract_type,
             template_content: formData.template_content,
-            default_pricing_type: formData.default_pricing_type
+            default_pricing_type: formData.default_pricing_type,
+            tenant_id: profile.tenant_id
           });
 
         if (error) throw error;
@@ -285,25 +303,24 @@ export const ContractTemplates = () => {
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="MSP Service Agreement"
+                  placeholder="Service Agreement Template"
                 />
               </div>
               <div>
                 <Label htmlFor="contract_type">Contract Type</Label>
                 <Select 
                   value={formData.contract_type} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, contract_type: value }))}
+                  onValueChange={(value: ContractType) => setFormData(prev => ({ ...prev, contract_type: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="msp">MSP Agreement</SelectItem>
                     <SelectItem value="service">Service Agreement</SelectItem>
                     <SelectItem value="project">Project Contract</SelectItem>
                     <SelectItem value="maintenance">Maintenance Contract</SelectItem>
-                    <SelectItem value="support">Support Contract</SelectItem>
-                    <SelectItem value="consulting">Consulting Agreement</SelectItem>
+                    <SelectItem value="retainer">Retainer Agreement</SelectItem>
+                    <SelectItem value="license">License Agreement</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

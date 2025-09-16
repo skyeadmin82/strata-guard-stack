@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { useEnhancedContractManagement, EnhancedContract } from '@/hooks/useEnhancedContractManagement';
 import { ContractDialog } from '@/components/Contracts/ContractDialog';
 import { RenewalReminders } from '@/components/Contracts/RenewalReminders';
+import { ContractTemplates } from '@/components/Contracts/ContractTemplates';
 
 export const ContractsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -188,6 +189,9 @@ export const ContractsPage = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Contract Templates */}
+        <ContractTemplates />
 
         {/* Renewal Reminders */}
         <RenewalReminders 
