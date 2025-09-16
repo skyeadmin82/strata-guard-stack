@@ -243,7 +243,14 @@ export const ProposalsPage = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredProposals.map((proposal) => (
-                      <TableRow key={proposal.id}>
+                      <TableRow 
+                        key={proposal.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => {
+                          // Primary action: View proposal details
+                          console.log('View proposal:', proposal.id);
+                        }}
+                      >
                         <TableCell className="font-medium">
                           {proposal.proposal_number}
                         </TableCell>

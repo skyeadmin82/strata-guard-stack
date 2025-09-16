@@ -245,46 +245,59 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {clients.map((client) => (
-                      <TableRow key={client.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{client.name}</div>
-                            {client.website && (
-                              <div className="flex items-center text-sm text-muted-foreground mt-1">
-                                <Globe className="h-3 w-3 mr-1" />
-                                <a 
-                                  href={client.website} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="hover:underline"
-                                >
-                                  {client.website.replace(/^https?:\/\//, '')}
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            {client.email && (
-                              <div className="flex items-center text-sm">
-                                <Mail className="h-3 w-3 mr-1" />
-                                <a href={`mailto:${client.email}`} className="hover:underline">
-                                  {client.email}
-                                </a>
-                              </div>
-                            )}
-                            {client.phone && (
-                              <div className="flex items-center text-sm text-muted-foreground">
-                                <Phone className="h-3 w-3 mr-1" />
-                                <a href={`tel:${client.phone}`} className="hover:underline">
-                                  {client.phone}
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
+                  {clients.map((client) => (
+                    <TableRow 
+                      key={client.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => onEditClient(client)}
+                    >
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{client.name}</div>
+                          {client.website && (
+                            <div className="flex items-center text-sm text-muted-foreground mt-1">
+                              <Globe className="h-3 w-3 mr-1" />
+                              <a 
+                                href={client.website} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {client.website.replace(/^https?:\/\//, '')}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {client.email && (
+                            <div className="flex items-center text-sm">
+                              <Mail className="h-3 w-3 mr-1" />
+                              <a 
+                                href={`mailto:${client.email}`} 
+                                className="hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {client.email}
+                              </a>
+                            </div>
+                          )}
+                          {client.phone && (
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Phone className="h-3 w-3 mr-1" />
+                              <a 
+                                href={`tel:${client.phone}`} 
+                                className="hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {client.phone}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
                         <TableCell>
                           {client.industry || (
                             <span className="text-muted-foreground">-</span>
@@ -306,7 +319,8 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({
                         <TableCell>
                           {formatDate(client.created_at)}
                         </TableCell>
-                        <TableCell>
+                      <TableCell>
+                        <div onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -356,7 +370,8 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({
                               </AlertDialog>
                             </DropdownMenuContent>
                           </DropdownMenu>
-                        </TableCell>
+                        </div>
+                      </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

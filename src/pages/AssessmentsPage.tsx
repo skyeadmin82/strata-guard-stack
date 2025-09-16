@@ -226,7 +226,14 @@ export const AssessmentsPage = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredAssessments.map((assessment) => (
-                      <TableRow key={assessment.id}>
+                      <TableRow 
+                        key={assessment.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => {
+                          // Primary action: View assessment details
+                          console.log('View assessment:', assessment.id);
+                        }}
+                      >
                         <TableCell>
                           <div className="flex items-center">
                             <Building2 className="w-4 h-4 mr-2 text-muted-foreground" />

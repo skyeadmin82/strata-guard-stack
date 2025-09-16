@@ -228,7 +228,14 @@ export const ContractsPage = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredContracts.map((contract) => (
-                      <TableRow key={contract.id}>
+                      <TableRow 
+                        key={contract.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => {
+                          // Primary action: View/Edit contract
+                          console.log('View contract:', contract.id);
+                        }}
+                      >
                         <TableCell className="font-medium">
                           {contract.contract_number}
                         </TableCell>

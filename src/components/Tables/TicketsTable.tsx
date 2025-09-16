@@ -402,7 +402,14 @@ export const TicketsTable: React.FC = () => {
             </TableHeader>
             <TableBody>
               {filteredTickets.map((ticket) => (
-                <TableRow key={ticket.id}>
+                <TableRow 
+                  key={ticket.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => {
+                    // Primary action: View ticket details
+                    console.log('View ticket details:', ticket.id);
+                  }}
+                >
                   <TableCell>
                     <div className="space-y-1">
                       <div className="font-medium text-sm">{ticket.title}</div>
@@ -443,12 +450,13 @@ export const TicketsTable: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem>
@@ -470,8 +478,9 @@ export const TicketsTable: React.FC = () => {
                             {status.replace('_', ' ')}
                           </DropdownMenuItem>
                         ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
