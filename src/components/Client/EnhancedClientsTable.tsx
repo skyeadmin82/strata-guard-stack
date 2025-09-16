@@ -364,6 +364,7 @@ export const EnhancedClientsTable: React.FC<EnhancedClientsTableProps> = ({
                         <TableRow 
                           key={client.id}
                           className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => setSelectedClientForDetails(client.id)}
                         >
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <Checkbox
