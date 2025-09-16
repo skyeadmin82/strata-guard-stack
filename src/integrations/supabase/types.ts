@@ -182,6 +182,164 @@ export type Database = {
           },
         ]
       }
+      api_endpoints: {
+        Row: {
+          allowed_roles: Json | null
+          api_key_required: boolean | null
+          auth_required: boolean | null
+          created_at: string | null
+          deprecated: boolean | null
+          deprecation_date: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          method: string
+          path: string
+          rate_limit_per_day: number | null
+          rate_limit_per_hour: number | null
+          rate_limit_per_minute: number | null
+          replacement_endpoint: string | null
+          request_schema: Json | null
+          response_schema: Json | null
+          tenant_id: string
+          updated_at: string | null
+          validation_enabled: boolean | null
+          version: string | null
+        }
+        Insert: {
+          allowed_roles?: Json | null
+          api_key_required?: boolean | null
+          auth_required?: boolean | null
+          created_at?: string | null
+          deprecated?: boolean | null
+          deprecation_date?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          method: string
+          path: string
+          rate_limit_per_day?: number | null
+          rate_limit_per_hour?: number | null
+          rate_limit_per_minute?: number | null
+          replacement_endpoint?: string | null
+          request_schema?: Json | null
+          response_schema?: Json | null
+          tenant_id: string
+          updated_at?: string | null
+          validation_enabled?: boolean | null
+          version?: string | null
+        }
+        Update: {
+          allowed_roles?: Json | null
+          api_key_required?: boolean | null
+          auth_required?: boolean | null
+          created_at?: string | null
+          deprecated?: boolean | null
+          deprecation_date?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          method?: string
+          path?: string
+          rate_limit_per_day?: number | null
+          rate_limit_per_hour?: number | null
+          rate_limit_per_minute?: number | null
+          replacement_endpoint?: string | null
+          request_schema?: Json | null
+          response_schema?: Json | null
+          tenant_id?: string
+          updated_at?: string | null
+          validation_enabled?: boolean | null
+          version?: string | null
+        }
+        Relationships: []
+      }
+      api_request_logs: {
+        Row: {
+          api_key_id: string | null
+          body: Json | null
+          client_ip: unknown | null
+          created_at: string | null
+          duration_ms: number | null
+          endpoint_id: string | null
+          error_message: string | null
+          error_stack: string | null
+          headers: Json | null
+          id: string
+          method: string
+          path: string
+          query_params: Json | null
+          rate_limit_hit: boolean | null
+          rate_limit_remaining: number | null
+          request_timestamp: string | null
+          response_body: Json | null
+          response_headers: Json | null
+          response_timestamp: string | null
+          status_code: number | null
+          tenant_id: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          api_key_id?: string | null
+          body?: Json | null
+          client_ip?: unknown | null
+          created_at?: string | null
+          duration_ms?: number | null
+          endpoint_id?: string | null
+          error_message?: string | null
+          error_stack?: string | null
+          headers?: Json | null
+          id?: string
+          method: string
+          path: string
+          query_params?: Json | null
+          rate_limit_hit?: boolean | null
+          rate_limit_remaining?: number | null
+          request_timestamp?: string | null
+          response_body?: Json | null
+          response_headers?: Json | null
+          response_timestamp?: string | null
+          status_code?: number | null
+          tenant_id: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          api_key_id?: string | null
+          body?: Json | null
+          client_ip?: unknown | null
+          created_at?: string | null
+          duration_ms?: number | null
+          endpoint_id?: string | null
+          error_message?: string | null
+          error_stack?: string | null
+          headers?: Json | null
+          id?: string
+          method?: string
+          path?: string
+          query_params?: Json | null
+          rate_limit_hit?: boolean | null
+          rate_limit_remaining?: number | null
+          request_timestamp?: string | null
+          response_body?: Json | null
+          response_headers?: Json | null
+          response_timestamp?: string | null
+          status_code?: number | null
+          tenant_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_request_logs_endpoint_id_fkey"
+            columns: ["endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "api_endpoints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_error_logs: {
         Row: {
           assessment_id: string | null
@@ -1600,6 +1758,71 @@ export type Database = {
           },
         ]
       }
+      data_mapping_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          duplicate_detection_rules: Json | null
+          entity_type: string
+          field_mappings: Json
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          merge_strategies: Json | null
+          name: string
+          provider_id: string | null
+          tenant_id: string
+          transformation_rules: Json | null
+          updated_at: string | null
+          validation_rules: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duplicate_detection_rules?: Json | null
+          entity_type: string
+          field_mappings?: Json
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          merge_strategies?: Json | null
+          name: string
+          provider_id?: string | null
+          tenant_id: string
+          transformation_rules?: Json | null
+          updated_at?: string | null
+          validation_rules?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duplicate_detection_rules?: Json | null
+          entity_type?: string
+          field_mappings?: Json
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          merge_strategies?: Json | null
+          name?: string
+          provider_id?: string | null
+          tenant_id?: string
+          transformation_rules?: Json | null
+          updated_at?: string | null
+          validation_rules?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_mapping_templates_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "integration_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_quality_metrics: {
         Row: {
           checked_at: string
@@ -2667,6 +2890,395 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          affected_records: number | null
+          alert_type: string
+          connection_id: string | null
+          context_data: Json | null
+          created_at: string | null
+          id: string
+          message: string
+          notification_channels: Json | null
+          notification_sent: boolean | null
+          resolved_at: string | null
+          severity: string | null
+          status: string | null
+          tenant_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          affected_records?: number | null
+          alert_type: string
+          connection_id?: string | null
+          context_data?: Json | null
+          created_at?: string | null
+          id?: string
+          message: string
+          notification_channels?: Json | null
+          notification_sent?: boolean | null
+          resolved_at?: string | null
+          severity?: string | null
+          status?: string | null
+          tenant_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          affected_records?: number | null
+          alert_type?: string
+          connection_id?: string | null
+          context_data?: Json | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          notification_channels?: Json | null
+          notification_sent?: boolean | null
+          resolved_at?: string | null
+          severity?: string | null
+          status?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_alerts_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_connections: {
+        Row: {
+          auth_status: string | null
+          connection_status: string | null
+          consecutive_failures: number | null
+          created_at: string | null
+          created_by: string | null
+          credentials: Json | null
+          description: string | null
+          error_count: number | null
+          error_threshold: number | null
+          field_mappings: Json | null
+          health_check_errors: Json | null
+          id: string
+          last_error: Json | null
+          last_health_check: string | null
+          last_sync_at: string | null
+          name: string
+          next_sync_at: string | null
+          oauth_state: string | null
+          provider_id: string | null
+          sync_enabled: boolean | null
+          sync_frequency: string | null
+          sync_settings: Json | null
+          sync_status: string | null
+          tenant_id: string
+          token_expires_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          auth_status?: string | null
+          connection_status?: string | null
+          consecutive_failures?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          credentials?: Json | null
+          description?: string | null
+          error_count?: number | null
+          error_threshold?: number | null
+          field_mappings?: Json | null
+          health_check_errors?: Json | null
+          id?: string
+          last_error?: Json | null
+          last_health_check?: string | null
+          last_sync_at?: string | null
+          name: string
+          next_sync_at?: string | null
+          oauth_state?: string | null
+          provider_id?: string | null
+          sync_enabled?: boolean | null
+          sync_frequency?: string | null
+          sync_settings?: Json | null
+          sync_status?: string | null
+          tenant_id: string
+          token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          auth_status?: string | null
+          connection_status?: string | null
+          consecutive_failures?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          credentials?: Json | null
+          description?: string | null
+          error_count?: number | null
+          error_threshold?: number | null
+          field_mappings?: Json | null
+          health_check_errors?: Json | null
+          id?: string
+          last_error?: Json | null
+          last_health_check?: string | null
+          last_sync_at?: string | null
+          name?: string
+          next_sync_at?: string | null
+          oauth_state?: string | null
+          provider_id?: string | null
+          sync_enabled?: boolean | null
+          sync_frequency?: string | null
+          sync_settings?: Json | null
+          sync_status?: string | null
+          tenant_id?: string
+          token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_connections_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "integration_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_providers: {
+        Row: {
+          api_config: Json | null
+          auth_type: string
+          base_url: string | null
+          created_at: string | null
+          deprecated_at: string | null
+          description: string | null
+          id: string
+          name: string
+          oauth_config: Json | null
+          provider_type: string
+          rate_limits: Json | null
+          retry_config: Json | null
+          status: string | null
+          tenant_id: string
+          timeout_seconds: number | null
+          updated_at: string | null
+          version: string | null
+          webhook_config: Json | null
+        }
+        Insert: {
+          api_config?: Json | null
+          auth_type: string
+          base_url?: string | null
+          created_at?: string | null
+          deprecated_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          oauth_config?: Json | null
+          provider_type: string
+          rate_limits?: Json | null
+          retry_config?: Json | null
+          status?: string | null
+          tenant_id: string
+          timeout_seconds?: number | null
+          updated_at?: string | null
+          version?: string | null
+          webhook_config?: Json | null
+        }
+        Update: {
+          api_config?: Json | null
+          auth_type?: string
+          base_url?: string | null
+          created_at?: string | null
+          deprecated_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          oauth_config?: Json | null
+          provider_type?: string
+          rate_limits?: Json | null
+          retry_config?: Json | null
+          status?: string | null
+          tenant_id?: string
+          timeout_seconds?: number | null
+          updated_at?: string | null
+          version?: string | null
+          webhook_config?: Json | null
+        }
+        Relationships: []
+      }
+      integration_sync_jobs: {
+        Row: {
+          completed_at: string | null
+          conflict_resolution: Json | null
+          connection_id: string | null
+          created_at: string | null
+          created_by: string | null
+          error_details: Json | null
+          estimated_completion: string | null
+          failed_records: number | null
+          id: string
+          job_type: string
+          max_retries: number | null
+          next_retry_at: string | null
+          priority: number | null
+          processed_records: number | null
+          progress_percentage: number | null
+          queued_at: string | null
+          retry_count: number | null
+          started_at: string | null
+          status: string | null
+          successful_records: number | null
+          sync_direction: string | null
+          sync_results: Json | null
+          tenant_id: string
+          total_records: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          conflict_resolution?: Json | null
+          connection_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          error_details?: Json | null
+          estimated_completion?: string | null
+          failed_records?: number | null
+          id?: string
+          job_type: string
+          max_retries?: number | null
+          next_retry_at?: string | null
+          priority?: number | null
+          processed_records?: number | null
+          progress_percentage?: number | null
+          queued_at?: string | null
+          retry_count?: number | null
+          started_at?: string | null
+          status?: string | null
+          successful_records?: number | null
+          sync_direction?: string | null
+          sync_results?: Json | null
+          tenant_id: string
+          total_records?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          conflict_resolution?: Json | null
+          connection_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          error_details?: Json | null
+          estimated_completion?: string | null
+          failed_records?: number | null
+          id?: string
+          job_type?: string
+          max_retries?: number | null
+          next_retry_at?: string | null
+          priority?: number | null
+          processed_records?: number | null
+          progress_percentage?: number | null
+          queued_at?: string | null
+          retry_count?: number | null
+          started_at?: string | null
+          status?: string | null
+          successful_records?: number | null
+          sync_direction?: string | null
+          sync_results?: Json | null
+          tenant_id?: string
+          total_records?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_sync_jobs_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_webhooks: {
+        Row: {
+          connection_id: string | null
+          consecutive_failures: number | null
+          created_at: string | null
+          delivery_success_rate: number | null
+          delivery_timeout: number | null
+          endpoint_url: string
+          event_filters: Json | null
+          id: string
+          is_active: boolean | null
+          last_delivery_at: string | null
+          retry_attempts: number | null
+          retry_delays: Json | null
+          signature_algorithm: string | null
+          signature_header: string | null
+          supported_events: Json | null
+          tenant_id: string
+          updated_at: string | null
+          webhook_secret: string | null
+        }
+        Insert: {
+          connection_id?: string | null
+          consecutive_failures?: number | null
+          created_at?: string | null
+          delivery_success_rate?: number | null
+          delivery_timeout?: number | null
+          endpoint_url: string
+          event_filters?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_delivery_at?: string | null
+          retry_attempts?: number | null
+          retry_delays?: Json | null
+          signature_algorithm?: string | null
+          signature_header?: string | null
+          supported_events?: Json | null
+          tenant_id: string
+          updated_at?: string | null
+          webhook_secret?: string | null
+        }
+        Update: {
+          connection_id?: string | null
+          consecutive_failures?: number | null
+          created_at?: string | null
+          delivery_success_rate?: number | null
+          delivery_timeout?: number | null
+          endpoint_url?: string
+          event_filters?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_delivery_at?: string | null
+          retry_attempts?: number | null
+          retry_delays?: Json | null
+          signature_algorithm?: string | null
+          signature_header?: string | null
+          supported_events?: Json | null
+          tenant_id?: string
+          updated_at?: string | null
+          webhook_secret?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_webhooks_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "integration_connections"
             referencedColumns: ["id"]
           },
         ]
@@ -4513,6 +5125,80 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_delivery_logs: {
+        Row: {
+          attempt_number: number | null
+          attempted_at: string | null
+          completed_at: string | null
+          created_at: string | null
+          delivery_url: string
+          duration_ms: number | null
+          error_message: string | null
+          event_data: Json
+          event_type: string
+          id: string
+          next_retry_at: string | null
+          request_body: Json | null
+          request_headers: Json | null
+          response_body: string | null
+          response_code: number | null
+          response_headers: Json | null
+          status: string | null
+          tenant_id: string
+          webhook_id: string | null
+        }
+        Insert: {
+          attempt_number?: number | null
+          attempted_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          delivery_url: string
+          duration_ms?: number | null
+          error_message?: string | null
+          event_data: Json
+          event_type: string
+          id?: string
+          next_retry_at?: string | null
+          request_body?: Json | null
+          request_headers?: Json | null
+          response_body?: string | null
+          response_code?: number | null
+          response_headers?: Json | null
+          status?: string | null
+          tenant_id: string
+          webhook_id?: string | null
+        }
+        Update: {
+          attempt_number?: number | null
+          attempted_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          delivery_url?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          event_data?: Json
+          event_type?: string
+          id?: string
+          next_retry_at?: string | null
+          request_body?: Json | null
+          request_headers?: Json | null
+          response_body?: string | null
+          response_code?: number | null
+          response_headers?: Json | null
+          status?: string | null
+          tenant_id?: string
+          webhook_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_delivery_logs_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "integration_webhooks"
             referencedColumns: ["id"]
           },
         ]
