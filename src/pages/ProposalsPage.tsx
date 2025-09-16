@@ -6,8 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ProposalDetailDialog } from '@/components/Proposals/ProposalDetailDialog';
+import { ProposalEditDialog } from '@/components/Proposals/ProposalEditDialog';
+import { ProposalTemplateManager } from '@/components/Proposals/ProposalTemplateManager';
+import { ProposalAnalytics } from '@/components/Proposals/ProposalAnalytics';
+import { WinLossTracker } from '@/components/Proposals/WinLossTracker';
 import { Search, Plus, FileText, DollarSign, Eye, Calendar, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -36,6 +42,10 @@ export const ProposalsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState('proposals');
+  const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
 
   const fetchProposals = async () => {
@@ -43,7 +53,7 @@ export const ProposalsPage = () => {
       // Fetch proposals and clients separately since there are no FK constraints
       const [proposalsResult, clientsResult] = await Promise.all([
         supabase.from('proposals').select('*').order('created_at', { ascending: false }),
-        supabase.from('clients').select('id, name')
+        supabase.from('clients').select('id, name, email')
       ]);
 
       if (proposalsResult.error) throw proposalsResult.error;
@@ -129,7 +139,7 @@ export const ProposalsPage = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Proposals</h1>
-            <p className="text-muted-foreground">Manage client proposals and track status</p>
+            <p className="text-muted-foreground">Manage client proposals and track performance</p>
           </div>
           <Button>
             <Plus className="w-4 h-4 mr-2" />
@@ -137,8 +147,18 @@ export const ProposalsPage = () => {
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="proposals">Proposals</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="winloss">Win/Loss</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="proposals" className="space-y-6">{/* Move all existing proposal content here */}
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Proposals</CardTitle>
@@ -187,10 +207,10 @@ export const ProposalsPage = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+            </div>
 
-        {/* Filters */}
-        <Card>
+            {/* Filters */}
+            <Card>
           <CardHeader>
             <CardTitle>Client Proposals</CardTitle>
           </CardHeader>
@@ -247,8 +267,8 @@ export const ProposalsPage = () => {
                         key={proposal.id}
                         className="cursor-pointer hover:bg-muted/50"
                         onClick={() => {
-                          // Primary action: View proposal details
-                          console.log('View proposal:', proposal.id);
+                          setSelectedProposal(proposal);
+                          setShowDetailDialog(true);
                         }}
                       >
                         <TableCell className="font-medium">
@@ -324,8 +344,44 @@ export const ProposalsPage = () => {
                 </Button>
               </div>
             )}
-          </CardContent>
-        </Card>
+            </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="templates">
+            <ProposalTemplateManager />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <ProposalAnalytics />
+          </TabsContent>
+
+          <TabsContent value="winloss">
+            <WinLossTracker proposals={proposals} />
+          </TabsContent>
+        </Tabs>
+
+        {/* Dialogs */}
+        <ProposalDetailDialog
+          open={showDetailDialog}
+          onOpenChange={setShowDetailDialog}
+          proposal={selectedProposal}
+          onEdit={(proposal) => {
+            setSelectedProposal(proposal);
+            setShowDetailDialog(false);
+            setShowEditDialog(true);
+          }}
+        />
+
+        <ProposalEditDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          proposal={selectedProposal}
+          onSave={() => {
+            fetchProposals();
+            setShowEditDialog(false);
+          }}
+        />
       </div>
     </DashboardLayout>
   );
