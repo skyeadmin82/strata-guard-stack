@@ -1825,6 +1825,13 @@ export type Database = {
             referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_contract_approvals_contract_id"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contract_audit_trail: {
@@ -1873,6 +1880,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "contract_audit_trail_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_contract_audit_trail_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contracts"
@@ -1999,6 +2013,13 @@ export type Database = {
             referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_contract_payments_contract_id"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contract_pricing_history: {
@@ -2044,6 +2065,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "contract_pricing_history_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_contract_pricing_history_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contracts"
@@ -2227,6 +2255,20 @@ export type Database = {
             referencedRelation: "contract_templates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_contracts_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_contracts_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
         ]
       }
       credit_notes: {
@@ -2290,6 +2332,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "credit_notes_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_credit_notes_invoice_id"
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
@@ -2903,6 +2952,13 @@ export type Database = {
             referencedRelation: "email_templates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_email_campaigns_template_id"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
         ]
       }
       email_configuration: {
@@ -3178,6 +3234,20 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_email_sends_campaign_id"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_email_sends_recipient_id"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "email_recipients"
             referencedColumns: ["id"]
           },
         ]
@@ -4430,6 +4500,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_invoice_line_items_invoice_id"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "invoice_line_items_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
@@ -4521,7 +4598,22 @@ export type Database = {
           updated_at?: string
           validation_errors?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_invoices_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_invoices_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
@@ -5288,6 +5380,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_payments_invoice_id"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "payments_invoice_id_fkey"
             columns: ["invoice_id"]
             isOneToOne: false
@@ -5592,7 +5691,15 @@ export type Database = {
           tenant_id?: string
           timeout_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_proposal_approvals_proposal_id"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       proposal_comments: {
         Row: {
@@ -5646,7 +5753,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_proposal_comments_proposal_id"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       proposal_items: {
         Row: {
@@ -5697,7 +5812,15 @@ export type Database = {
           total_price?: number
           unit_price?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_proposal_items_proposal_id"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       proposal_notifications: {
         Row: {
@@ -5754,7 +5877,15 @@ export type Database = {
           subject?: string
           tenant_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_proposal_notifications_proposal_id"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       proposal_signatures: {
         Row: {
@@ -5826,7 +5957,15 @@ export type Database = {
           verification_code?: string | null
           verification_method?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_proposal_signatures_proposal_id"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       proposal_templates: {
         Row: {
@@ -5928,7 +6067,15 @@ export type Database = {
           timezone?: string | null
           user_agent?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_proposal_tracking_proposal_id"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       proposal_versions: {
         Row: {
@@ -5964,7 +6111,15 @@ export type Database = {
           tenant_id?: string
           version_number?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_proposal_versions_proposal_id"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       proposals: {
         Row: {
@@ -6069,7 +6224,22 @@ export type Database = {
           view_count?: number | null
           viewed_date?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_proposals_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_proposals_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scheduled_assessments: {
         Row: {
@@ -6289,6 +6459,27 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_service_bookings_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_service_bookings_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_service_bookings_service_id"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_catalog"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "service_bookings_assigned_technician_fkey"
             columns: ["assigned_technician"]
@@ -6739,6 +6930,20 @@ export type Database = {
           validation_errors?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_support_tickets_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_support_tickets_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_support_tickets_template"
             columns: ["template_id"]
@@ -7206,7 +7411,15 @@ export type Database = {
           updated_at?: string
           work_order_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_time_entries_work_order_id"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       time_tracking_entries: {
         Row: {
@@ -7249,6 +7462,13 @@ export type Database = {
           work_type?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_time_tracking_entries_ticket_id"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "time_tracking_entries_ticket_id_fkey"
             columns: ["ticket_id"]
@@ -7804,7 +8024,22 @@ export type Database = {
           used_parts?: Json | null
           work_order_number?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_work_orders_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_work_orders_client_id"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workflow_executions: {
         Row: {
@@ -7876,7 +8111,15 @@ export type Database = {
           triggered_by?: string | null
           workflow_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_workflow_executions_workflow_id"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
