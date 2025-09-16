@@ -7687,7 +7687,12 @@ export type Database = {
         Returns: number
       }
       calculate_sla_due_date: {
-        Args: { tenant_uuid: string; ticket_priority: string }
+        Args:
+          | {
+              tenant_uuid: string
+              ticket_priority: Database["public"]["Enums"]["ticket_priority"]
+            }
+          | { tenant_uuid: string; ticket_priority: string }
         Returns: string
       }
       extract_email_domain: {
