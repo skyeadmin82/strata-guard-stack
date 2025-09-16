@@ -217,3 +217,142 @@ export interface ContractPayment {
   created_at: string;
   paid_at?: string;
 }
+
+// Assessment Engine Types
+export interface AssessmentTemplate {
+  id: string;
+  tenant_id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  version: number;
+  status: 'draft' | 'active' | 'completed' | 'archived';
+  scoring_rules: Record<string, any>;
+  threshold_rules: Record<string, any>;
+  conditional_logic: Record<string, any>;
+  validation_rules: Record<string, any>;
+  estimated_duration?: number;
+  passing_score?: number;
+  max_score?: number;
+  is_active: boolean;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AssessmentQuestion {
+  id: string;
+  tenant_id: string;
+  template_id: string;
+  section?: string;
+  question_number: number;
+  question_type: 'text' | 'number' | 'boolean' | 'single_choice' | 'multiple_choice' | 'scale' | 'matrix';
+  question_text: string;
+  description?: string;
+  options: Array<{value: any; label: string}>;
+  validation_rules: Record<string, any>;
+  scoring_weight: number;
+  max_points: number;
+  required: boolean;
+  conditional_logic: Record<string, any>;
+  help_text?: string;
+  created_at: string;
+}
+
+export interface Assessment {
+  id: string;
+  tenant_id: string;
+  template_id: string;
+  client_id: string;
+  assessor_id?: string;
+  status: 'in_progress' | 'completed' | 'validated' | 'flagged';
+  started_at: string;
+  completed_at?: string;
+  last_saved_at: string;
+  current_question: number;
+  total_score: number;
+  max_possible_score: number;
+  percentage_score: number;
+  session_data: Record<string, any>;
+  validation_errors: Array<any>;
+  recovery_data: Record<string, any>;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AssessmentResponse {
+  id: string;
+  tenant_id: string;
+  assessment_id: string;
+  question_id: string;
+  response_value?: string;
+  response_data: Record<string, any>;
+  score: number;
+  auto_saved: boolean;
+  validation_status: string;
+  validation_errors: Array<any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AssessmentOpportunity {
+  id: string;
+  tenant_id: string;
+  assessment_id: string;
+  client_id: string;
+  opportunity_type: string;
+  title: string;
+  description?: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'identified' | 'qualified' | 'proposal_sent' | 'won' | 'lost' | 'cancelled';
+  estimated_value?: number;
+  currency: string;
+  threshold_data: Record<string, any>;
+  detection_rules: Record<string, any>;
+  assigned_to?: string;
+  due_date?: string;
+  follow_up_date?: string;
+  automation_errors: Array<any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AssessmentReport {
+  id: string;
+  tenant_id: string;
+  assessment_id: string;
+  report_type: string;
+  status: 'pending' | 'generating' | 'completed' | 'failed' | 'retrying';
+  generation_started_at?: string;
+  generation_completed_at?: string;
+  report_data: Record<string, any>;
+  export_formats: Array<string>;
+  file_path?: string;
+  error_details: Record<string, any>;
+  retry_count: number;
+  max_retries: number;
+  email_recipients: Array<string>;
+  email_sent: boolean;
+  email_errors: Array<any>;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AssessmentErrorLog {
+  id: string;
+  tenant_id: string;
+  assessment_id?: string;
+  error_type: string;
+  error_code?: string;
+  error_message: string;
+  error_details: Record<string, any>;
+  context: Record<string, any>;
+  severity: string;
+  resolved: boolean;
+  resolution_notes?: string;
+  resolved_by?: string;
+  resolved_at?: string;
+  created_at: string;
+}
