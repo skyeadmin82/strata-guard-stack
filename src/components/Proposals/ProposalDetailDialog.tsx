@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProposalESignature } from './ProposalESignature';
 import { ProposalTracking } from './ProposalTracking';
+import { ProposalPDFGenerator } from './ProposalPDFGenerator';
 import { Edit, Download, Send, Eye, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -73,8 +74,8 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
   };
 
   const handleDownload = async () => {
-    // TODO: Implement PDF generation and download
-    console.log('Download proposal:', proposal.id);
+    // PDF generation is now handled by ProposalPDFGenerator component
+    console.log('Download handled by PDF generator');
   };
 
   const handleSend = async () => {
@@ -103,10 +104,10 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
               </Button>
-              <Button variant="outline" size="sm" onClick={handleDownload}>
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
+              <ProposalPDFGenerator 
+                proposalId={proposal.id}
+                proposalTitle={proposal.title}
+              />
               <Button variant="outline" size="sm" onClick={handleSend}>
                 <Send className="w-4 h-4 mr-2" />
                 Send

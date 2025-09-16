@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ProposalItemsManager } from './ProposalItemsManager';
 
 interface ProposalCreateDialogProps {
   open: boolean;
@@ -37,6 +38,8 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
     terms_and_conditions: '',
     payment_terms: '',
   });
+  
+  const [proposalItems, setProposalItems] = useState<any[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -60,6 +63,7 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
       terms_and_conditions: '',
       payment_terms: '',
     });
+    setProposalItems([]);
   };
 
   const fetchClients = async () => {
@@ -147,11 +151,32 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
         tracking_pixel_id: crypto.randomUUID(),
       };
 
-      const { error } = await supabase
+      const { data: insertedProposal, error } = await supabase
         .from('proposals')
-        .insert(proposalData);
+        .insert(proposalData)
+        .select('id')
+        .single();
 
       if (error) throw error;
+
+      // Save proposal items if any
+      if (proposalItems.length > 0 && insertedProposal?.id) {
+        const itemsWithProposalId = proposalItems.map((item, index) => ({
+          ...item,
+          tenant_id: userProfile?.tenant_id,
+          proposal_id: insertedProposal.id,
+          item_order: index + 1,
+          created_at: new Date().toISOString(),
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('proposal_items')
+          .insert(itemsWithProposalId);
+
+        if (itemsError) {
+          console.warn('Failed to save proposal items:', itemsError);
+        }
+      }
 
       toast({
         title: 'Success',
@@ -179,9 +204,12 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto" aria-describedby="create-proposal-description">
         <DialogHeader>
           <DialogTitle>Create New Proposal</DialogTitle>
+          <div id="create-proposal-description" className="sr-only">
+            Create a new proposal with client details, items, and pricing
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -325,6 +353,13 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
               placeholder="e.g., Net 30 days"
             />
           </div>
+
+          {/* Proposal Items */}
+          <ProposalItemsManager
+            items={proposalItems}
+            onItemsChange={setProposalItems}
+            currency={formData.currency}
+          />
 
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
