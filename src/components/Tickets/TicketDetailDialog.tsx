@@ -245,7 +245,7 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
                 Ticket Details - Created {new Date(ticket.created_at).toLocaleDateString()}
               </DialogDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mr-2">
               {!isEditing ? (
                 <Button 
                   variant="outline" 
