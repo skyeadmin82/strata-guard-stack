@@ -14,6 +14,148 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          address: Json | null
+          company_size: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          industry: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: Json | null
+          company_size?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          industry?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: Json | null
+          company_size?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          industry?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          department: string | null
+          email: string
+          first_name: string
+          id: string
+          is_active: boolean
+          is_primary: boolean
+          last_name: string
+          notes: string | null
+          phone: string | null
+          tenant_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          email: string
+          first_name: string
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          last_name: string
+          notes?: string | null
+          phone?: string | null
+          tenant_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          email?: string
+          first_name?: string
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          last_name?: string
+          notes?: string | null
+          phone?: string | null
+          tenant_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       error_logs: {
         Row: {
           context: Json | null
