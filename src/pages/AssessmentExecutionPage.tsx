@@ -3,21 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { AssessmentExecutionInterface } from '@/components/Assessments/AssessmentExecutionInterface';
 import { 
   ArrowLeft, 
-  ArrowRight, 
-  Save, 
-  CheckCircle, 
   Building2, 
   FileText,
-  HelpCircle
+  Clock,
+  Target
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -25,12 +20,13 @@ interface Question {
   id: string;
   question_number: number;
   question_text: string;
-  question_type: string;
+  question_type: 'multiple_choice' | 'text' | 'number' | 'boolean' | 'scale';
   section: string;
-  options: Array<{ label: string; value: number }>;
+  options?: Array<{ label: string; value: number; description?: string }>;
   max_points: number;
   required: boolean;
   help_text?: string;
+  validation_rules?: any;
 }
 
 interface Assessment {
@@ -42,6 +38,9 @@ interface Assessment {
   total_score: number;
   max_possible_score: number;
   percentage_score: number;
+  started_at?: string;
+  completed_at?: string;
+  created_at: string;
 }
 
 export const AssessmentExecutionPage = () => {
@@ -105,12 +104,13 @@ export const AssessmentExecutionPage = () => {
         id: q.id,
         question_number: q.question_number,
         question_text: q.question_text,
-        question_type: q.question_type,
+        question_type: q.question_type as 'multiple_choice' | 'text' | 'number' | 'boolean' | 'scale',
         section: q.section || 'General',
-        options: Array.isArray(q.options) ? q.options as Array<{ label: string; value: number }> : [],
-        max_points: q.max_points,
-        required: q.required,
-        help_text: q.help_text || undefined
+        options: Array.isArray(q.options) ? q.options as Array<{ label: string; value: number; description?: string }> : undefined,
+        max_points: q.max_points || 1,
+        required: q.required || false,
+        help_text: q.help_text || undefined,
+        validation_rules: q.validation_rules || undefined
       }));
 
       // Load existing responses
@@ -232,24 +232,30 @@ export const AssessmentExecutionPage = () => {
     }
   };
 
-  const handleResponseChange = (questionId: string, selectedValue: number) => {
-    const question = questions.find(q => q.id === questionId);
-    if (!question) return;
-
-    saveResponse(questionId, selectedValue, selectedValue);
+  const handleResponseChange = (questionId: string, value: any, score: number) => {
+    saveResponse(questionId, value, score);
   };
 
-  const nextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
+  const handleNavigate = (direction: 'next' | 'previous') => {
+    if (direction === 'next' && currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-    }
-  };
-
-  const previousQuestion = () => {
-    if (currentQuestionIndex > 0) {
+    } else if (direction === 'previous' && currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
   };
+
+  // Listen for custom navigation events
+  useEffect(() => {
+    const handleNavigateToQuestion = (event: any) => {
+      const targetIndex = event.detail;
+      if (targetIndex >= 0 && targetIndex < questions.length) {
+        setCurrentQuestionIndex(targetIndex);
+      }
+    };
+
+    window.addEventListener('navigate-to-question', handleNavigateToQuestion);
+    return () => window.removeEventListener('navigate-to-question', handleNavigateToQuestion);
+  }, [questions.length]);
 
   const completeAssessment = async () => {
     try {
@@ -320,15 +326,15 @@ export const AssessmentExecutionPage = () => {
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
   const completedQuestions = Object.keys(responses).length;
-  const progress = (completedQuestions / questions.length) * 100;
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
   const allQuestionsAnswered = completedQuestions === questions.length;
+  const canNavigateNext = currentQuestionIndex < questions.length - 1;
+  const canNavigatePrevious = currentQuestionIndex > 0;
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <div className="max-w-5xl mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -346,167 +352,85 @@ export const AssessmentExecutionPage = () => {
                   <FileText className="w-4 h-4" />
                   {templateName}
                 </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  Started {format(new Date(assessment?.started_at || assessment?.created_at || new Date()), 'MMM dd, yyyy')}
+                </div>
               </div>
             </div>
           </div>
-          <Badge variant={assessment.status === 'completed' ? 'default' : 'secondary'}>
-            {assessment.status.replace('_', ' ').toUpperCase()}
-          </Badge>
-        </div>
-
-        {/* Progress */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Progress</span>
-              <span className="text-sm text-muted-foreground">
-                {completedQuestions} of {questions.length} questions
-              </span>
-            </div>
-            <Progress value={progress} className="mb-2" />
-            <div className="text-xs text-muted-foreground">
-              {progress.toFixed(0)}% Complete
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Current Question */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  Question {currentQuestion.question_number}
-                  {currentQuestion.required && (
-                    <span className="text-red-500 text-sm">*</span>
-                  )}
-                </CardTitle>
-                <Badge variant="outline" className="mt-1">
-                  {currentQuestion.section}
-                </Badge>
-              </div>
-              {currentQuestion.help_text && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <HelpCircle className="w-4 h-4" />
-                  <span>Help available</span>
-                </div>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-medium mb-4">{currentQuestion.question_text}</h3>
-              
-              {currentQuestion.help_text && (
-                <div className="mb-4 p-3 bg-muted rounded-md">
-                  <p className="text-sm text-muted-foreground">
-                    💡 {currentQuestion.help_text}
-                  </p>
-                </div>
-              )}
-
-              {currentQuestion.question_type === 'multiple_choice' && (
-                <RadioGroup
-                  value={responses[currentQuestion.id]?.value?.toString() || ''}
-                  onValueChange={(value) => handleResponseChange(currentQuestion.id, parseInt(value))}
-                >
-                  {currentQuestion.options.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <RadioGroupItem value={option.value.toString()} id={`option-${index}`} />
-                      <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
-                        {option.label}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              )}
-
-              {responses[currentQuestion.id] && (
-                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                  <p className="text-sm text-green-800">
-                    ✓ Answer saved - Score: {responses[currentQuestion.id].score} points
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Navigation */}
-        <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            onClick={previousQuestion}
-            disabled={currentQuestionIndex === 0}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Previous
-          </Button>
-
-          <div className="flex gap-2">
-            {saving && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                Saving...
-              </div>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            {!isLastQuestion ? (
-              <Button onClick={nextQuestion}>
-                Next
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            ) : (
-              <Button
-                onClick={completeAssessment}
-                disabled={!allQuestionsAnswered || completing}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                {completing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Completing...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Complete Assessment
-                  </>
-                )}
-              </Button>
+          <div className="flex items-center gap-2">
+            <Badge variant={assessment?.status === 'completed' ? 'default' : 'secondary'}>
+              {assessment?.status?.replace('_', ' ').toUpperCase()}
+            </Badge>
+            {assessment?.status === 'completed' && (
+              <Badge variant="outline" className="bg-green-50 text-green-700">
+                <Target className="w-3 h-3 mr-1" />
+                {assessment.percentage_score?.toFixed(1)}%
+              </Badge>
             )}
           </div>
         </div>
 
-        {/* Summary */}
+        {/* Assessment Execution Interface */}
+        <AssessmentExecutionInterface
+          questions={questions}
+          responses={responses}
+          currentQuestionIndex={currentQuestionIndex}
+          onResponseChange={handleResponseChange}
+          onNavigate={handleNavigate}
+          onComplete={completeAssessment}
+          saving={saving}
+          completing={completing}
+          canNavigateNext={canNavigateNext}
+          canNavigatePrevious={canNavigatePrevious}
+          isLastQuestion={isLastQuestion}
+          allQuestionsAnswered={allQuestionsAnswered}
+        />
+
+        {/* Assessment Summary */}
         {completedQuestions > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Current Summary</CardTitle>
+              <CardTitle>Assessment Summary</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-primary">{completedQuestions}</p>
                   <p className="text-sm text-muted-foreground">Questions Answered</p>
-                  <p className="text-2xl font-bold">{completedQuestions}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Questions</p>
+                <div className="text-center">
                   <p className="text-2xl font-bold">{questions.length}</p>
+                  <p className="text-sm text-muted-foreground">Total Questions</p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Current Score</p>
-                  <p className="text-2xl font-bold">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-600">
                     {Object.values(responses).reduce((sum: number, r: any) => sum + (r.score || 0), 0)}
                   </p>
+                  <p className="text-sm text-muted-foreground">Current Score</p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Progress</p>
-                  <p className="text-2xl font-bold">{progress.toFixed(0)}%</p>
+                <div className="text-center">
+                  <p className="text-2xl font-bold">
+                    {questions.reduce((sum, q) => sum + q.max_points, 0)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Max Possible</p>
                 </div>
               </div>
+              
+              {assessment?.status === 'completed' && (
+                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="text-center">
+                    <h3 className="font-semibold text-green-800 mb-2">Assessment Completed!</h3>
+                    <p className="text-green-700">
+                      Final Score: <span className="font-bold">{assessment.percentage_score?.toFixed(1)}%</span>
+                    </p>
+                    <p className="text-sm text-green-600 mt-1">
+                      Completed on {format(new Date(assessment.completed_at!), 'MMMM dd, yyyy \'at\' h:mm a')}
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
