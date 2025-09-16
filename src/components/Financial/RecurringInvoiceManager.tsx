@@ -104,7 +104,7 @@ export const RecurringInvoiceManager: React.FC = () => {
         .from('recurring_invoice_schedules')
         .select(`
           *,
-          clients!recurring_invoice_schedules_client_id_fkey(name),
+          clients(name),
           contracts(title),
           proposals(title)
         `)
