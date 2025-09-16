@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
 import { useAuth } from '@/contexts/AuthContext';
+import { ProductionDataCleanup } from '@/components/Environment/ProductionDataCleanup';
 
 export const SettingsPage: React.FC = () => {
   const { profile } = useAuth();
@@ -679,6 +680,8 @@ export const SettingsPage: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              <ProductionDataCleanup />
             </TabsContent>
           </Tabs>
         </div>
