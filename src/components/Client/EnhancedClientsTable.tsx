@@ -56,7 +56,7 @@ import { ContactsManager } from './ContactsManager';
 
 interface EnhancedClientsTableProps {
   onCreateClient: () => void;
-  onEditClient: (client: Client) => void;
+  onEditClient: (client: Client, fromDetails?: boolean) => void;
   onDeleteClient: (id: string) => Promise<boolean>;
 }
 
@@ -366,6 +366,7 @@ export const EnhancedClientsTable: React.FC<EnhancedClientsTableProps> = ({
                           key={client.id}
                           className="cursor-pointer hover:bg-muted/50"
                           onClick={() => setSelectedClientForDetails(client.id)}
+                          data-client-id={client.id}
                         >
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <Checkbox
@@ -560,7 +561,7 @@ export const EnhancedClientsTable: React.FC<EnhancedClientsTableProps> = ({
                       const client = clients.find(c => c.id === selectedClientForDetails);
                       if (client) {
                         setSelectedClientForDetails(null);
-                        onEditClient(client);
+                        onEditClient(client, true);
                       }
                     }}
                     variant="outline"

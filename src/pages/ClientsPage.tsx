@@ -20,6 +20,7 @@ export const ClientsPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(false);
+  const [returnToDetailsAfterEdit, setReturnToDetailsAfterEdit] = useState<string | null>(null);
   const { toast } = useToast();
   const { fetchClientsWithStats } = useEnhancedClientManagement();
 
@@ -133,14 +134,18 @@ export const ClientsPage: React.FC = () => {
     setShowForm(true);
   };
 
-  const handleEditClient = (client: Client) => {
+  const handleEditClient = (client: Client, fromDetails = false) => {
     setEditingClient(client);
+    if (fromDetails) {
+      setReturnToDetailsAfterEdit(client.id);
+    }
     setShowForm(true);
   };
 
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingClient(null);
+    setReturnToDetailsAfterEdit(null);
   };
 
   const handleSubmitForm = async (data: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'tenant_id'>) => {
@@ -149,7 +154,20 @@ export const ClientsPage: React.FC = () => {
     } else {
       await createClient(data);
     }
+    
+    const shouldReturnToDetails = returnToDetailsAfterEdit;
     handleCloseForm();
+    
+    // If we need to return to details dialog, set it after a brief delay to ensure state is clean
+    if (shouldReturnToDetails) {
+      setTimeout(() => {
+        // Find the updated client and show details
+        const updatedClient = document.querySelector(`[data-client-id="${shouldReturnToDetails}"]`) as HTMLElement;
+        if (updatedClient) {
+          updatedClient.click();
+        }
+      }, 100);
+    }
   };
 
   return (
