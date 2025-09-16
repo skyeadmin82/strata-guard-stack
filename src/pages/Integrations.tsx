@@ -27,11 +27,13 @@ import {
   CheckCircle
 } from 'lucide-react';
 
-// Import integration components
+// Import components
 import PSAMigration from '@/components/integrations/PSAMigration';
 import { useIntegrations } from '@/hooks/useIntegrations';
+import { DashboardLayout } from '@/components/Layout/DashboardLayout';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
-export default function Integrations() {
+function IntegrationsContent() {
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
   const { integrations, loading, connectIntegration, disconnectIntegration } = useIntegrations();
@@ -424,5 +426,15 @@ export default function Integrations() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+export default function Integrations() {
+  return (
+    <ProtectedRoute>
+      <DashboardLayout>
+        <IntegrationsContent />
+      </DashboardLayout>
+    </ProtectedRoute>
   );
 }
