@@ -6241,6 +6241,174 @@ export type Database = {
           },
         ]
       }
+      recurring_invoice_history: {
+        Row: {
+          amount: number
+          billing_period_end: string
+          billing_period_start: string
+          created_at: string | null
+          generated_at: string | null
+          generation_attempts: number | null
+          id: string
+          invoice_id: string | null
+          last_error: string | null
+          paid_at: string | null
+          recurring_schedule_id: string
+          scheduled_date: string
+          sent_at: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          amount: number
+          billing_period_end: string
+          billing_period_start: string
+          created_at?: string | null
+          generated_at?: string | null
+          generation_attempts?: number | null
+          id?: string
+          invoice_id?: string | null
+          last_error?: string | null
+          paid_at?: string | null
+          recurring_schedule_id: string
+          scheduled_date: string
+          sent_at?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          amount?: number
+          billing_period_end?: string
+          billing_period_start?: string
+          created_at?: string | null
+          generated_at?: string | null
+          generation_attempts?: number | null
+          id?: string
+          invoice_id?: string | null
+          last_error?: string | null
+          paid_at?: string | null
+          recurring_schedule_id?: string
+          scheduled_date?: string
+          sent_at?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_invoice_history_recurring_schedule_id_fkey"
+            columns: ["recurring_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_invoice_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_invoice_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurring_invoice_schedules: {
+        Row: {
+          amount: number
+          auto_send: boolean | null
+          client_id: string
+          contract_id: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string
+          description: string | null
+          end_date: string | null
+          frequency: string
+          id: string
+          invoice_title: string
+          last_billed_date: string | null
+          next_billing_date: string
+          payment_terms_days: number | null
+          proposal_id: string | null
+          reminder_days_before: Json | null
+          send_reminders: boolean | null
+          start_date: string
+          status: string
+          tax_rate: number | null
+          tenant_id: string
+          total_invoices_generated: number | null
+          total_revenue_generated: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          auto_send?: boolean | null
+          client_id: string
+          contract_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          end_date?: string | null
+          frequency: string
+          id?: string
+          invoice_title: string
+          last_billed_date?: string | null
+          next_billing_date: string
+          payment_terms_days?: number | null
+          proposal_id?: string | null
+          reminder_days_before?: Json | null
+          send_reminders?: boolean | null
+          start_date: string
+          status?: string
+          tax_rate?: number | null
+          tenant_id: string
+          total_invoices_generated?: number | null
+          total_revenue_generated?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          auto_send?: boolean | null
+          client_id?: string
+          contract_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          invoice_title?: string
+          last_billed_date?: string | null
+          next_billing_date?: string
+          payment_terms_days?: number | null
+          proposal_id?: string | null
+          reminder_days_before?: Json | null
+          send_reminders?: boolean | null
+          start_date?: string
+          status?: string
+          tax_rate?: number | null
+          tenant_id?: string
+          total_invoices_generated?: number | null
+          total_revenue_generated?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_invoice_schedules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_invoice_schedules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheduled_assessments: {
         Row: {
           assigned_to: string | null
