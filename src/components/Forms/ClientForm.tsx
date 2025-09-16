@@ -197,75 +197,107 @@ export const ClientForm: React.FC<ClientFormProps> = ({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">
-                Company Name <span className="text-destructive">*</span>
+                Company Name <span className="text-destructive" aria-label="required">*</span>
               </Label>
               <Input
                 id="name"
+                name="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 onBlur={(e) => handleBlur('name', e.target.value)}
                 placeholder="Enter company name"
                 className={errors.name ? 'border-destructive' : ''}
+                aria-required="true"
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "name-error" : "name-help"}
               />
               {errors.name && (
-                <p className="text-sm text-destructive">{errors.name}</p>
+                <p id="name-error" className="text-sm text-destructive" role="alert">{errors.name}</p>
               )}
+              <p id="name-help" className="text-xs text-muted-foreground sr-only">
+                Enter the full legal name of the company (2-100 characters)
+              </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 onBlur={(e) => handleBlur('email', e.target.value)}
                 placeholder="contact@company.com"
                 className={errors.email ? 'border-destructive' : ''}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : "email-help"}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
+                <p id="email-error" className="text-sm text-destructive" role="alert">{errors.email}</p>
               )}
+              <p id="email-help" className="text-xs text-muted-foreground sr-only">
+                Primary contact email address for this client
+              </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
               <Input
                 id="phone"
+                name="phone"
+                type="tel"
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
                 onBlur={(e) => handleBlur('phone', e.target.value)}
                 placeholder="+1-555-0123"
                 className={errors.phone ? 'border-destructive' : ''}
+                aria-invalid={!!errors.phone}
+                aria-describedby={errors.phone ? "phone-error" : "phone-help"}
               />
               {errors.phone && (
-                <p className="text-sm text-destructive">{errors.phone}</p>
+                <p id="phone-error" className="text-sm text-destructive" role="alert">{errors.phone}</p>
               )}
+              <p id="phone-help" className="text-xs text-muted-foreground sr-only">
+                Phone number with country code (7-20 characters)
+              </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="website">Website</Label>
               <Input
                 id="website"
+                name="website"
+                type="url"
                 value={formData.website}
                 onChange={(e) => handleInputChange('website', e.target.value)}
                 onBlur={(e) => handleBlur('website', e.target.value)}
                 placeholder="https://company.com"
                 className={errors.website ? 'border-destructive' : ''}
+                aria-invalid={!!errors.website}
+                aria-describedby={errors.website ? "website-error" : "website-help"}
               />
               {errors.website && (
-                <p className="text-sm text-destructive">{errors.website}</p>
+                <p id="website-error" className="text-sm text-destructive" role="alert">{errors.website}</p>
               )}
+              <p id="website-help" className="text-xs text-muted-foreground sr-only">
+                Company website URL (must start with http:// or https://)
+              </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="industry">Industry</Label>
               <Input
                 id="industry"
+                name="industry"
                 value={formData.industry}
                 onChange={(e) => handleInputChange('industry', e.target.value)}
                 placeholder="Technology, Healthcare, etc."
+                aria-describedby="industry-help"
               />
+              <p id="industry-help" className="text-xs text-muted-foreground sr-only">
+                The primary industry or business sector
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -273,8 +305,12 @@ export const ClientForm: React.FC<ClientFormProps> = ({
               <Select
                 value={formData.company_size}
                 onValueChange={(value) => handleInputChange('company_size', value)}
+                name="company_size"
               >
-                <SelectTrigger>
+                <SelectTrigger 
+                  id="company_size"
+                  aria-describedby="company-size-help"
+                >
                   <SelectValue placeholder="Select company size" />
                 </SelectTrigger>
                 <SelectContent>
@@ -285,6 +321,9 @@ export const ClientForm: React.FC<ClientFormProps> = ({
                   <SelectItem value="1000+">1000+ employees</SelectItem>
                 </SelectContent>
               </Select>
+              <p id="company-size-help" className="text-xs text-muted-foreground sr-only">
+                Approximate number of employees at the company
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -292,8 +331,12 @@ export const ClientForm: React.FC<ClientFormProps> = ({
               <Select
                 value={formData.status}
                 onValueChange={(value) => handleInputChange('status', value)}
+                name="status"
               >
-                <SelectTrigger>
+                <SelectTrigger 
+                  id="status"
+                  aria-describedby="status-help"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -302,6 +345,9 @@ export const ClientForm: React.FC<ClientFormProps> = ({
                   <SelectItem value="prospect">Prospect</SelectItem>
                 </SelectContent>
               </Select>
+              <p id="status-help" className="text-xs text-muted-foreground sr-only">
+                Current relationship status with this client
+              </p>
             </div>
           </div>
 
@@ -309,11 +355,16 @@ export const ClientForm: React.FC<ClientFormProps> = ({
             <Label htmlFor="notes">Notes</Label>
             <Textarea
               id="notes"
+              name="notes"
               value={formData.notes}
               onChange={(e) => handleInputChange('notes', e.target.value)}
               placeholder="Additional notes about this client..."
               rows={3}
+              aria-describedby="notes-help"
             />
+            <p id="notes-help" className="text-xs text-muted-foreground sr-only">
+              Optional additional information or special requirements for this client
+            </p>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

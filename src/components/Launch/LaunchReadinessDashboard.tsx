@@ -157,7 +157,7 @@ export const LaunchReadinessDashboard: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6" role="main" aria-labelledby="main-heading">
+    <div className="container mx-auto p-6 space-y-6" role="main" aria-labelledby="main-heading" id="main-content">
       <div className="flex justify-between items-center">
         <div>
           <h1 id="main-heading" className="text-3xl font-bold">Launch Readiness Dashboard</h1>
