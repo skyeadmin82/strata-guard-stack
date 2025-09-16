@@ -88,6 +88,11 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ client }) => {
       errors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = 'Invalid email format';
+    } else if (client.domains && client.domains.length > 0) {
+      const emailDomain = formData.email.toLowerCase().split('@')[1];
+      if (!client.domains.includes(emailDomain)) {
+        errors.email = `Email domain "${emailDomain}" is not authorized. Use: ${client.domains.join(', ')}`;
+      }
     }
 
     setFormErrors(errors);
@@ -381,6 +386,11 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ client }) => {
                 />
                 {formErrors.email && (
                   <p className="text-sm text-destructive">{formErrors.email}</p>
+                )}
+                {client.domains && client.domains.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Email must be from authorized domains: {client.domains.join(', ')}
+                  </p>
                 )}
               </div>
 

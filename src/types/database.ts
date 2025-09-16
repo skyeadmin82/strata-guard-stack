@@ -10,6 +10,7 @@ export interface Client {
   email?: string | null;
   status: 'active' | 'inactive' | 'prospect';
   notes?: string | null;
+  domains?: string[];
   created_at: string;
   updated_at: string;
   created_by?: string | null;

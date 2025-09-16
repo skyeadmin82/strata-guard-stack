@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Loader2, Save, X } from 'lucide-react';
+import { AlertCircle, Loader2, Save, X, Plus } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ClientFormProps {
@@ -49,6 +49,7 @@ export const ClientForm: React.FC<ClientFormProps> = ({
     email: client?.email || '',
     status: client?.status || 'active',
     notes: client?.notes || '',
+    domains: client?.domains || [],
   });
 
   const [isDirty, setIsDirty] = useState(false);
@@ -152,6 +153,7 @@ export const ClientForm: React.FC<ClientFormProps> = ({
       email: '',
       status: 'active',
       notes: '',
+      domains: [],
     });
     setIsDirty(false);
     clearErrors();
@@ -325,7 +327,62 @@ export const ClientForm: React.FC<ClientFormProps> = ({
                 Approximate number of employees at the company
               </p>
             </div>
+          </div>
 
+          {/* Domains Management */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>Authorized Domains</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setFormData(prev => ({ ...prev, domains: [...prev.domains, ''] }));
+                  setIsDirty(true);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Domain
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {formData.domains.map((domain, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input
+                    value={domain}
+                    onChange={(e) => {
+                      const newDomains = [...formData.domains];
+                      newDomains[index] = e.target.value.toLowerCase();
+                      setFormData(prev => ({ ...prev, domains: newDomains }));
+                      setIsDirty(true);
+                    }}
+                    placeholder="example.com"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const newDomains = formData.domains.filter((_, i) => i !== index);
+                      setFormData(prev => ({ ...prev, domains: newDomains }));
+                      setIsDirty(true);
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              {formData.domains.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Add authorized domains to enable email validation for contacts, tickets, and user management.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select

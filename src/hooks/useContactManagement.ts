@@ -101,6 +101,20 @@ export const useContactManagement = (clientId: string) => {
           .eq('client_id', clientId);
       }
 
+      // Validate email domain against client domains
+      const { data: clientData } = await supabase
+        .from('clients')
+        .select('domains')
+        .eq('id', clientId)
+        .single();
+
+      if (clientData?.domains && clientData.domains.length > 0) {
+        const emailDomain = contactData.email.toLowerCase().split('@')[1];
+        if (!clientData.domains.includes(emailDomain)) {
+          throw new Error(`Email domain "${emailDomain}" is not authorized for this client. Authorized domains: ${clientData.domains.join(', ')}`);
+        }
+      }
+
       // Clean up the contact data - convert empty strings to null for optional fields
       const cleanedContactData = {
         ...contactData,
@@ -141,6 +155,22 @@ export const useContactManagement = (clientId: string) => {
   // Update contact
   const updateContact = useCallback(async (contactId: string, contactData: Partial<Contact>) => {
     try {
+      // Validate email domain if email is being updated
+      if (contactData.email) {
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('domains')
+          .eq('id', clientId)
+          .single();
+
+        if (clientData?.domains && clientData.domains.length > 0) {
+          const emailDomain = contactData.email.toLowerCase().split('@')[1];
+          if (!clientData.domains.includes(emailDomain)) {
+            throw new Error(`Email domain "${emailDomain}" is not authorized for this client. Authorized domains: ${clientData.domains.join(', ')}`);
+          }
+        }
+      }
+
       // If setting as primary, first remove primary status from others
       if (contactData.is_primary) {
         await supabase
