@@ -1,73 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, FileText, DollarSign, Calendar, Building2 } from 'lucide-react';
+import { Search, Plus, FileText, DollarSign, Calendar, Building2, RotateCcw, TrendingUp, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
-
-interface Contract {
-  id: string;
-  contract_number: string;
-  title: string;
-  description?: string;
-  contract_type: string;
-  status: string;
-  total_value?: number;
-  currency: string;
-  start_date: string;
-  end_date?: string;
-  client_id: string;
-  clients?: { name: string } | null;
-  created_at: string;
-}
+import { useEnhancedContractManagement, EnhancedContract } from '@/hooks/useEnhancedContractManagement';
+import { ContractDialog } from '@/components/Contracts/ContractDialog';
+import { RenewalReminders } from '@/components/Contracts/RenewalReminders';
 
 export const ContractsPage = () => {
-  const [contracts, setContracts] = useState<Contract[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedContract, setSelectedContract] = useState<EnhancedContract | null>(null);
+  const [dialogMode, setDialogMode] = useState<'view' | 'edit' | 'create'>('view');
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
+  
+  const {
+    contracts,
+    stats,
+    loading,
+    selectedContracts,
+    bulkRenewalAction,
+    toggleContractSelection,
+    selectAllContracts,
+    clearSelection
+  } = useEnhancedContractManagement();
 
-  const fetchContracts = async () => {
-    try {
-      // Fetch contracts and clients separately since there are no FK constraints
-      const [contractsResult, clientsResult] = await Promise.all([
-        supabase.from('contracts').select('*').order('created_at', { ascending: false }),
-        supabase.from('clients').select('id, name')
-      ]);
-
-      if (contractsResult.error) throw contractsResult.error;
-      if (clientsResult.error) throw clientsResult.error;
-
-      // Manually join the data
-      const contractsWithClients = contractsResult.data?.map(contract => ({
-        ...contract,
-        clients: clientsResult.data?.find(client => client.id === contract.client_id) || null
-      })) || [];
-
-      setContracts(contractsWithClients as unknown as Contract[]);
-    } catch (error) {
-      console.error('Error fetching contracts:', error);
+  const handleBulkRenewal = async () => {
+    if (selectedContracts.length === 0) {
       toast({
-        title: 'Error',
-        description: 'Failed to load contracts',
+        title: 'No Selection',
+        description: 'Please select contracts to renew',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
+      return;
     }
+    
+    await bulkRenewalAction(selectedContracts, 12);
   };
 
-  useEffect(() => {
-    fetchContracts();
-  }, []);
+  const handleViewContract = (contract: EnhancedContract) => {
+    setSelectedContract(contract);
+    setDialogMode('view');
+    setDialogOpen(true);
+  };
+
+  const handleCreateContract = () => {
+    setSelectedContract(null);
+    setDialogMode('create');
+    setDialogOpen(true);
+  };
 
   const filteredContracts = contracts.filter((contract) => {
     const matchesSearch = 
@@ -119,33 +108,39 @@ export const ContractsPage = () => {
             <h1 className="text-3xl font-bold">Contracts</h1>
             <p className="text-muted-foreground">Manage client contracts and agreements</p>
           </div>
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Contract
-          </Button>
+          <div className="flex gap-2">
+            {selectedContracts.length > 0 && (
+              <Button variant="outline" onClick={handleBulkRenewal}>
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Bulk Renew ({selectedContracts.length})
+              </Button>
+            )}
+            <Button onClick={handleCreateContract}>
+              <Plus className="w-4 h-4 mr-2" />
+              New Contract
+            </Button>
+          </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Enhanced Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Contracts</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{contracts.length}</div>
+              <div className="text-2xl font-bold">{stats.total_contracts}</div>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Contracts</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Active</CardTitle>
+              <FileText className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {contracts.filter(c => c.status === 'active').length}
-              </div>
+              <div className="text-2xl font-bold">{stats.active_contracts}</div>
             </CardContent>
           </Card>
 
@@ -156,26 +151,49 @@ export const ContractsPage = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(
-                  contracts.reduce((sum, contract) => sum + (contract.total_value || 0), 0),
-                  'USD'
-                )}
+                {formatCurrency(stats.total_value, 'USD')}
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Approval</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Expiring Soon</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.expiring_soon}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Renewal Revenue</CardTitle>
+              <RotateCcw className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {contracts.filter(c => c.status === 'pending_approval').length}
+                {formatCurrency(stats.renewal_revenue, 'USD')}
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Avg Profitability</CardTitle>
+              <TrendingUp className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.avg_profitability.toFixed(1)}%</div>
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Renewal Reminders */}
+        <RenewalReminders 
+          contracts={contracts} 
+          onViewContract={handleViewContract}
+        />
 
         {/* Filters */}
         <Card>
@@ -210,36 +228,69 @@ export const ContractsPage = () => {
               </Select>
             </div>
 
+            {/* Bulk Actions */}
+            {selectedContracts.length > 0 && (
+              <div className="flex items-center gap-4 mb-4 p-3 bg-muted rounded-lg">
+                <span className="text-sm font-medium">
+                  {selectedContracts.length} contract(s) selected
+                </span>
+                <Button size="sm" variant="outline" onClick={clearSelection}>
+                  Clear Selection
+                </Button>
+                <Button size="sm" onClick={handleBulkRenewal}>
+                  Bulk Renew
+                </Button>
+              </div>
+            )}
+
             {/* Contracts Table */}
             {filteredContracts.length > 0 ? (
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={selectedContracts.length === filteredContracts.length}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              selectAllContracts();
+                            } else {
+                              clearSelection();
+                            }
+                          }}
+                        />
+                      </TableHead>
                       <TableHead>Contract #</TableHead>
                       <TableHead>Title</TableHead>
                       <TableHead>Client</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Value</TableHead>
-                      <TableHead>Start Date</TableHead>
-                      <TableHead>End Date</TableHead>
+                      <TableHead>Profitability</TableHead>
+                      <TableHead>Renewal</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredContracts.map((contract) => (
-                      <TableRow 
-                        key={contract.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => {
-                          // Primary action: View/Edit contract
-                          console.log('View contract:', contract.id);
-                        }}
-                      >
-                        <TableCell className="font-medium">
+                      <TableRow key={contract.id} className="hover:bg-muted/50">
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedContracts.includes(contract.id)}
+                            onCheckedChange={() => toggleContractSelection(contract.id)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </TableCell>
+                        <TableCell 
+                          className="font-medium cursor-pointer"
+                          onClick={() => handleViewContract(contract)}
+                        >
                           {contract.contract_number}
                         </TableCell>
-                        <TableCell>
+                        <TableCell 
+                          className="cursor-pointer"
+                          onClick={() => handleViewContract(contract)}
+                        >
                           <div>
                             <div className="font-medium">{contract.title}</div>
                             {contract.description && (
@@ -266,13 +317,37 @@ export const ContractsPage = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {formatCurrency(contract.total_value || 0, contract.currency)}
+                          <div>
+                            <div className="font-medium">
+                              {formatCurrency(contract.total_value || 0, contract.currency)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {formatCurrency(contract.monthly_revenue || 0, contract.currency)}/mo
+                            </div>
+                          </div>
                         </TableCell>
                         <TableCell>
-                          {contract.start_date ? format(new Date(contract.start_date), 'MMM dd, yyyy') : '-'}
+                          <div className="flex items-center">
+                            <TrendingUp className="w-3 h-3 mr-1 text-green-500" />
+                            <span className="text-sm font-medium">
+                              {contract.profitability_score?.toFixed(1)}%
+                            </span>
+                          </div>
                         </TableCell>
                         <TableCell>
-                          {contract.end_date ? format(new Date(contract.end_date), 'MMM dd, yyyy') : '-'}
+                          {contract.days_until_renewal !== null ? (
+                            <div className="flex items-center gap-2">
+                              <Badge variant={contract.renewal_risk === 'high' ? 'destructive' : 
+                                              contract.renewal_risk === 'medium' ? 'secondary' : 'default'}>
+                                {contract.days_until_renewal}d
+                              </Badge>
+                              {contract.auto_renewal && (
+                                <RotateCcw className="w-3 h-3 text-muted-foreground" />
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -289,7 +364,7 @@ export const ContractsPage = () => {
                     : 'Get started by creating your first contract'
                   }
                 </p>
-                <Button>
+                <Button onClick={handleCreateContract}>
                   <Plus className="w-4 h-4 mr-2" />
                   Create Contract
                 </Button>
@@ -298,6 +373,14 @@ export const ContractsPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Contract Dialog */}
+      <ContractDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        contract={selectedContract}
+        mode={dialogMode}
+      />
     </DashboardLayout>
   );
 };
