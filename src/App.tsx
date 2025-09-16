@@ -25,9 +25,9 @@ const App = () => {
   }), []);
 
   return (
-    <ErrorRecoveryProvider>
-      <QueryClientProvider client={queryClient}>
-        <EnvironmentProvider>
+    <QueryClientProvider client={queryClient}>
+      <EnvironmentProvider>
+        <ErrorRecoveryProvider>
           <AuthProvider>
             <TooltipProvider>
               <BrowserRouter>
@@ -44,9 +44,9 @@ const App = () => {
               </BrowserRouter>
             </TooltipProvider>
           </AuthProvider>
-        </EnvironmentProvider>
-      </QueryClientProvider>
-    </ErrorRecoveryProvider>
+        </ErrorRecoveryProvider>
+      </EnvironmentProvider>
+    </QueryClientProvider>
   );
 };
 
