@@ -68,6 +68,52 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
 
+  // Optimized metrics queries
+  const getMetrics = async () => {
+    try {
+      // Total clients
+      const { count: clientCount } = await supabase
+        .from('clients')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      // Open tickets  
+      const { count: ticketCount } = await supabase
+        .from('support_tickets')
+        .select('*', { count: 'exact', head: true })
+        .in('status', ['submitted', 'in_review', 'in_progress', 'pending_client']);
+
+      // Active contracts
+      const { count: contractCount } = await supabase
+        .from('contracts')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      // Calculate MRR from contracts
+      const { data: contracts } = await supabase
+        .from('contracts')
+        .select('total_value')
+        .eq('status', 'active');
+      
+      const mrr = contracts?.reduce((sum, c) => sum + ((c.total_value || 0) / 12), 0) || 0;
+      
+      // Get assessment average
+      const { data: assessments } = await supabase
+        .from('assessments')
+        .select('percentage_score')
+        .eq('status', 'completed');
+      
+      const avgScore = assessments?.length > 0 
+        ? assessments.reduce((sum, a) => sum + (a.percentage_score || 0), 0) / assessments.length
+        : 0;
+      
+      return { clientCount, ticketCount, contractCount, mrr, avgScore };
+    } catch (error) {
+      console.error('Error fetching metrics:', error);
+      return { clientCount: 0, ticketCount: 0, contractCount: 0, mrr: 0, avgScore: 0 };
+    }
+  };
+
   // Fetch comprehensive dashboard data
   const fetchDashboardData = async (): Promise<{
     metrics: DashboardMetric[];
@@ -75,58 +121,44 @@ const Index = () => {
     activity: ActivityItem[];
   }> => {
     try {
-      // Fetch current and historical data
+      // Get optimized metrics
+      const { clientCount, ticketCount, contractCount, mrr, avgScore } = await getMetrics();
+      
+      // Fetch detailed data for charts and activity
       const [
         clientsResponse, 
         ticketsResponse, 
         contractsResponse, 
-        assessmentsResponse,
-        historicalClientsResponse,
-        recentTicketsResponse
+        assessmentsResponse
       ] = await Promise.all([
-        supabase.from('clients').select('*', { count: 'exact' }),
-        supabase.from('support_tickets').select('*', { count: 'exact' }),
-        supabase.from('contracts').select('*'),
-        supabase.from('assessments').select('*', { count: 'exact' }),
-        supabase.from('clients').select('created_at').gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
-        supabase.from('support_tickets').select('created_at, status').gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        supabase.from('clients').select('*').eq('status', 'active').order('created_at', { ascending: false }),
+        supabase.from('support_tickets').select('*').order('created_at', { ascending: false }).limit(20),
+        supabase.from('contracts').select('*').order('created_at', { ascending: false }),
+        supabase.from('assessments').select('*').eq('status', 'completed').order('completed_at', { ascending: false }).limit(10)
       ]);
 
-      // Calculate metrics with real data
-      const clientCount = clientsResponse.count || 0;
-      const openTicketCount = ticketsResponse.data?.filter(t => 
-        ['submitted', 'in_review', 'in_progress', 'pending_client'].includes(t.status)
-      ).length || 0;
-      const totalTicketCount = ticketsResponse.count || 0;
+      // Calculate growth rates for trends
+      const recentClients = clientsResponse.data?.filter(c => {
+        const createdAt = new Date(c.created_at);
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        return createdAt >= thirtyDaysAgo;
+      }).length || 0;
       
-      // Calculate MRR from active contracts
-      const activeContracts = contractsResponse.data?.filter(c => c.status === 'active') || [];
-      const mrr = activeContracts.reduce((sum, contract) => {
-        const monthlyValue = (contract.total_value || 0) / 12; // Assuming annual contracts
-        return sum + monthlyValue;
-      }, 0);
-
-      // Calculate average assessment score
-      const completedAssessments = assessmentsResponse.data?.filter(a => a.status === 'completed') || [];
-      const avgScore = completedAssessments.length > 0 
-        ? completedAssessments.reduce((sum, a) => sum + (a.percentage_score || 0), 0) / completedAssessments.length
-        : 0;
-
-      // Calculate growth rates
-      const newClientsThisMonth = historicalClientsResponse.data?.length || 0;
-      const clientGrowthRate = clientCount > 0 ? ((newClientsThisMonth / clientCount) * 100) : 0;
+      const clientGrowthRate = clientCount > 0 ? ((recentClients / clientCount) * 100) : 0;
       
-      const recentOpenTickets = recentTicketsResponse.data?.filter(t => 
-        ['submitted', 'in_review', 'in_progress', 'pending_client'].includes(t.status)
+      const resolvedTickets = ticketsResponse.data?.filter(t => 
+        ['resolved', 'closed'].includes(t.status)
       ).length || 0;
-      const ticketChangeRate = totalTicketCount > 0 ? (((totalTicketCount - openTicketCount) / totalTicketCount) * 100) : 0;
+      
+      const totalTickets = ticketsResponse.data?.length || 0;
+      const resolutionRate = totalTickets > 0 ? ((resolvedTickets / totalTickets) * 100) : 0;
 
       // Generate chart data
       const chartData: ChartData = {
-        revenueData: generateRevenueData(activeContracts),
+        revenueData: generateRevenueData(contractsResponse.data || []),
         ticketData: generateTicketVolumeData(ticketsResponse.data || []),
         clientGrowthData: generateClientGrowthData(clientsResponse.data || []),
-        topClientsData: generateTopClientsData(activeContracts, clientsResponse.data || [])
+        topClientsData: generateTopClientsData(contractsResponse.data || [], clientsResponse.data || [])
       };
 
       // Generate activity feed
@@ -134,36 +166,36 @@ const Index = () => {
         ticketsResponse.data || [],
         clientsResponse.data || [],
         contractsResponse.data || [],
-        completedAssessments
+        assessmentsResponse.data || []
       );
 
       const metrics: DashboardMetric[] = [
         {
           title: 'Total Clients',
-          value: clientCount,
+          value: clientCount || 0,
           change: clientGrowthRate > 0 ? `+${Math.round(clientGrowthRate)}%` : '0%',
           trend: clientGrowthRate > 0 ? 'up' : 'neutral',
           icon: Building2,
         },
         {
           title: 'Open Tickets',
-          value: openTicketCount,
-          change: ticketChangeRate > 0 ? `-${Math.round(ticketChangeRate)}%` : `+${Math.round(Math.abs(ticketChangeRate))}%`,
-          trend: ticketChangeRate > 0 ? 'down' : 'up',
+          value: ticketCount || 0,
+          change: resolutionRate > 50 ? `-${Math.round(resolutionRate - 50)}%` : `+${Math.round(50 - resolutionRate)}%`,
+          trend: resolutionRate > 50 ? 'down' : 'up',
           icon: Ticket,
         },
         {
           title: 'Monthly Revenue',
-          value: `$${Math.round(mrr).toLocaleString()}`,
+          value: `$${Math.round(mrr || 0).toLocaleString()}`,
           change: mrr > 0 ? '+12.3%' : '0%',
           trend: mrr > 0 ? 'up' : 'neutral',
           icon: DollarSign,
         },
         {
           title: 'Active Contracts',
-          value: activeContracts.length,
-          change: activeContracts.length > 0 ? '+5.1%' : '0%',
-          trend: activeContracts.length > 0 ? 'up' : 'neutral',
+          value: contractCount || 0,
+          change: contractCount > 0 ? '+5.1%' : '0%',
+          trend: contractCount > 0 ? 'up' : 'neutral',
           icon: FileText,
         },
         {
