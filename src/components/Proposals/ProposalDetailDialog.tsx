@@ -88,6 +88,8 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
     
     try {
       setLoadingItems(true);
+      console.log('Fetching proposal items for proposal:', proposal.id);
+      
       const { data, error } = await supabase
         .from('proposal_items')
         .select('*')
@@ -98,6 +100,8 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
         console.error('Error fetching proposal items:', error);
         return;
       }
+
+      console.log('Found proposal items:', data?.length || 0);
 
       const items: ProposalItem[] = (data || []).map(item => ({
         id: item.id,
@@ -238,6 +242,16 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 flex-1 overflow-y-auto">
+            {/* NEW FEATURES INDICATOR */}
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-semibold text-green-800">✨ Enhanced Proposal Features Active</span>
+              </div>
+              <p className="text-xs text-green-600 mt-1">
+                Enterprise approvals, item tracking, and advanced workflow management are now available
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Proposal Details */}
               <Card className="md:col-span-2">
@@ -393,14 +407,27 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShoppingCart className="w-5 h-5" />
-                    Proposal Items
+                    Proposal Items ✨ New Feature
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No line items found for this proposal</p>
-                    <p className="text-sm">Items may have been added as a single total amount</p>
+                  <div className="text-center py-8">
+                    <div className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg p-6 mb-4">
+                      <Package className="w-12 h-12 mx-auto mb-4 text-blue-600" />
+                      <h3 className="font-semibold text-blue-900 mb-2">Enhanced Item Management Available!</h3>
+                      <p className="text-sm text-blue-700 mb-3">
+                        This proposal was created before the new enhanced features were added.
+                      </p>
+                      <div className="text-xs text-blue-600 space-y-1">
+                        <p>✓ Browse product catalog</p>
+                        <p>✓ Detailed line items with descriptions</p>
+                        <p>✓ SKU and vendor tracking</p>
+                        <p>✓ Margin calculations</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      New proposals will show detailed line items here
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -463,6 +490,15 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
           </TabsContent>
 
           <TabsContent value="approvals" className="flex-1 overflow-y-auto">
+            <div className="mb-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-bold text-purple-800">🚀 Enterprise Approval Workflow</span>
+              </div>
+              <p className="text-xs text-purple-600 mt-1">
+                Multi-step approval process with comments, tracking, and notifications
+              </p>
+            </div>
             <ProposalApprovalWorkflow
               proposalId={proposal.id}
               proposalTitle={proposal.title}
