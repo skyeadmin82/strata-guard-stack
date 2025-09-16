@@ -304,6 +304,7 @@ export const LaunchReadinessDashboard: React.FC = () => {
                   className="w-full"
                   aria-label="Run integration tests to validate system components"
                   aria-describedby="integration-help"
+                  onBlur={(e) => e.currentTarget.blur()}
                 >
                   <Activity className="mr-2 h-4 w-4" aria-hidden="true" />
                   Run Integration Tests
@@ -311,8 +312,12 @@ export const LaunchReadinessDashboard: React.FC = () => {
                 <div id="integration-help" className="sr-only">Runs comprehensive tests to validate all system components are working correctly</div>
                 
                 <Button 
-                  onClick={runSecurityScan}
+                  onClick={(e) => {
+                    runSecurityScan();
+                    e.currentTarget.blur();
+                  }}
                   variant="outline"
+                  disabled={isRunningTests}
                   className="w-full"
                   aria-label="Run security scan to check for vulnerabilities"
                   aria-describedby="security-help"
@@ -323,8 +328,12 @@ export const LaunchReadinessDashboard: React.FC = () => {
                 <div id="security-help" className="sr-only">Performs security vulnerability assessment across the system</div>
                 
                 <Button 
-                  onClick={runPerformanceAnalysis}
+                  onClick={(e) => {
+                    runPerformanceAnalysis();
+                    e.currentTarget.blur();
+                  }}
                   variant="outline"
+                  disabled={isRunningTests}
                   className="w-full"
                   aria-label="Run performance analysis to check system speed"
                   aria-describedby="performance-help"
@@ -335,8 +344,12 @@ export const LaunchReadinessDashboard: React.FC = () => {
                 <div id="performance-help" className="sr-only">Analyzes system performance metrics and identifies optimization opportunities</div>
                 
                 <Button 
-                  onClick={runAccessibilityAudit}
+                  onClick={(e) => {
+                    runAccessibilityAudit();
+                    e.currentTarget.blur();
+                  }}
                   variant="outline"
+                  disabled={isRunningTests}
                   className="w-full"
                   aria-label="Run accessibility audit to check compliance"
                   aria-describedby="accessibility-help"
