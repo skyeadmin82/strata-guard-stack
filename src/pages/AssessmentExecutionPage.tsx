@@ -68,6 +68,11 @@ export const AssessmentExecutionPage = () => {
     try {
       setLoading(true);
 
+      // Validate assessmentId is a valid UUID
+      if (!assessmentId || assessmentId === ':assessmentId' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assessmentId)) {
+        throw new Error('Invalid assessment ID');
+      }
+
       // Load assessment
       const { data: assessmentData, error: assessmentError } = await supabase
         .from('assessments')
