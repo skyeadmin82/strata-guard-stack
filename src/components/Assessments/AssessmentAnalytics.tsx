@@ -52,17 +52,23 @@ export const AssessmentAnalytics: React.FC = () => {
     try {
       setLoading(true);
 
-      // Load basic stats
-      const [assessmentsResult, opportunitiesResult] = await Promise.all([
+      // Load basic stats and detailed data
+      const [assessmentsResult, opportunitiesResult, questionsResult, responsesResult] = await Promise.all([
         supabase.from('assessments').select('*, clients(name)'),
-        supabase.from('assessment_opportunities').select('*, clients(name)')
+        supabase.from('assessment_opportunities').select('*, clients(name)'),
+        supabase.from('assessment_questions').select('*'),
+        supabase.from('assessment_responses').select('*')
       ]);
 
       if (assessmentsResult.error) throw assessmentsResult.error;
       if (opportunitiesResult.error) throw opportunitiesResult.error;
+      if (questionsResult.error) throw questionsResult.error;
+      if (responsesResult.error) throw responsesResult.error;
 
       const assessments = assessmentsResult.data || [];
       const opportunities = opportunitiesResult.data || [];
+      const assessmentQuestions = questionsResult.data || [];
+      const assessmentResponses = responsesResult.data || [];
       
       const completedAssessments = assessments.filter(a => a.status === 'completed');
       const averageScore = completedAssessments.length > 0 
@@ -71,14 +77,26 @@ export const AssessmentAnalytics: React.FC = () => {
 
       const totalOpportunityValue = opportunities.reduce((sum, opp) => sum + (opp.estimated_value || 0), 0);
 
-      // Calculate section scores (mock data since we don't have detailed response data)
-      const sectionScores = [
-        { section: 'Network Security', averageScore: 78, count: completedAssessments.length },
-        { section: 'Backup & Recovery', averageScore: 82, count: completedAssessments.length },
-        { section: 'Access Control', averageScore: 71, count: completedAssessments.length },
-        { section: 'Hardware', averageScore: 85, count: completedAssessments.length },
-        { section: 'Security Policies', averageScore: 74, count: completedAssessments.length }
-      ];
+      // Calculate real section scores from assessment responses
+      const sectionScores = await Promise.all([
+        'Network Security', 'Backup & Recovery', 'Access Control', 'Hardware', 'Security Policies'
+      ].map(async (section) => {
+        // Get responses for this section from actual data
+        const sectionQuestions = assessmentQuestions.filter(q => q.section === section);
+        const sectionResponses = assessmentResponses.filter(r => 
+          sectionQuestions.some(q => q.id === r.question_id)
+        );
+        
+        const averageScore = sectionResponses.length > 0
+          ? sectionResponses.reduce((sum, r) => sum + Number(r.score || 0), 0) / sectionResponses.length
+          : 0;
+          
+        return {
+          section,
+          averageScore: Math.round(averageScore),
+          count: sectionResponses.length
+        };
+      }));
 
       // Score distribution
       const scoreDistribution = [
