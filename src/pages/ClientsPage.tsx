@@ -3,6 +3,9 @@ import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { ClientForm } from '@/components/Forms/ClientForm';
 import { Client } from '@/types/database';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useEnhancedClientManagement } from '@/hooks/useEnhancedClientManagement';
 import {
   Dialog,
   DialogContent,
@@ -16,24 +19,113 @@ import { EnhancedClientsTable } from '@/components/Client/EnhancedClientsTable';
 export const ClientsPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
-
-  // Using enhanced client management through EnhancedClientsTable
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const { fetchClientsWithStats } = useEnhancedClientManagement();
 
   const createClient = async (data: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'tenant_id'>) => {
-    // Implementation handled by the enhanced table
-    console.log('Creating client:', data);
+    try {
+      setLoading(true);
+      console.log('Creating client:', data);
+      
+      const { data: currentUser } = await supabase.auth.getUser();
+      const { data: userProfile } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('auth_user_id', currentUser.user?.id)
+        .single();
+
+      const clientData = {
+        ...data,
+        tenant_id: userProfile?.tenant_id,
+      };
+
+      const { error } = await supabase
+        .from('clients')
+        .insert(clientData);
+
+      if (error) throw error;
+      
+      toast({
+        title: 'Success',
+        description: 'Client created successfully',
+      });
+
+      // Refresh the clients list
+      await fetchClientsWithStats();
+    } catch (error) {
+      console.error('Error creating client:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create client',
+        variant: 'destructive',
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateClient = async (id: string, data: Partial<Client>) => {
-    // Implementation handled by the enhanced table  
-    console.log('Updating client:', id, data);
+    try {
+      setLoading(true);
+      console.log('Updating client:', id, data);
+      
+      const { error } = await supabase
+        .from('clients')
+        .update(data)
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast({
+        title: 'Success',
+        description: 'Client updated successfully',
+      });
+
+      // Refresh the clients list
+      await fetchClientsWithStats();
+    } catch (error) {
+      console.error('Error updating client:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update client',
+        variant: 'destructive',
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const deleteClient = async (id: string): Promise<boolean> => {
-    // Implementation handled by the enhanced table
-    console.log('Deleting client:', id);
-    return true;
+    try {
+      console.log('Deleting client:', id);
+      
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast({
+        title: 'Success',
+        description: 'Client deleted successfully',
+      });
+
+      // Refresh the clients list
+      await fetchClientsWithStats();
+      return true;
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete client',
+        variant: 'destructive',
+      });
+      return false;
+    }
   };
 
   const handleCreateClient = () => {
