@@ -1064,6 +1064,57 @@ export type Database = {
         }
         Relationships: []
       }
+      capacity_metrics: {
+        Row: {
+          created_at: string | null
+          critical_threshold: number | null
+          current_usage: number
+          growth_trend: string | null
+          id: string
+          max_capacity: number
+          measured_at: string | null
+          measurement_details: Json | null
+          predicted_exhaustion_date: string | null
+          resource_name: string
+          resource_type: string
+          tenant_id: string
+          usage_percentage: number | null
+          warning_threshold: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          critical_threshold?: number | null
+          current_usage: number
+          growth_trend?: string | null
+          id?: string
+          max_capacity: number
+          measured_at?: string | null
+          measurement_details?: Json | null
+          predicted_exhaustion_date?: string | null
+          resource_name: string
+          resource_type: string
+          tenant_id: string
+          usage_percentage?: number | null
+          warning_threshold?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          critical_threshold?: number | null
+          current_usage?: number
+          growth_trend?: string | null
+          id?: string
+          max_capacity?: number
+          measured_at?: string | null
+          measurement_details?: Json | null
+          predicted_exhaustion_date?: string | null
+          resource_name?: string
+          resource_type?: string
+          tenant_id?: string
+          usage_percentage?: number | null
+          warning_threshold?: number | null
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           address: Json | null
@@ -1868,6 +1919,54 @@ export type Database = {
           table_name?: string
           tenant_id?: string
           threshold_value?: number | null
+        }
+        Relationships: []
+      }
+      device_sessions: {
+        Row: {
+          battery_level: number | null
+          created_at: string
+          data_usage_mb: number | null
+          device_id: string
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          location_last_known: Json | null
+          offline_data_size: number | null
+          session_token: string
+          technician_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          battery_level?: number | null
+          created_at?: string
+          data_usage_mb?: number | null
+          device_id: string
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          location_last_known?: Json | null
+          offline_data_size?: number | null
+          session_token: string
+          technician_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          battery_level?: number | null
+          created_at?: string
+          data_usage_mb?: number | null
+          device_id?: string
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          location_last_known?: Json | null
+          offline_data_size?: number | null
+          session_token?: string
+          technician_id?: string
+          tenant_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2678,6 +2777,114 @@ export type Database = {
           },
         ]
       }
+      field_messages: {
+        Row: {
+          content: string | null
+          created_at: string
+          delivery_status: string | null
+          file_path: string | null
+          id: string
+          location_data: Json | null
+          message_type: string
+          priority: string | null
+          read_at: string | null
+          recipient_id: string | null
+          sender_id: string
+          sync_status: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          delivery_status?: string | null
+          file_path?: string | null
+          id?: string
+          location_data?: Json | null
+          message_type: string
+          priority?: string | null
+          read_at?: string | null
+          recipient_id?: string | null
+          sender_id: string
+          sync_status?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          delivery_status?: string | null
+          file_path?: string | null
+          id?: string
+          location_data?: Json | null
+          message_type?: string
+          priority?: string | null
+          read_at?: string | null
+          recipient_id?: string | null
+          sender_id?: string
+          sync_status?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      field_service_photos: {
+        Row: {
+          caption: string | null
+          compressed_file_path: string | null
+          compressed_file_size: number | null
+          created_at: string
+          file_path: string | null
+          file_size: number | null
+          id: string
+          local_id: string | null
+          location_coordinates: Json | null
+          offline_created_at: string | null
+          photo_type: string
+          sync_status: string | null
+          technician_id: string
+          tenant_id: string
+          updated_at: string
+          work_order_id: string | null
+        }
+        Insert: {
+          caption?: string | null
+          compressed_file_path?: string | null
+          compressed_file_size?: number | null
+          created_at?: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          local_id?: string | null
+          location_coordinates?: Json | null
+          offline_created_at?: string | null
+          photo_type: string
+          sync_status?: string | null
+          technician_id: string
+          tenant_id: string
+          updated_at?: string
+          work_order_id?: string | null
+        }
+        Update: {
+          caption?: string | null
+          compressed_file_path?: string | null
+          compressed_file_size?: number | null
+          created_at?: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          local_id?: string | null
+          location_coordinates?: Json | null
+          offline_created_at?: string | null
+          photo_type?: string
+          sync_status?: string | null
+          technician_id?: string
+          tenant_id?: string
+          updated_at?: string
+          work_order_id?: string | null
+        }
+        Relationships: []
+      }
       file_uploads: {
         Row: {
           access_permissions: Json | null
@@ -3437,6 +3644,117 @@ export type Database = {
         }
         Relationships: []
       }
+      monitoring_errors: {
+        Row: {
+          affected_users: number | null
+          api_endpoint: string | null
+          assigned_to: string | null
+          browser: string | null
+          business_impact: string | null
+          category: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          device_type: string | null
+          error_code: string | null
+          error_message: string
+          error_stack: string | null
+          error_type: string
+          first_occurred_at: string | null
+          id: string
+          ip_address: unknown | null
+          last_occurred_at: string | null
+          occurrence_count: number | null
+          os: string | null
+          page_url: string | null
+          resolution_notes: string | null
+          resolution_time_minutes: number | null
+          resolved_at: string | null
+          session_id: string | null
+          severity: string | null
+          sla_breach: boolean | null
+          sla_target_minutes: number | null
+          status: string | null
+          subcategory: string | null
+          tenant_id: string
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          affected_users?: number | null
+          api_endpoint?: string | null
+          assigned_to?: string | null
+          browser?: string | null
+          business_impact?: string | null
+          category?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          error_code?: string | null
+          error_message: string
+          error_stack?: string | null
+          error_type: string
+          first_occurred_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          last_occurred_at?: string | null
+          occurrence_count?: number | null
+          os?: string | null
+          page_url?: string | null
+          resolution_notes?: string | null
+          resolution_time_minutes?: number | null
+          resolved_at?: string | null
+          session_id?: string | null
+          severity?: string | null
+          sla_breach?: boolean | null
+          sla_target_minutes?: number | null
+          status?: string | null
+          subcategory?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          affected_users?: number | null
+          api_endpoint?: string | null
+          assigned_to?: string | null
+          browser?: string | null
+          business_impact?: string | null
+          category?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          error_code?: string | null
+          error_message?: string
+          error_stack?: string | null
+          error_type?: string
+          first_occurred_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          last_occurred_at?: string | null
+          occurrence_count?: number | null
+          os?: string | null
+          page_url?: string | null
+          resolution_notes?: string | null
+          resolution_time_minutes?: number | null
+          resolved_at?: string | null
+          session_id?: string | null
+          severity?: string | null
+          sla_breach?: boolean | null
+          sla_target_minutes?: number | null
+          status?: string | null
+          subcategory?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           booking_reminders: Json | null
@@ -3511,6 +3829,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      parts_inventory: {
+        Row: {
+          barcode: string | null
+          category: string | null
+          created_at: string
+          current_stock: number
+          description: string | null
+          id: string
+          location: string | null
+          manufacturer: string | null
+          max_stock_level: number | null
+          min_stock_level: number | null
+          part_name: string
+          part_number: string
+          sync_status: string | null
+          tenant_id: string
+          unit_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          barcode?: string | null
+          category?: string | null
+          created_at?: string
+          current_stock?: number
+          description?: string | null
+          id?: string
+          location?: string | null
+          manufacturer?: string | null
+          max_stock_level?: number | null
+          min_stock_level?: number | null
+          part_name: string
+          part_number: string
+          sync_status?: string | null
+          tenant_id: string
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          barcode?: string | null
+          category?: string | null
+          created_at?: string
+          current_stock?: number
+          description?: string | null
+          id?: string
+          location?: string | null
+          manufacturer?: string | null
+          max_stock_level?: number | null
+          min_stock_level?: number | null
+          part_name?: string
+          part_number?: string
+          sync_status?: string | null
+          tenant_id?: string
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       payment_transactions: {
         Row: {
@@ -3605,6 +3980,63 @@ export type Database = {
           transaction_id?: string | null
           updated_at?: string | null
           user_agent?: string | null
+        }
+        Relationships: []
+      }
+      performance_metrics: {
+        Row: {
+          api_endpoint: string | null
+          browser: string | null
+          connection_type: string | null
+          created_at: string | null
+          device_type: string | null
+          id: string
+          location_country: string | null
+          measured_at: string | null
+          metric_name: string
+          metric_type: string
+          page_url: string | null
+          session_id: string | null
+          tenant_id: string
+          unit: string
+          user_id: string | null
+          value: number
+        }
+        Insert: {
+          api_endpoint?: string | null
+          browser?: string | null
+          connection_type?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          location_country?: string | null
+          measured_at?: string | null
+          metric_name: string
+          metric_type: string
+          page_url?: string | null
+          session_id?: string | null
+          tenant_id: string
+          unit: string
+          user_id?: string | null
+          value: number
+        }
+        Update: {
+          api_endpoint?: string | null
+          browser?: string | null
+          connection_type?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          location_country?: string | null
+          measured_at?: string | null
+          metric_name?: string
+          metric_type?: string
+          page_url?: string | null
+          session_id?: string | null
+          tenant_id?: string
+          unit?: string
+          user_id?: string | null
+          value?: number
         }
         Relationships: []
       }
@@ -4326,6 +4758,75 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          actions_taken: Json | null
+          attack_pattern: string | null
+          attack_vector: string | null
+          automated_response: boolean | null
+          blocked: boolean | null
+          created_at: string | null
+          event_description: string
+          event_severity: string | null
+          event_type: string
+          false_positive: boolean | null
+          id: string
+          investigated: boolean | null
+          investigated_by: string | null
+          investigation_notes: string | null
+          ip_address: unknown | null
+          occurred_at: string | null
+          session_id: string | null
+          tenant_id: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          actions_taken?: Json | null
+          attack_pattern?: string | null
+          attack_vector?: string | null
+          automated_response?: boolean | null
+          blocked?: boolean | null
+          created_at?: string | null
+          event_description: string
+          event_severity?: string | null
+          event_type: string
+          false_positive?: boolean | null
+          id?: string
+          investigated?: boolean | null
+          investigated_by?: string | null
+          investigation_notes?: string | null
+          ip_address?: unknown | null
+          occurred_at?: string | null
+          session_id?: string | null
+          tenant_id: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          actions_taken?: Json | null
+          attack_pattern?: string | null
+          attack_vector?: string | null
+          automated_response?: boolean | null
+          blocked?: boolean | null
+          created_at?: string | null
+          event_description?: string
+          event_severity?: string | null
+          event_type?: string
+          false_positive?: boolean | null
+          id?: string
+          investigated?: boolean | null
+          investigated_by?: string | null
+          investigation_notes?: string | null
+          ip_address?: unknown | null
+          occurred_at?: string | null
+          session_id?: string | null
+          tenant_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       service_bookings: {
         Row: {
           all_day: boolean | null
@@ -4836,6 +5337,201 @@ export type Database = {
           },
         ]
       }
+      sync_queue: {
+        Row: {
+          action: string
+          created_at: string
+          data: Json
+          entity_id: string | null
+          entity_type: string
+          error_message: string | null
+          id: string
+          local_id: string | null
+          max_retries: number | null
+          priority: number | null
+          retry_count: number | null
+          sync_status: string | null
+          technician_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          data: Json
+          entity_id?: string | null
+          entity_type: string
+          error_message?: string | null
+          id?: string
+          local_id?: string | null
+          max_retries?: number | null
+          priority?: number | null
+          retry_count?: number | null
+          sync_status?: string | null
+          technician_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          data?: Json
+          entity_id?: string | null
+          entity_type?: string
+          error_message?: string | null
+          id?: string
+          local_id?: string | null
+          max_retries?: number | null
+          priority?: number | null
+          retry_count?: number | null
+          sync_status?: string | null
+          technician_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      system_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_level: string | null
+          alert_type: string
+          auto_resolve: boolean | null
+          created_at: string | null
+          current_value: number | null
+          description: string
+          escalation_level: number | null
+          id: string
+          metric_name: string | null
+          notification_channels: Json | null
+          notification_sent: boolean | null
+          resolved_at: string | null
+          source_id: string | null
+          source_type: string | null
+          status: string | null
+          tenant_id: string
+          threshold_value: number | null
+          title: string
+          triggered_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_level?: string | null
+          alert_type: string
+          auto_resolve?: boolean | null
+          created_at?: string | null
+          current_value?: number | null
+          description: string
+          escalation_level?: number | null
+          id?: string
+          metric_name?: string | null
+          notification_channels?: Json | null
+          notification_sent?: boolean | null
+          resolved_at?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string | null
+          tenant_id: string
+          threshold_value?: number | null
+          title: string
+          triggered_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_level?: string | null
+          alert_type?: string
+          auto_resolve?: boolean | null
+          created_at?: string | null
+          current_value?: number | null
+          description?: string
+          escalation_level?: number | null
+          id?: string
+          metric_name?: string | null
+          notification_channels?: Json | null
+          notification_sent?: boolean | null
+          resolved_at?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string | null
+          tenant_id?: string
+          threshold_value?: number | null
+          title?: string
+          triggered_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      system_health_checks: {
+        Row: {
+          alert_threshold: number | null
+          check_details: Json | null
+          check_interval_seconds: number | null
+          checked_at: string | null
+          consecutive_failures: number | null
+          created_at: string | null
+          critical_threshold: number | null
+          endpoint_url: string | null
+          error_message: string | null
+          id: string
+          last_alert_sent_at: string | null
+          next_check_at: string | null
+          response_time_ms: number | null
+          service_name: string
+          service_type: string
+          status: string
+          status_code: number | null
+          tenant_id: string
+          warning_threshold: number | null
+        }
+        Insert: {
+          alert_threshold?: number | null
+          check_details?: Json | null
+          check_interval_seconds?: number | null
+          checked_at?: string | null
+          consecutive_failures?: number | null
+          created_at?: string | null
+          critical_threshold?: number | null
+          endpoint_url?: string | null
+          error_message?: string | null
+          id?: string
+          last_alert_sent_at?: string | null
+          next_check_at?: string | null
+          response_time_ms?: number | null
+          service_name: string
+          service_type: string
+          status: string
+          status_code?: number | null
+          tenant_id: string
+          warning_threshold?: number | null
+        }
+        Update: {
+          alert_threshold?: number | null
+          check_details?: Json | null
+          check_interval_seconds?: number | null
+          checked_at?: string | null
+          consecutive_failures?: number | null
+          created_at?: string | null
+          critical_threshold?: number | null
+          endpoint_url?: string | null
+          error_message?: string | null
+          id?: string
+          last_alert_sent_at?: string | null
+          next_check_at?: string | null
+          response_time_ms?: number | null
+          service_name?: string
+          service_type?: string
+          status?: string
+          status_code?: number | null
+          tenant_id?: string
+          warning_threshold?: number | null
+        }
+        Relationships: []
+      }
       system_monitors: {
         Row: {
           alert_config: Json | null
@@ -4917,6 +5613,144 @@ export type Database = {
           settings?: Json | null
           subdomain?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      time_entries: {
+        Row: {
+          billable: boolean | null
+          created_at: string
+          duration_minutes: number | null
+          end_time: string | null
+          entry_type: string
+          id: string
+          local_id: string | null
+          location_end: Json | null
+          location_start: Json | null
+          notes: string | null
+          offline_created_at: string | null
+          start_time: string
+          sync_status: string | null
+          technician_id: string
+          tenant_id: string
+          updated_at: string
+          work_order_id: string | null
+        }
+        Insert: {
+          billable?: boolean | null
+          created_at?: string
+          duration_minutes?: number | null
+          end_time?: string | null
+          entry_type: string
+          id?: string
+          local_id?: string | null
+          location_end?: Json | null
+          location_start?: Json | null
+          notes?: string | null
+          offline_created_at?: string | null
+          start_time: string
+          sync_status?: string | null
+          technician_id: string
+          tenant_id: string
+          updated_at?: string
+          work_order_id?: string | null
+        }
+        Update: {
+          billable?: boolean | null
+          created_at?: string
+          duration_minutes?: number | null
+          end_time?: string | null
+          entry_type?: string
+          id?: string
+          local_id?: string | null
+          location_end?: Json | null
+          location_start?: Json | null
+          notes?: string | null
+          offline_created_at?: string | null
+          start_time?: string
+          sync_status?: string | null
+          technician_id?: string
+          tenant_id?: string
+          updated_at?: string
+          work_order_id?: string | null
+        }
+        Relationships: []
+      }
+      user_activity_logs: {
+        Row: {
+          activity_details: Json | null
+          activity_name: string
+          activity_type: string
+          anomaly_flags: Json | null
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          device_type: string | null
+          duration_ms: number | null
+          id: string
+          ip_address: unknown | null
+          is_suspicious: boolean | null
+          occurred_at: string | null
+          os: string | null
+          page_url: string | null
+          referrer_url: string | null
+          risk_score: number | null
+          screen_resolution: string | null
+          session_id: string
+          tenant_id: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_details?: Json | null
+          activity_name: string
+          activity_type: string
+          anomaly_flags?: Json | null
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          duration_ms?: number | null
+          id?: string
+          ip_address?: unknown | null
+          is_suspicious?: boolean | null
+          occurred_at?: string | null
+          os?: string | null
+          page_url?: string | null
+          referrer_url?: string | null
+          risk_score?: number | null
+          screen_resolution?: string | null
+          session_id: string
+          tenant_id: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_details?: Json | null
+          activity_name?: string
+          activity_type?: string
+          anomaly_flags?: Json | null
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          duration_ms?: number | null
+          id?: string
+          ip_address?: unknown | null
+          is_suspicious?: boolean | null
+          occurred_at?: string | null
+          os?: string | null
+          page_url?: string | null
+          referrer_url?: string | null
+          risk_score?: number | null
+          screen_resolution?: string | null
+          session_id?: string
+          tenant_id?: string
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -5202,6 +6036,105 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      work_orders: {
+        Row: {
+          actual_end_time: string | null
+          actual_start_time: string | null
+          assigned_technician_id: string | null
+          client_id: string | null
+          completion_notes: string | null
+          created_at: string
+          created_by: string | null
+          customer_signature: Json | null
+          description: string | null
+          equipment_details: Json | null
+          estimated_duration_minutes: number | null
+          id: string
+          local_id: string | null
+          location_address: string | null
+          location_coordinates: Json | null
+          offline_created_at: string | null
+          photo_attachments: Json | null
+          priority: string
+          required_parts: Json | null
+          scheduled_end_time: string | null
+          scheduled_start_time: string | null
+          service_type: string | null
+          status: string
+          sync_status: string | null
+          technician_signature: Json | null
+          tenant_id: string
+          title: string
+          updated_at: string
+          used_parts: Json | null
+          work_order_number: string
+        }
+        Insert: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          assigned_technician_id?: string | null
+          client_id?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_signature?: Json | null
+          description?: string | null
+          equipment_details?: Json | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          local_id?: string | null
+          location_address?: string | null
+          location_coordinates?: Json | null
+          offline_created_at?: string | null
+          photo_attachments?: Json | null
+          priority?: string
+          required_parts?: Json | null
+          scheduled_end_time?: string | null
+          scheduled_start_time?: string | null
+          service_type?: string | null
+          status?: string
+          sync_status?: string | null
+          technician_signature?: Json | null
+          tenant_id: string
+          title: string
+          updated_at?: string
+          used_parts?: Json | null
+          work_order_number: string
+        }
+        Update: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          assigned_technician_id?: string | null
+          client_id?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_signature?: Json | null
+          description?: string | null
+          equipment_details?: Json | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          local_id?: string | null
+          location_address?: string | null
+          location_coordinates?: Json | null
+          offline_created_at?: string | null
+          photo_attachments?: Json | null
+          priority?: string
+          required_parts?: Json | null
+          scheduled_end_time?: string | null
+          scheduled_start_time?: string | null
+          service_type?: string | null
+          status?: string
+          sync_status?: string | null
+          technician_signature?: Json | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          used_parts?: Json | null
+          work_order_number?: string
+        }
+        Relationships: []
       }
       workflow_executions: {
         Row: {
