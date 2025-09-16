@@ -88,15 +88,28 @@ export const UsersTable: React.FC = () => {
 
   const handleAddUser = async () => {
     try {
-      // For demo purposes, we'll create a fake auth_user_id
-      // In real implementation, this would come from Supabase Auth
-      const fakeAuthUserId = `demo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Create invitation for new user in Supabase Auth
+      const { data: authResult, error: authError } = await supabase.auth.admin.inviteUserByEmail(
+        newUser.email,
+        {
+          data: {
+            first_name: newUser.first_name,
+            last_name: newUser.last_name,
+            role: newUser.role
+          }
+        }
+      );
+
+      if (authError) throw authError;
+
+      const authUserId = authResult.user?.id;
+      if (!authUserId) throw new Error('Failed to create auth user');
       
       const { data, error } = await supabase
         .from('users')
         .insert({
           ...newUser,
-          auth_user_id: fakeAuthUserId,
+          auth_user_id: authUserId,
           tenant_id: profile?.tenant_id,
           is_active: true
         })
@@ -111,7 +124,7 @@ export const UsersTable: React.FC = () => {
       
       toast({
         title: "Success",
-        description: "User added successfully (Demo mode: no email invitation sent)",
+        description: "User invited successfully. They will receive an email to set up their account.",
       });
     } catch (error) {
       console.error('Error adding user:', error);

@@ -13,6 +13,7 @@ import {
   Send,
   Settings
 } from 'lucide-react';
+import { format } from 'date-fns';
 import { useEmailAutomation } from '@/hooks/useEmailAutomation';
 import { EmailTemplateDialog } from './EmailTemplateDialog';
 import { EmailCampaignDialog } from './EmailCampaignDialog';
@@ -58,11 +59,7 @@ export const EmailMarketingDashboard: React.FC = () => {
     }
   };
 
-  const mockRecentCampaigns = [
-    { id: '1', name: 'Monthly Newsletter', status: 'sent', sent: 2840, opens: 704, clicks: 91, date: '2024-01-15' },
-    { id: '2', name: 'Product Update', status: 'sending', sent: 1500, opens: 450, clicks: 72, date: '2024-01-14' },
-    { id: '3', name: 'Welcome Series #1', status: 'scheduled', sent: 0, opens: 0, clicks: 0, date: '2024-01-16' }
-  ];
+  // Remove mockRecentCampaigns - use real data from database
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -184,11 +181,11 @@ export const EmailMarketingDashboard: React.FC = () => {
           <Card>
             <CardContent className="p-0">
               <div className="space-y-0">
-                {mockRecentCampaigns.map((campaign, index) => (
+                {campaigns.slice(0, 3).map((campaign, index) => (
                   <div 
                     key={campaign.id} 
                     className={`flex items-center justify-between p-4 ${
-                      index < mockRecentCampaigns.length - 1 ? 'border-b' : ''
+                      index < 2 ? 'border-b' : ''
                     }`}
                   >
                     <div className="flex items-center gap-4">
@@ -198,22 +195,22 @@ export const EmailMarketingDashboard: React.FC = () => {
                           <Badge className={getStatusColor(campaign.status)}>
                             {campaign.status}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">{campaign.date}</span>
+                          <span className="text-sm text-muted-foreground">{campaign.created_at ? format(new Date(campaign.created_at), 'MMM dd') : ''}</span>
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="flex items-center gap-6 text-sm">
                         <div className="text-center">
-                          <p className="font-medium">{campaign.sent}</p>
+                          <p className="font-medium">{campaign.total_sent || 0}</p>
                           <p className="text-muted-foreground">Sent</p>
                         </div>
                         <div className="text-center">
-                          <p className="font-medium">{campaign.opens}</p>
+                          <p className="font-medium">{campaign.total_opened || 0}</p>
                           <p className="text-muted-foreground">Opens</p>
                         </div>
                         <div className="text-center">
-                          <p className="font-medium">{campaign.clicks}</p>
+                          <p className="font-medium">{campaign.total_clicked || 0}</p>
                           <p className="text-muted-foreground">Clicks</p>
                         </div>
                       </div>
