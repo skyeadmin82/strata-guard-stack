@@ -1359,6 +1359,7 @@ export type Database = {
           company_size: string | null
           created_at: string
           created_by: string | null
+          domains: string[] | null
           email: string | null
           health_score: number | null
           id: string
@@ -1380,6 +1381,7 @@ export type Database = {
           company_size?: string | null
           created_at?: string
           created_by?: string | null
+          domains?: string[] | null
           email?: string | null
           health_score?: number | null
           id?: string
@@ -1401,6 +1403,7 @@ export type Database = {
           company_size?: string | null
           created_at?: string
           created_by?: string | null
+          domains?: string[] | null
           email?: string | null
           health_score?: number | null
           id?: string
@@ -7687,9 +7690,17 @@ export type Database = {
         Args: { tenant_uuid: string; ticket_priority: string }
         Returns: string
       }
+      extract_email_domain: {
+        Args: { email_address: string }
+        Returns: string
+      }
       get_current_user_tenant_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      is_email_domain_allowed: {
+        Args: { client_uuid: string; email_address: string }
+        Returns: boolean
       }
       user_has_role: {
         Args: { _role: Database["public"]["Enums"]["user_role"] }
