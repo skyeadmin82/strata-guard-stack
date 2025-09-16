@@ -14,6 +14,9 @@ import { AuthPage } from "./pages/AuthPage";
 import { ClientsPage } from "./pages/ClientsPage";
 import { UsersPage } from "./pages/UsersPage";
 import { TicketsPage } from "./pages/TicketsPage";
+import { ContractsPage } from "./pages/ContractsPage";
+import { AssessmentsPage } from "./pages/AssessmentsPage";
+import { ProposalsPage } from "./pages/ProposalsPage";
 import { MonitoringPage } from "./pages/MonitoringPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { HelpPage } from "./pages/HelpPage";
@@ -61,6 +64,9 @@ const App = () => {
                     <Route path="/clients" element={<ClientsPage />} />
                     <Route path="/users" element={<UsersPage />} />
                     <Route path="/tickets" element={<TicketsPage />} />
+                    <Route path="/contracts" element={<ContractsPage />} />
+                    <Route path="/assessments" element={<AssessmentsPage />} />
+                    <Route path="/proposals" element={<ProposalsPage />} />
                     <Route path="/monitoring" element={<MonitoringPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/help" element={<HelpPage />} />

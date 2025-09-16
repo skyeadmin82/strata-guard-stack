@@ -250,8 +250,8 @@ export const DemoDataGenerator: React.FC = () => {
       'Cloud Storage Issues', 'Video Conferencing Problems', 'Website Maintenance', 'System Updates Required'
     ];
 
-    const priorities = ['low', 'medium', 'high', 'critical'];
-    const statuses = ['open', 'in_progress', 'waiting', 'resolved', 'closed'];
+    const priorities = ['low', 'medium', 'high', 'critical', 'urgent'];
+    const statuses = ['draft', 'submitted', 'in_review', 'in_progress', 'pending_client', 'resolved', 'closed'];
     const categories = ['hardware', 'software', 'network', 'security', 'other'];
 
     const tickets = [];
