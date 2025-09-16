@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { TicketDetailDialog } from '@/components/Tickets/TicketDetailDialog';
 import { 
   Search, 
   Plus, 
@@ -67,6 +68,8 @@ export const TicketsTable: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [newTicket, setNewTicket] = useState({
     title: '',
     description: '',
@@ -195,6 +198,20 @@ export const TicketsTable: React.FC = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleViewTicket = (ticket: Ticket) => {
+    setSelectedTicket(ticket);
+    setIsDetailDialogOpen(true);
+  };
+
+  const handleEditTicket = (ticket: Ticket) => {
+    setSelectedTicket(ticket);
+    setIsDetailDialogOpen(true);
+  };
+
+  const handleTicketUpdate = (updatedTicket: Ticket) => {
+    setTickets(tickets.map(t => t.id === updatedTicket.id ? updatedTicket : t));
   };
 
   useEffect(() => {
@@ -405,10 +422,7 @@ export const TicketsTable: React.FC = () => {
                 <TableRow 
                   key={ticket.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => {
-                    // Primary action: View ticket details
-                    console.log('View ticket details:', ticket.id);
-                  }}
+                  onClick={() => handleViewTicket(ticket)}
                 >
                   <TableCell>
                     <div className="space-y-1">
@@ -459,11 +473,11 @@ export const TicketsTable: React.FC = () => {
                         </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewTicket(ticket)}>
                           <Eye className="mr-2 h-4 w-4" />
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditTicket(ticket)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Edit Ticket
                         </DropdownMenuItem>
@@ -497,6 +511,14 @@ export const TicketsTable: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Ticket Detail Dialog */}
+      <TicketDetailDialog
+        ticket={selectedTicket}
+        open={isDetailDialogOpen}
+        onOpenChange={setIsDetailDialogOpen}
+        onUpdate={handleTicketUpdate}
+      />
     </div>
   );
 };
