@@ -1,23 +1,11 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { useTenant } from './useTenant';
+import type { Database } from '@/integrations/supabase/types';
 
-interface AutomationWorkflow {
-  id: string;
-  name: string;
-  description?: string;
-  workflow_type: 'scheduled' | 'trigger' | 'manual';
-  trigger_config: any;
-  steps: WorkflowStep[];
-  conditions: any;
-  retry_config: {
-    max_attempts: number;
-    delay_seconds: number[];
-  };
-  status: 'active' | 'inactive' | 'paused';
-  is_ai_powered: boolean;
-  fallback_workflow_id?: string;
-}
+type AutomationWorkflow = Database['public']['Tables']['automation_workflows']['Row'];
+type WorkflowExecution = Database['public']['Tables']['workflow_executions']['Row'];
 
 interface WorkflowStep {
   id: string;
@@ -26,22 +14,6 @@ interface WorkflowStep {
   config: any;
   rollback_config?: any;
   timeout_seconds?: number;
-}
-
-interface WorkflowExecution {
-  id: string;
-  workflow_id: string;
-  execution_status: 'running' | 'completed' | 'failed' | 'cancelled';
-  started_at: string;
-  completed_at?: string;
-  duration_ms?: number;
-  steps_completed: number;
-  steps_total: number;
-  current_step?: any;
-  execution_log: ExecutionLogEntry[];
-  error_step?: number;
-  error_message?: string;
-  manual_intervention_required: boolean;
 }
 
 interface ExecutionLogEntry {
@@ -57,19 +29,25 @@ interface ExecutionLogEntry {
 
 export const useAutomationEngine = () => {
   const { toast } = useToast();
+  const { tenantId } = useTenant();
   const [isExecuting, setIsExecuting] = useState(false);
   const [currentExecution, setCurrentExecution] = useState<WorkflowExecution | null>(null);
 
   const createWorkflow = useCallback(async (workflowConfig: Partial<AutomationWorkflow>) => {
+    if (!tenantId) {
+      throw new Error('Tenant not loaded');
+    }
+
     try {
       const { data, error } = await supabase
         .from('automation_workflows')
         .insert({
+          tenant_id: tenantId,
           name: workflowConfig.name || 'Untitled Workflow',
           description: workflowConfig.description,
           workflow_type: workflowConfig.workflow_type || 'manual',
           trigger_config: workflowConfig.trigger_config || {},
-          steps: JSON.stringify(workflowConfig.steps || []),
+          steps: workflowConfig.steps || [],
           conditions: workflowConfig.conditions || {},
           retry_config: workflowConfig.retry_config || {
             max_attempts: 3,
@@ -98,12 +76,16 @@ export const useAutomationEngine = () => {
       });
       return null;
     }
-  }, [toast]);
+  }, [toast, tenantId]);
 
   const executeWorkflow = useCallback(async (
     workflowId: string,
     context: any = {}
   ): Promise<{ success: boolean; executionId?: string }> => {
+    if (!tenantId) {
+      throw new Error('Tenant not loaded');
+    }
+
     setIsExecuting(true);
     
     try {
@@ -126,13 +108,17 @@ export const useAutomationEngine = () => {
         throw new Error(`Workflow validation failed: ${validationResult.errors.join(', ')}`);
       }
 
+      // Parse steps if they're stored as JSON string
+      const steps = Array.isArray(workflow.steps) ? workflow.steps : JSON.parse(workflow.steps as string);
+
       // Create execution record
       const { data: execution, error: executionError } = await supabase
         .from('workflow_executions')
         .insert({
+          tenant_id: tenantId,
           workflow_id: workflowId,
           execution_status: 'running',
-          steps_total: workflow.steps.length,
+          steps_total: steps.length,
           steps_completed: 0,
           execution_log: [],
           context_data: context
@@ -147,7 +133,7 @@ export const useAutomationEngine = () => {
       // Execute workflow steps
       let executionResult;
       try {
-        executionResult = await executeWorkflowSteps(execution.id, workflow, context);
+        executionResult = await executeWorkflowSteps(execution.id, { ...workflow, steps }, context);
       } catch (stepError) {
         // Try fallback workflow if available
         if (workflow.fallback_workflow_id) {
@@ -207,21 +193,24 @@ export const useAutomationEngine = () => {
       setIsExecuting(false);
       setCurrentExecution(null);
     }
-  }, [toast]);
+  }, [toast, tenantId]);
 
-  const validateWorkflow = async (workflow: AutomationWorkflow): Promise<{
+  const validateWorkflow = async (workflow: any): Promise<{
     valid: boolean;
     errors: string[];
   }> => {
     const errors: string[] = [];
 
+    // Parse steps if they're stored as JSON
+    const steps = Array.isArray(workflow.steps) ? workflow.steps : JSON.parse(workflow.steps as string);
+
     // Check if steps exist
-    if (!workflow.steps || workflow.steps.length === 0) {
+    if (!steps || steps.length === 0) {
       errors.push('Workflow must have at least one step');
     }
 
     // Validate each step
-    workflow.steps.forEach((step, index) => {
+    steps.forEach((step: WorkflowStep, index: number) => {
       if (!step.name) {
         errors.push(`Step ${index + 1} is missing a name`);
       }
@@ -234,7 +223,7 @@ export const useAutomationEngine = () => {
     });
 
     // Check for circular dependencies
-    if (hasCircularDependencies(workflow.steps)) {
+    if (hasCircularDependencies(steps)) {
       errors.push('Workflow contains circular dependencies');
     }
 
@@ -246,10 +235,10 @@ export const useAutomationEngine = () => {
 
   const executeWorkflowSteps = async (
     executionId: string,
-    workflow: AutomationWorkflow,
+    workflow: any,
     context: any
   ): Promise<{ success: boolean; stepsCompleted: number; error?: string }> => {
-    const steps = workflow.steps;
+    const steps = workflow.steps as WorkflowStep[];
     let stepsCompleted = 0;
     const executionLog: ExecutionLogEntry[] = [];
 
@@ -309,8 +298,8 @@ export const useAutomationEngine = () => {
           .from('workflow_executions')
           .update({
             steps_completed: stepsCompleted,
-            current_step: step,
-            execution_log: executionLog
+            current_step: step as any,
+            execution_log: executionLog as any
           })
           .eq('id', executionId);
       }
@@ -319,7 +308,8 @@ export const useAutomationEngine = () => {
 
     } catch (error) {
       // Perform full rollback if configured
-      if (workflow.retry_config.max_attempts > 1) {
+      const retryConfig = workflow.retry_config as any;
+      if (retryConfig && retryConfig.max_attempts > 1) {
         await performFullRollback(executionId, executionLog);
       }
 
@@ -334,7 +324,7 @@ export const useAutomationEngine = () => {
   const executeStepWithTimeout = async (
     step: WorkflowStep,
     context: any,
-    workflow: AutomationWorkflow
+    workflow: any
   ): Promise<any> => {
     const timeout = step.timeout_seconds || 300; // 5 minutes default
 

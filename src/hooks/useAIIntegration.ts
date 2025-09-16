@@ -1,20 +1,10 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { useTenant } from './useTenant';
+import type { Database } from '@/integrations/supabase/types';
 
-interface AIRequest {
-  id: string;
-  request_type: 'analysis' | 'prediction' | 'automation' | 'chat';
-  provider: 'openai' | 'claude' | 'fallback';
-  model?: string;
-  prompt: string;
-  response?: string;
-  status: 'pending' | 'completed' | 'failed' | 'timeout';
-  confidence_score?: number;
-  fallback_used: boolean;
-  created_at: string;
-  completed_at?: string;
-}
+type AIRequest = Database['public']['Tables']['ai_requests']['Row'];
 
 interface AIRequestOptions {
   provider?: 'openai' | 'claude';
@@ -26,14 +16,19 @@ interface AIRequestOptions {
 
 export const useAIIntegration = () => {
   const { toast } = useToast();
+  const { tenantId } = useTenant();
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentRequest, setCurrentRequest] = useState<AIRequest | null>(null);
 
   const makeAIRequest = useCallback(async (
-    requestType: AIRequest['request_type'],
+    requestType: string,
     prompt: string,
     options: AIRequestOptions = {}
   ): Promise<{ success: boolean; response?: string; requestId?: string; fallbackUsed?: boolean }> => {
+    if (!tenantId) {
+      throw new Error('Tenant not loaded');
+    }
+
     setIsProcessing(true);
     
     try {
@@ -41,6 +36,7 @@ export const useAIIntegration = () => {
       const { data: requestData, error: requestError } = await supabase
         .from('ai_requests')
         .insert({
+          tenant_id: tenantId,
           request_type: requestType,
           provider: options.provider || 'openai',
           model: options.model,
@@ -106,7 +102,7 @@ export const useAIIntegration = () => {
       setIsProcessing(false);
       setCurrentRequest(null);
     }
-  }, [toast]);
+  }, [toast, tenantId]);
 
   const tryAIProvider = async (
     requestId: string,
@@ -165,7 +161,7 @@ export const useAIIntegration = () => {
 
   const tryFallbackSystem = async (
     requestId: string,
-    requestType: AIRequest['request_type'],
+    requestType: string,
     prompt: string
   ): Promise<{ success: boolean; response?: string; confidence?: number; fallbackUsed: boolean }> => {
     try {
