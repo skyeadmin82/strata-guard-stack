@@ -256,6 +256,7 @@ export const DemoDataGenerator: React.FC = () => {
       createdAt.setDate(createdAt.getDate() - daysAgo);
 
       tickets.push({
+        ticket_number: `TIC-${new Date().getFullYear()}-${String(1000 + i).padStart(4, '0')}`,
         title: `${title} - ${client?.name || 'Unknown'}`,
         description: `${category} issue reported by ${contact?.first_name} ${contact?.last_name}. Requires immediate attention to resolve ${title.toLowerCase()}.`,
         priority,
