@@ -11,7 +11,7 @@ import { ProposalPDFGenerator } from './ProposalPDFGenerator';
 import { ProposalApprovalWorkflow } from './ProposalApprovalWorkflow';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Edit, Download, Send, Eye, Calendar, Package, ShoppingCart, EyeOff, DollarSign, TrendingUp } from 'lucide-react';
+import { Edit, Download, Send, Eye, Calendar, Package, ShoppingCart, EyeOff, DollarSign, TrendingUp, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Proposal {
@@ -79,17 +79,16 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
   const { toast } = useToast();
 
   useEffect(() => {
-    if (proposal?.id) {
+    if (proposal?.id && !loadingItems) {
       fetchProposalItems();
     }
   }, [proposal?.id]);
 
   const fetchProposalItems = async () => {
-    if (!proposal?.id) return;
+    if (!proposal?.id || loadingItems) return;
     
     try {
       setLoadingItems(true);
-      console.log('Fetching proposal items for proposal:', proposal.id);
       
       const { data, error } = await supabase
         .from('proposal_items')
@@ -99,10 +98,22 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
 
       if (error) {
         console.error('Error fetching proposal items:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load proposal items. Please try again.',
+          variant: 'destructive',
+        });
         return;
       }
 
-      console.log('Found proposal items:', data?.length || 0);
+      const itemCount = data?.length || 0;
+      if (itemCount === 0) {
+        toast({
+          title: 'No Items Found',
+          description: 'This proposal has no items yet. Add items to get started.',
+          variant: 'default',
+        });
+      }
 
       const items: ProposalItem[] = (data || []).map(item => ({
         id: item.id,
@@ -159,7 +170,6 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
 
   const handleDownload = async () => {
     // PDF generation is now handled by ProposalPDFGenerator component
-    console.log('Download handled by PDF generator');
   };
 
   const handleSend = async () => {
@@ -410,8 +420,36 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
               </Card>
             </div>
             
-            {/* Proposal Items - NEW ENHANCED FEATURE */}
-            {proposalItems.length > 0 && (
+            {/* Proposal Items Section */}
+            {loadingItems ? (
+              <Card>
+                <CardContent className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                    <p className="text-muted-foreground">Loading proposal items...</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : proposalItems.length === 0 ? (
+              <Card>
+                <CardContent className="flex items-center justify-center py-12">
+                  <div className="text-center">
+                    <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No Items Added Yet</h3>
+                    <p className="text-muted-foreground mb-4">
+                      This proposal doesn't have any products or services added.
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => onOpenChange(false)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Edit Proposal to Add Items
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -491,37 +529,6 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
                         ))}
                       </TableBody>
                     </Table>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {proposalItems.length === 0 && !loadingItems && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ShoppingCart className="w-5 h-5" />
-                    Proposal Items ✨ New Feature
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8">
-                    <div className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg p-6 mb-4">
-                      <Package className="w-12 h-12 mx-auto mb-4 text-blue-600" />
-                      <h3 className="font-semibold text-blue-900 mb-2">Enhanced Item Management Available!</h3>
-                      <p className="text-sm text-blue-700 mb-3">
-                        This proposal was created before the new enhanced features were added.
-                      </p>
-                      <div className="text-xs text-blue-600 space-y-1">
-                        <p>✓ Browse product catalog</p>
-                        <p>✓ Detailed line items with descriptions</p>
-                        <p>✓ SKU and vendor tracking</p>
-                        <p>✓ Margin calculations</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      New proposals will show detailed line items here
-                    </p>
                   </div>
                 </CardContent>
               </Card>

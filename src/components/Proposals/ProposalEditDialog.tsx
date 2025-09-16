@@ -79,6 +79,11 @@ export const ProposalEditDialog: React.FC<ProposalEditDialogProps> = ({
 
       if (error) {
         console.error('Error fetching proposal items:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load proposal items. Please try again.',
+          variant: 'destructive',
+        });
         return;
       }
 
