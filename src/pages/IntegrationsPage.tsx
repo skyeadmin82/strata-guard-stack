@@ -427,40 +427,6 @@ const IntegrationsPage = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Stripe */}
-                  <Card className="border-2 border-dashed hover:border-solid transition-all">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <DollarSign className="w-4 h-4 text-purple-600" />
-                          </div>
-                          Stripe
-                        </CardTitle>
-                        <Badge variant="secondary">Coming Soon</Badge>
-                      </div>
-                      <CardDescription>
-                        Process payments, subscriptions, and manage billing
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="text-sm">
-                          <span className="font-medium">Features:</span>
-                          <ul className="text-muted-foreground text-xs mt-1 space-y-1">
-                            <li>• Payment processing</li>
-                            <li>• Subscription management</li>
-                            <li>• Invoice automation</li>
-                            <li>• Revenue tracking</li>
-                          </ul>
-                        </div>
-                        <Button className="w-full" variant="outline" disabled>
-                          Coming Soon
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
                   {/* Microsoft 365 */}
                   <Card className="border-2 border-dashed hover:border-solid transition-all">
                     <CardHeader>
