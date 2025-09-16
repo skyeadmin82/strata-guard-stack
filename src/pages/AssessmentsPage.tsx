@@ -15,6 +15,7 @@ import { AssessmentRiskMatrix } from '@/components/Assessments/AssessmentRiskMat
 import { AssessmentSchedulingDialog } from '@/components/Assessments/AssessmentSchedulingDialog';
 import { AssessmentComparison } from '@/components/Assessments/AssessmentComparison';
 import { ActionItemsManager } from '@/components/Assessments/ActionItemsManager';
+import { Assessment } from '@/types/database';
 import { 
   Search, 
   Plus, 
@@ -30,23 +31,13 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 
-interface Assessment {
-  id: string;
-  status: string;
-  total_score?: number;
-  max_possible_score?: number;
-  percentage_score?: number;
-  started_at?: string;
-  completed_at?: string;
-  client_id: string;
-  template_id: string;
+interface AssessmentWithRelations extends Assessment {
   clients?: { name: string } | null;
   assessment_templates?: { name: string; category?: string } | null;
-  created_at: string;
 }
 
 export const AssessmentsPage = () => {
-  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [assessments, setAssessments] = useState<AssessmentWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -76,7 +67,7 @@ export const AssessmentsPage = () => {
         ...assessment,
         clients: clientsResult.data?.find(client => client.id === assessment.client_id) || null,
         assessment_templates: templatesResult.data?.find(template => template.id === assessment.template_id) || null,
-        // Transform to match Assessment interface
+        // Transform to match Assessment interface from database types
         assessed_by: assessment.assessor_id || '',
         assessment_type: 'general' as const,
         title: `Assessment ${assessment.id}`,
@@ -86,7 +77,7 @@ export const AssessmentsPage = () => {
         recommendations: []
       })) || [];
 
-      setAssessments(assessmentsWithRelations as Assessment[]);
+      setAssessments(assessmentsWithRelations as AssessmentWithRelations[]);
       setClients(clientsResult.data || []);
       setTemplates(templatesResult.data || []);
     } catch (error) {
