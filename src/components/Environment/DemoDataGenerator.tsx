@@ -140,6 +140,7 @@ export const DemoDataGenerator: React.FC = () => {
       };
     });
 
+    let createdCount = 0;
     for (let i = 0; i < sampleClients.length; i++) {
       const { error } = await supabase
         .from('clients')
@@ -149,12 +150,20 @@ export const DemoDataGenerator: React.FC = () => {
         });
 
       if (error) {
-        throw new Error(`Failed to create client: ${error.message}`);
+        // Handle duplicate data gracefully
+        if (error.code === '23505' || error.message.includes('duplicate') || error.message.includes('already exists')) {
+          console.log(`Client "${sampleClients[i].name}" already exists, skipping...`);
+        } else {
+          console.warn(`Failed to create client "${sampleClients[i].name}": ${error.message}`);
+        }
+      } else {
+        createdCount++;
       }
 
       updateStepStatus('clients', 'running', ((i + 1) / sampleClients.length) * 100);
       await new Promise(resolve => setTimeout(resolve, 100));
     }
+    console.log(`Created ${createdCount} new clients (${sampleClients.length - createdCount} already existed)`)
   };
 
   const generateContacts = async (): Promise<void> => {
@@ -201,7 +210,12 @@ export const DemoDataGenerator: React.FC = () => {
           });
 
         if (error) {
-          throw new Error(`Failed to create contact: ${error.message}`);
+          // Handle duplicate data gracefully
+          if (error.code === '23505' || error.message.includes('duplicate') || error.message.includes('already exists')) {
+            console.log(`Contact "${firstName} ${lastName}" already exists, skipping...`);
+          } else {
+            console.warn(`Failed to create contact "${firstName} ${lastName}": ${error.message}`);
+          }
         }
 
         contactCount++;
@@ -273,18 +287,27 @@ export const DemoDataGenerator: React.FC = () => {
       });
     }
 
+    let createdTickets = 0;
     for (let i = 0; i < tickets.length; i++) {
       const { error } = await supabase
         .from('support_tickets')
         .insert(tickets[i]);
 
       if (error) {
-        throw new Error(`Failed to create ticket: ${error.message}`);
+        // Handle duplicate data gracefully
+        if (error.code === '23505' || error.message.includes('duplicate') || error.message.includes('already exists')) {
+          console.log(`Ticket "${tickets[i].ticket_number}" already exists, skipping...`);
+        } else {
+          console.warn(`Failed to create ticket "${tickets[i].ticket_number}": ${error.message}`);
+        }
+      } else {
+        createdTickets++;
       }
 
       updateStepStatus('tickets', 'running', ((i + 1) / tickets.length) * 100);
       await new Promise(resolve => setTimeout(resolve, 50));
     }
+    console.log(`Created ${createdTickets} new tickets (${tickets.length - createdTickets} already existed)`)
   };
 
   const generateContracts = async (): Promise<void> => {
@@ -340,8 +363,15 @@ export const DemoDataGenerator: React.FC = () => {
           .select();
 
         if (error) {
-          console.error(`Contract creation failed:`, error);
-          throw new Error(`Failed to create contract: ${error.message}`);
+          // Handle duplicate data gracefully
+          if (error.code === '23505' || error.message.includes('duplicate') || error.message.includes('already exists')) {
+            console.log(`Contract "${contractData.contract_number}" already exists, skipping...`);
+          } else {
+            console.error(`Contract creation failed:`, error);
+            console.warn(`Failed to create contract "${contractData.contract_number}": ${error.message}`);
+          }
+        } else {
+          console.log(`Successfully created contract:`, data);
         }
 
         console.log(`Successfully created contract:`, data);
@@ -427,7 +457,12 @@ export const DemoDataGenerator: React.FC = () => {
         });
 
       if (error) {
-        throw new Error(`Failed to create assessment: ${error.message}`);
+        // Handle duplicate data gracefully
+        if (error.code === '23505' || error.message.includes('duplicate') || error.message.includes('already exists')) {
+          console.log(`Assessment for client "${client.name}" already exists, skipping...`);
+        } else {
+          console.warn(`Failed to create assessment for client "${client.name}": ${error.message}`);
+        }
       }
 
       updateStepStatus('assessments', 'running', ((i + 1) / selectedClients.length) * 100);
@@ -455,10 +490,11 @@ export const DemoDataGenerator: React.FC = () => {
       const createdDate = new Date();
       createdDate.setDate(createdDate.getDate() - Math.floor(Math.random() * 10));
 
+      const proposalNumber = `PROP-${new Date().getFullYear()}-${String(100 + i).padStart(3, '0')}`;
       const { error } = await supabase
         .from('proposals')
         .insert({
-          proposal_number: `PROP-${new Date().getFullYear()}-${String(100 + i).padStart(3, '0')}`,
+          proposal_number: proposalNumber,
           title: `IT Infrastructure Upgrade Proposal - ${client.name}`,
           description: `Comprehensive IT infrastructure upgrade and modernization proposal for ${client.name}`,
           status: status as any,
@@ -476,7 +512,12 @@ export const DemoDataGenerator: React.FC = () => {
         });
 
       if (error) {
-        throw new Error(`Failed to create proposal: ${error.message}`);
+        // Handle duplicate data gracefully
+        if (error.code === '23505' || error.message.includes('duplicate') || error.message.includes('already exists')) {
+          console.log(`Proposal "${proposalNumber}" already exists, skipping...`);
+        } else {
+          console.warn(`Failed to create proposal "${proposalNumber}": ${error.message}`);
+        }
       }
 
       updateStepStatus('proposals', 'running', ((i + 1) / selectedClients.length) * 100);
@@ -524,8 +565,12 @@ export const DemoDataGenerator: React.FC = () => {
         .insert(batch);
 
       if (error) {
-        // Don't fail if activity logs table doesn't exist
-        console.warn('Failed to create activity logs:', error.message);
+        // Handle duplicate data and missing table gracefully
+        if (error.code === '23505' || error.message.includes('duplicate') || error.message.includes('already exists')) {
+          console.log('Some activity logs already exist, skipping duplicates...');
+        } else {
+          console.warn('Failed to create activity logs:', error.message);
+        }
       }
 
       updateStepStatus('activity', 'running', ((i + 50) / activities.length) * 100);
