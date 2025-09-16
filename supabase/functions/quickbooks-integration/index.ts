@@ -268,7 +268,7 @@ Deno.serve(async (req) => {
     console.log(`QuickBooks Integration: ${method} ${path}`);
     
     // Handle action-based requests from frontend
-    if (method === 'POST' && path === '/') {
+    if (method === 'POST' && (path === '/' || path.includes('quickbooks-integration'))) {
       const { action, config, connectionId, syncType } = await req.json();
       
       // Generate OAuth URL
@@ -276,7 +276,6 @@ Deno.serve(async (req) => {
         try {
           const state = crypto.randomUUID();
           const scope = 'com.intuit.quickbooks.accounting';
-          const environment = config?.environment === 'production' ? 'appcenter.intuit.com' : 'developer.intuit.com';
           
           // Use config values or fallback to environment variables
           const clientId = config?.clientId || QB_CLIENT_ID;
@@ -289,13 +288,18 @@ Deno.serve(async (req) => {
             );
           }
           
-          const authUrl = `https://appcenter.intuit.com/connect/oauth2?` +
+          // For sandbox environment, use developer.intuit.com OAuth endpoint
+          const oauthHost = config?.environment === 'production' ? 'appcenter.intuit.com' : 'developer.intuit.com';
+          
+          const authUrl = `https://${oauthHost}/connect/oauth2?` +
             `client_id=${encodeURIComponent(clientId)}&` +
             `scope=${encodeURIComponent(scope)}&` +
             `redirect_uri=${encodeURIComponent(redirectUri)}&` +
             `response_type=code&` +
             `access_type=offline&` +
             `state=${state}`;
+          
+          console.log(`Generated auth URL for ${config?.environment || 'sandbox'} environment:`, authUrl);
           
           return new Response(
             JSON.stringify({ auth_url: authUrl, state }),
