@@ -533,13 +533,6 @@ export type Database = {
             foreignKeyName: "fk_assessment_opportunities_client_id"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "client_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_assessment_opportunities_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -937,13 +930,6 @@ export type Database = {
           validation_errors?: Json | null
         }
         Relationships: [
-          {
-            foreignKeyName: "fk_assessments_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_stats"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "fk_assessments_client_id"
             columns: ["client_id"]
@@ -1417,13 +1403,6 @@ export type Database = {
             foreignKeyName: "client_activities_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "client_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_activities_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -1432,13 +1411,6 @@ export type Database = {
             columns: ["performed_by"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_client_activities_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_stats"
             referencedColumns: ["id"]
           },
           {
@@ -1740,13 +1712,6 @@ export type Database = {
             foreignKeyName: "contacts_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "client_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contacts_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -1762,13 +1727,6 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_contacts_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_stats"
             referencedColumns: ["id"]
           },
           {
@@ -2253,13 +2211,6 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "contract_templates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_contracts_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_stats"
             referencedColumns: ["id"]
           },
           {
@@ -4615,13 +4566,6 @@ export type Database = {
             foreignKeyName: "fk_invoices_client_id"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "client_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_invoices_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -6405,13 +6349,6 @@ export type Database = {
             foreignKeyName: "fk_proposals_client_id"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "client_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_proposals_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -7004,13 +6941,6 @@ export type Database = {
             foreignKeyName: "fk_service_bookings_client_id"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "client_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_service_bookings_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -7026,13 +6956,6 @@ export type Database = {
             columns: ["assigned_technician"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_bookings_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_stats"
             referencedColumns: ["id"]
           },
           {
@@ -7272,13 +7195,6 @@ export type Database = {
             foreignKeyName: "service_requests_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "client_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -7475,13 +7391,6 @@ export type Database = {
             foreignKeyName: "fk_support_tickets_client_id"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "client_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_support_tickets_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -7504,13 +7413,6 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "support_tickets_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_stats"
             referencedColumns: ["id"]
           },
           {
@@ -8570,13 +8472,6 @@ export type Database = {
             foreignKeyName: "fk_work_orders_client_id"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "client_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_work_orders_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -8684,8 +8579,11 @@ export type Database = {
       }
       database_health_summary: {
         Row: {
-          metric: string | null
-          value: string | null
+          health_status: string | null
+          last_updated: string | null
+          row_count: number | null
+          size_bytes: number | null
+          table_name: string | null
         }
         Relationships: []
       }
@@ -8720,9 +8618,31 @@ export type Database = {
         Args: { email_address: string }
         Returns: string
       }
+      get_client_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          active_contracts: number
+          avg_assessment_score: number
+          contact_count: number
+          health_score: number
+          id: string
+          last_activity_at: string
+          name: string
+          open_tickets: number
+          recent_activities: number
+          risk_level: string
+          satisfaction_rating: number
+          total_contract_value: number
+          total_tickets: number
+        }[]
+      }
       get_current_user_tenant_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_database_health_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: Record<string, unknown>[]
       }
       is_email_domain_allowed: {
         Args: { client_uuid: string; email_address: string }
