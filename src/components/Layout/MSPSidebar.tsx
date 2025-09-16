@@ -23,6 +23,7 @@ import {
   Wrench,
   DollarSign,
   Mail,
+  TestTube,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -63,6 +64,11 @@ const navigationItems = [
     title: 'Financial',
     url: '/financial',
     icon: DollarSign,
+  },
+  {
+    title: 'Testing',
+    url: '/testing',
+    icon: TestTube,
   },
   {
     title: 'Monitoring',

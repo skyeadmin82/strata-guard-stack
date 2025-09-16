@@ -15,6 +15,7 @@ import { TicketsPage } from "./pages/TicketsPage";
 import { MonitoringPage } from "./pages/MonitoringPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { HelpPage } from "./pages/HelpPage";
+import TestingPage from "./pages/TestingPage";
 import { EmailMarketingPage } from "./pages/EmailMarketingPage";
 import { FieldServicePage } from "./pages/FieldServicePage";
 import { FinancialManagementPage } from "./pages/FinancialManagementPage";
@@ -50,7 +51,8 @@ const App = () => {
                   <Route path="/tickets" element={<TicketsPage />} />
                   <Route path="/monitoring" element={<MonitoringPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
-                  <Route path="/help" element={<HelpPage />} />
+          <Route path="/help" element={<HelpPage />} />
+          <Route path="/testing" element={<TestingPage />} />
                   <Route path="/email" element={<EmailMarketingPage />} />
                   <Route path="/field-service" element={<FieldServicePage />} />
                   <Route path="/financial" element={<FinancialManagementPage />} />
