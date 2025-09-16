@@ -8141,6 +8141,13 @@ export type Database = {
         }
         Relationships: []
       }
+      database_health_summary: {
+        Row: {
+          metric: string | null
+          value: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       auto_assign_ticket: {
@@ -8160,6 +8167,10 @@ export type Database = {
           | { tenant_uuid: string; ticket_priority: string }
         Returns: string
       }
+      calculate_sla_status: {
+        Args: { created_at: string; priority: string; sla_due_date: string }
+        Returns: string
+      }
       extract_email_domain: {
         Args: { email_address: string }
         Returns: string
@@ -8175,6 +8186,14 @@ export type Database = {
       user_has_role: {
         Args: { _role: Database["public"]["Enums"]["user_role"] }
         Returns: boolean
+      }
+      validate_tenant_data_integrity: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          issue_description: string
+          record_count: number
+          table_name: string
+        }[]
       }
     }
     Enums: {
