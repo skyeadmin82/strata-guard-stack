@@ -147,7 +147,7 @@ export const FieldServicePage: React.FC = () => {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background">
+      <DashboardLayout>
         {/* Mobile Status Bar */}
         <MobileStatusBar
           isOnline={isOnline}
@@ -436,7 +436,7 @@ export const FieldServicePage: React.FC = () => {
             </Card>
           </div>
         )}
-      </div>
+      </DashboardLayout>
     </ProtectedRoute>
   );
 };
