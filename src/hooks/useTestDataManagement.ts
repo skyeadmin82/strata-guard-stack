@@ -85,16 +85,19 @@ export const useTestDataManagement = () => {
         })
       };
 
-      const generator = generators[dataType as keyof typeof generators];
+      const generator = generators[dataType];
       if (!generator) {
         throw new Error(`Unknown data type: ${dataType}`);
       }
 
-      const testData = Array.from({ length: count }, generator);
+      const testData: any[] = [];
+      for (let i = 0; i < count; i++) {
+        testData.push(generator());
+      }
       
-      // Insert test data
+      // Insert test data - use type assertion for dynamic table names
       const { error } = await supabase
-        .from(dataType)
+        .from(dataType as any)
         .insert(testData);
 
       if (error) throw error;
@@ -125,7 +128,7 @@ export const useTestDataManagement = () => {
       const results: ValidationRule[] = [];
       
       for (const rule of rules) {
-        let query = supabase.from(tableName).select('*', { count: 'exact' });
+        let query = supabase.from(tableName as any).select('*', { count: 'exact' });
         
         // Apply tenant filter
         query = query.eq('tenant_id', currentTenant.id);
@@ -138,7 +141,7 @@ export const useTestDataManagement = () => {
           case 'unique':
             // Check for duplicates
             const { data: duplicates } = await supabase
-              .from(tableName)
+              .from(tableName as any)
               .select(rule.field, { count: 'exact' })
               .eq('tenant_id', currentTenant.id)
               .not(rule.field, 'is', null);
@@ -351,7 +354,7 @@ export const useTestDataManagement = () => {
     
     try {
       const { error } = await supabase
-        .from(dataType)
+        .from(dataType as any)
         .delete()
         .eq('tenant_id', currentTenant.id)
         .like('name', 'Test %');

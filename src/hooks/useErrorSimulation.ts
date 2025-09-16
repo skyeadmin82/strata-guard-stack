@@ -123,7 +123,7 @@ export const useErrorSimulation = () => {
           error_message: `Simulating ${config.error_type} for ${config.duration_seconds}s`,
           context: {
             simulation: true,
-            config,
+            config: JSON.parse(JSON.stringify(config)),
             timestamp: new Date().toISOString()
           },
           environment: 'demo'
