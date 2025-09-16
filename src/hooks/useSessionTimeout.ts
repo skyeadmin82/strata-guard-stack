@@ -35,10 +35,13 @@ export const useSessionTimeout = (config: Partial<SessionTimeoutConfig> = {}) =>
   const warningRef = useRef<NodeJS.Timeout>();
   const lastActivityRef = useRef<number>(Date.now());
 
+  // ✅ FIX: Stable timestamp for auto-save to prevent infinite re-renders
+  const sessionStartTime = useRef<number>(Date.now());
+
   // Auto-save hook for preserving data during timeout
   const { forceSave } = useAutoSave({
     key: 'session_timeout_backup',
-    data: { timestamp: Date.now() },
+    data: { timestamp: sessionStartTime.current }, // ✅ FIX: Use stable reference
     enabled: true,
     onSave: async (data) => {
       // Save current form data or important state
@@ -80,7 +83,7 @@ export const useSessionTimeout = (config: Partial<SessionTimeoutConfig> = {}) =>
 
     }, finalConfig.timeoutDuration - finalConfig.warningTime);
 
-  }, [finalConfig, user]);
+  }, [finalConfig.enabled, finalConfig.timeoutDuration, finalConfig.warningTime, user]); // ✅ FIX: Added missing dependencies
 
   // Handle session timeout
   const handleTimeout = useCallback(async () => {
@@ -126,6 +129,13 @@ export const useSessionTimeout = (config: Partial<SessionTimeoutConfig> = {}) =>
     resetTimeout();
   }, [state.isTimedOut, resetTimeout]);
 
+  // ✅ FIX: Memoized activity handler to prevent constant re-creation
+  const activityHandler = useCallback(() => {
+    if (state.isTimedOut) return;
+    lastActivityRef.current = Date.now();
+    resetTimeout();
+  }, [state.isTimedOut, resetTimeout]);
+
   // Set up activity listeners
   useEffect(() => {
     if (!finalConfig.enabled || !user) return;
@@ -133,7 +143,7 @@ export const useSessionTimeout = (config: Partial<SessionTimeoutConfig> = {}) =>
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
     
     events.forEach(event => {
-      document.addEventListener(event, trackActivity, true);
+      document.addEventListener(event, activityHandler, { passive: true }); // ✅ FIX: Added passive for performance
     });
 
     // Initial timeout setup
@@ -141,27 +151,37 @@ export const useSessionTimeout = (config: Partial<SessionTimeoutConfig> = {}) =>
 
     return () => {
       events.forEach(event => {
-        document.removeEventListener(event, trackActivity, true);
+        document.removeEventListener(event, activityHandler);
       });
       
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       if (warningRef.current) clearTimeout(warningRef.current);
     };
-  }, [finalConfig.enabled, user, trackActivity, resetTimeout]);
+  }, [finalConfig.enabled, user, activityHandler, resetTimeout]); // ✅ FIX: Fixed dependencies
 
-  // Countdown update effect
+  // ✅ FIX: Optimized countdown update effect with throttling
   useEffect(() => {
     if (!state.isWarningShown) return;
 
+    let lastUpdate = Date.now();
+    const throttleDelay = 1000; // Update every second max
+
     const interval = setInterval(() => {
+      const now = Date.now();
+      if (now - lastUpdate < throttleDelay) return;
+      
+      lastUpdate = now;
+      const timeRemaining = getTimeRemaining();
+      
       setState(prev => {
-        const timeRemaining = getTimeRemaining();
+        // Only update if value actually changed
+        if (prev.timeRemaining === timeRemaining) return prev;
         return {
           ...prev,
           timeRemaining: timeRemaining || 0
         };
       });
-    }, 1000);
+    }, 500); // Check more frequently but throttle updates
 
     return () => clearInterval(interval);
   }, [state.isWarningShown, getTimeRemaining]);
