@@ -67,6 +67,8 @@ export const useEnhancedContractManagement = () => {
         const client = clientsResult.data?.find(c => c.id === contract.client_id);
         const today = new Date();
         const renewalDate = contract.renewal_date ? new Date(contract.renewal_date) : null;
+        
+        // Fix negative days calculation and handle past renewal dates
         const daysUntilRenewal = renewalDate ? 
           Math.ceil((renewalDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
         
@@ -77,11 +79,17 @@ export const useEnhancedContractManagement = () => {
         const profitabilityScore = contract.total_value ? 
           Math.min(100, Math.max(0, (contract.total_value * 0.3) / 1000)) : 0;
         
-        // Renewal risk assessment
+        // Enhanced renewal risk assessment
         let renewalRisk: 'low' | 'medium' | 'high' = 'low';
         if (daysUntilRenewal !== null) {
-          if (daysUntilRenewal < 30) renewalRisk = 'high';
-          else if (daysUntilRenewal < 90) renewalRisk = 'medium';
+          if (daysUntilRenewal < 0) {
+            // Past renewal date - high risk
+            renewalRisk = 'high';
+          } else if (daysUntilRenewal < 30) {
+            renewalRisk = 'high';
+          } else if (daysUntilRenewal < 90) {
+            renewalRisk = 'medium';
+          }
         }
 
         return {
@@ -96,16 +104,29 @@ export const useEnhancedContractManagement = () => {
 
       setContracts(enhancedContracts as EnhancedContract[]);
       
-      // Calculate stats
+      // Calculate stats with improved logic
       const totalContracts = enhancedContracts.length;
       const activeContracts = enhancedContracts.filter(c => c.status === 'active').length;
       const totalValue = enhancedContracts.reduce((sum, c) => sum + (c.total_value || 0), 0);
+      
+      // Fix expiring soon calculation - only count contracts with future renewal dates
       const expiringSoon = enhancedContracts.filter(c => 
-        c.days_until_renewal !== null && c.days_until_renewal < 90
+        c.days_until_renewal !== null && 
+        c.days_until_renewal > 0 && 
+        c.days_until_renewal < 90 &&
+        c.status === 'active'
       ).length;
+      
+      // Fix renewal revenue calculation - only active contracts with future renewals
       const renewalRevenue = enhancedContracts
-        .filter(c => c.days_until_renewal !== null && c.days_until_renewal < 365)
+        .filter(c => 
+          c.days_until_renewal !== null && 
+          c.days_until_renewal > 0 && 
+          c.days_until_renewal < 365 &&
+          c.status === 'active'
+        )
         .reduce((sum, c) => sum + (c.total_value || 0), 0);
+        
       const avgProfitability = enhancedContracts.length > 0 ?
         enhancedContracts.reduce((sum, c) => sum + (c.profitability_score || 0), 0) / enhancedContracts.length : 0;
 
@@ -136,8 +157,9 @@ export const useEnhancedContractManagement = () => {
         const contract = contracts.find(c => c.id === id);
         if (!contract) return;
 
-        const currentEndDate = new Date(contract.end_date || contract.start_date);
-        const newEndDate = new Date(currentEndDate);
+        // Use current date as base for renewal calculation instead of potentially past end date
+        const baseDate = new Date();
+        const newEndDate = new Date(baseDate);
         newEndDate.setMonth(newEndDate.getMonth() + months);
         
         const newRenewalDate = new Date(newEndDate);
@@ -153,7 +175,13 @@ export const useEnhancedContractManagement = () => {
           .eq('id', id);
       });
 
-      await Promise.all(updates);
+      const results = await Promise.all(updates.filter(Boolean));
+      
+      // Check for any errors in the results
+      const errors = results.filter(result => result?.error);
+      if (errors.length > 0) {
+        throw new Error(`Failed to update ${errors.length} contracts`);
+      }
       
       toast({
         title: 'Success',

@@ -59,8 +59,21 @@ export const ContractsPage = () => {
   };
 
   const handleSaveContract = async () => {
-    // Refresh contracts after save
-    await fetchContracts();
+    try {
+      // Refresh contracts after save
+      await fetchContracts();
+      toast({
+        title: 'Success',
+        description: 'Contract saved successfully',
+      });
+    } catch (error) {
+      console.error('Error saving contract:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save contract',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleCreateContract = () => {
@@ -92,10 +105,15 @@ export const ContractsPage = () => {
   };
 
   const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency || 'USD',
-    }).format(amount);
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency || 'USD',
+      }).format(amount || 0);
+    } catch (error) {
+      console.error('Error formatting currency:', error);
+      return `$${(amount || 0).toFixed(2)}`;
+    }
   };
 
   if (loading) {
@@ -350,7 +368,10 @@ export const ContractsPage = () => {
                             <div className="flex items-center gap-2">
                               <Badge variant={contract.renewal_risk === 'high' ? 'destructive' : 
                                               contract.renewal_risk === 'medium' ? 'secondary' : 'default'}>
-                                {contract.days_until_renewal}d
+                                {contract.days_until_renewal < 0 ? 
+                                  `${Math.abs(contract.days_until_renewal)}d overdue` : 
+                                  `${contract.days_until_renewal}d`
+                                }
                               </Badge>
                               {contract.auto_renewal && (
                                 <RotateCcw className="w-3 h-3 text-muted-foreground" />

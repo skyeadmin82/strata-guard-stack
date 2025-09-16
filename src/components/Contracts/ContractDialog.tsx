@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,7 +24,7 @@ export const ContractDialog = ({ open, onOpenChange, contract, mode, onModeChang
   const [formData, setFormData] = useState({
     title: contract?.title || '',
     description: contract?.description || '',
-    contract_type: contract?.contract_type || 'msp',
+    contract_type: contract?.contract_type || 'service',
     total_value: contract?.total_value?.toString() || '',
     currency: contract?.currency || 'USD',
     start_date: contract?.start_date || '',
@@ -78,6 +78,10 @@ export const ContractDialog = ({ open, onOpenChange, contract, mode, onModeChang
             {isCreateMode ? 'Create New Contract' : 
              isViewMode ? 'Contract Details' : 'Edit Contract'}
           </DialogTitle>
+          <DialogDescription>
+            {isCreateMode ? 'Create a new contract for your client' :
+             isViewMode ? 'View contract details and information' : 'Edit contract information and save changes'}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
