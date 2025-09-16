@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_requests: {
+        Row: {
+          completed_at: string | null
+          confidence_score: number | null
+          context_data: Json | null
+          cost: number | null
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          expires_at: string | null
+          fallback_reason: string | null
+          fallback_used: boolean | null
+          id: string
+          latency_ms: number | null
+          max_retries: number | null
+          model: string | null
+          prompt: string
+          provider: string
+          quality_score: number | null
+          request_type: string
+          response: string | null
+          retry_count: number | null
+          status: string
+          tenant_id: string
+          tokens_used: number | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          confidence_score?: number | null
+          context_data?: Json | null
+          cost?: number | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          expires_at?: string | null
+          fallback_reason?: string | null
+          fallback_used?: boolean | null
+          id?: string
+          latency_ms?: number | null
+          max_retries?: number | null
+          model?: string | null
+          prompt: string
+          provider?: string
+          quality_score?: number | null
+          request_type: string
+          response?: string | null
+          retry_count?: number | null
+          status?: string
+          tenant_id: string
+          tokens_used?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          confidence_score?: number | null
+          context_data?: Json | null
+          cost?: number | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          expires_at?: string | null
+          fallback_reason?: string | null
+          fallback_used?: boolean | null
+          id?: string
+          latency_ms?: number | null
+          max_retries?: number | null
+          model?: string | null
+          prompt?: string
+          provider?: string
+          quality_score?: number | null
+          request_type?: string
+          response?: string | null
+          retry_count?: number | null
+          status?: string
+          tenant_id?: string
+          tokens_used?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       api_access_tokens: {
         Row: {
           allowed_ips: unknown[] | null
@@ -674,6 +755,156 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      automation_workflows: {
+        Row: {
+          average_duration_ms: number | null
+          conditions: Json | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          execution_count: number | null
+          failure_count: number | null
+          fallback_workflow_id: string | null
+          id: string
+          is_ai_powered: boolean | null
+          last_executed_at: string | null
+          name: string
+          next_execution_at: string | null
+          retry_config: Json | null
+          status: string
+          steps: Json
+          success_count: number | null
+          tenant_id: string
+          timeout_seconds: number | null
+          trigger_config: Json | null
+          updated_at: string
+          workflow_type: string
+        }
+        Insert: {
+          average_duration_ms?: number | null
+          conditions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          execution_count?: number | null
+          failure_count?: number | null
+          fallback_workflow_id?: string | null
+          id?: string
+          is_ai_powered?: boolean | null
+          last_executed_at?: string | null
+          name: string
+          next_execution_at?: string | null
+          retry_config?: Json | null
+          status?: string
+          steps?: Json
+          success_count?: number | null
+          tenant_id: string
+          timeout_seconds?: number | null
+          trigger_config?: Json | null
+          updated_at?: string
+          workflow_type: string
+        }
+        Update: {
+          average_duration_ms?: number | null
+          conditions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          execution_count?: number | null
+          failure_count?: number | null
+          fallback_workflow_id?: string | null
+          id?: string
+          is_ai_powered?: boolean | null
+          last_executed_at?: string | null
+          name?: string
+          next_execution_at?: string | null
+          retry_config?: Json | null
+          status?: string
+          steps?: Json
+          success_count?: number | null
+          tenant_id?: string
+          timeout_seconds?: number | null
+          trigger_config?: Json | null
+          updated_at?: string
+          workflow_type?: string
+        }
+        Relationships: []
+      }
+      bi_reports: {
+        Row: {
+          access_permissions: Json | null
+          cache_ttl: number | null
+          chart_config: Json | null
+          created_at: string
+          created_by: string | null
+          data_sources: Json
+          description: string | null
+          error_count: number | null
+          export_formats: string[] | null
+          filters: Json | null
+          generation_time_ms: number | null
+          id: string
+          is_public: boolean | null
+          last_error: string | null
+          last_generated_at: string | null
+          name: string
+          query_definition: Json
+          report_type: string
+          schedule_config: Json | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          access_permissions?: Json | null
+          cache_ttl?: number | null
+          chart_config?: Json | null
+          created_at?: string
+          created_by?: string | null
+          data_sources?: Json
+          description?: string | null
+          error_count?: number | null
+          export_formats?: string[] | null
+          filters?: Json | null
+          generation_time_ms?: number | null
+          id?: string
+          is_public?: boolean | null
+          last_error?: string | null
+          last_generated_at?: string | null
+          name: string
+          query_definition?: Json
+          report_type: string
+          schedule_config?: Json | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          access_permissions?: Json | null
+          cache_ttl?: number | null
+          chart_config?: Json | null
+          created_at?: string
+          created_by?: string | null
+          data_sources?: Json
+          description?: string | null
+          error_count?: number | null
+          export_formats?: string[] | null
+          filters?: Json | null
+          generation_time_ms?: number | null
+          id?: string
+          is_public?: boolean | null
+          last_error?: string | null
+          last_generated_at?: string | null
+          name?: string
+          query_definition?: Json
+          report_type?: string
+          schedule_config?: Json | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       clients: {
         Row: {
@@ -1369,6 +1600,54 @@ export type Database = {
           },
         ]
       }
+      data_quality_metrics: {
+        Row: {
+          checked_at: string
+          column_name: string | null
+          created_at: string
+          details: Json | null
+          error_count: number | null
+          id: string
+          is_passing: boolean | null
+          metric_type: string
+          metric_value: number
+          sample_size: number | null
+          table_name: string
+          tenant_id: string
+          threshold_value: number | null
+        }
+        Insert: {
+          checked_at?: string
+          column_name?: string | null
+          created_at?: string
+          details?: Json | null
+          error_count?: number | null
+          id?: string
+          is_passing?: boolean | null
+          metric_type: string
+          metric_value: number
+          sample_size?: number | null
+          table_name: string
+          tenant_id: string
+          threshold_value?: number | null
+        }
+        Update: {
+          checked_at?: string
+          column_name?: string | null
+          created_at?: string
+          details?: Json | null
+          error_count?: number | null
+          id?: string
+          is_passing?: boolean | null
+          metric_type?: string
+          metric_value?: number
+          sample_size?: number | null
+          table_name?: string
+          tenant_id?: string
+          threshold_value?: number | null
+        }
+        Relationships: []
+      }
       error_logs: {
         Row: {
           context: Json | null
@@ -1742,6 +2021,60 @@ export type Database = {
           },
         ]
       }
+      monitor_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_data: Json | null
+          alert_level: string
+          created_at: string
+          id: string
+          message: string
+          monitor_id: string
+          notification_attempts: number | null
+          notification_sent: boolean | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          status: string
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_data?: Json | null
+          alert_level: string
+          created_at?: string
+          id?: string
+          message: string
+          monitor_id: string
+          notification_attempts?: number | null
+          notification_sent?: boolean | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_data?: Json | null
+          alert_level?: string
+          created_at?: string
+          id?: string
+          message?: string
+          monitor_id?: string
+          notification_attempts?: number | null
+          notification_sent?: boolean | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           booking_reminders: Json | null
@@ -1910,6 +2243,135 @@ export type Database = {
           transaction_id?: string | null
           updated_at?: string | null
           user_agent?: string | null
+        }
+        Relationships: []
+      }
+      prediction_models: {
+        Row: {
+          accuracy_score: number | null
+          confidence_threshold: number | null
+          created_at: string
+          created_by: string | null
+          data_source: string
+          description: string | null
+          fallback_method: string | null
+          features: Json
+          id: string
+          is_active: boolean | null
+          last_trained_at: string | null
+          model_parameters: Json | null
+          model_type: string
+          name: string
+          performance_metrics: Json | null
+          status: string
+          target_column: string | null
+          tenant_id: string
+          training_config: Json | null
+          training_data_count: number | null
+          training_duration_ms: number | null
+          updated_at: string
+        }
+        Insert: {
+          accuracy_score?: number | null
+          confidence_threshold?: number | null
+          created_at?: string
+          created_by?: string | null
+          data_source: string
+          description?: string | null
+          fallback_method?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean | null
+          last_trained_at?: string | null
+          model_parameters?: Json | null
+          model_type: string
+          name: string
+          performance_metrics?: Json | null
+          status?: string
+          target_column?: string | null
+          tenant_id: string
+          training_config?: Json | null
+          training_data_count?: number | null
+          training_duration_ms?: number | null
+          updated_at?: string
+        }
+        Update: {
+          accuracy_score?: number | null
+          confidence_threshold?: number | null
+          created_at?: string
+          created_by?: string | null
+          data_source?: string
+          description?: string | null
+          fallback_method?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean | null
+          last_trained_at?: string | null
+          model_parameters?: Json | null
+          model_type?: string
+          name?: string
+          performance_metrics?: Json | null
+          status?: string
+          target_column?: string | null
+          tenant_id?: string
+          training_config?: Json | null
+          training_data_count?: number | null
+          training_duration_ms?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      predictions: {
+        Row: {
+          actual_recorded_at: string | null
+          actual_value: Json | null
+          confidence_score: number
+          created_at: string
+          deviation_percent: number | null
+          expires_at: string | null
+          id: string
+          input_data: Json
+          is_accurate: boolean | null
+          model_id: string
+          predicted_value: Json
+          prediction_interval: Json | null
+          prediction_type: string
+          probability_distribution: Json | null
+          tenant_id: string
+        }
+        Insert: {
+          actual_recorded_at?: string | null
+          actual_value?: Json | null
+          confidence_score: number
+          created_at?: string
+          deviation_percent?: number | null
+          expires_at?: string | null
+          id?: string
+          input_data: Json
+          is_accurate?: boolean | null
+          model_id: string
+          predicted_value: Json
+          prediction_interval?: Json | null
+          prediction_type: string
+          probability_distribution?: Json | null
+          tenant_id: string
+        }
+        Update: {
+          actual_recorded_at?: string | null
+          actual_value?: Json | null
+          confidence_score?: number
+          created_at?: string
+          deviation_percent?: number | null
+          expires_at?: string | null
+          id?: string
+          input_data?: Json
+          is_accurate?: boolean | null
+          model_id?: string
+          predicted_value?: Json
+          prediction_interval?: Json | null
+          prediction_type?: string
+          probability_distribution?: Json | null
+          tenant_id?: string
         }
         Relationships: []
       }
@@ -3012,6 +3474,60 @@ export type Database = {
           },
         ]
       }
+      system_monitors: {
+        Row: {
+          alert_config: Json | null
+          alert_count: number | null
+          check_config: Json
+          check_interval_minutes: number | null
+          created_at: string
+          description: string | null
+          id: string
+          is_critical: boolean | null
+          last_alert_at: string | null
+          last_checked_at: string | null
+          monitor_type: string
+          name: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          alert_config?: Json | null
+          alert_count?: number | null
+          check_config?: Json
+          check_interval_minutes?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_critical?: boolean | null
+          last_alert_at?: string | null
+          last_checked_at?: string | null
+          monitor_type: string
+          name: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          alert_config?: Json | null
+          alert_count?: number | null
+          check_config?: Json
+          check_interval_minutes?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_critical?: boolean | null
+          last_alert_at?: string | null
+          last_checked_at?: string | null
+          monitor_type?: string
+          name?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tenants: {
         Row: {
           created_at: string
@@ -3250,6 +3766,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      workflow_executions: {
+        Row: {
+          completed_at: string | null
+          context_data: Json | null
+          current_step: Json | null
+          duration_ms: number | null
+          error_details: Json | null
+          error_message: string | null
+          error_step: number | null
+          execution_log: Json | null
+          execution_status: string
+          id: string
+          intervention_message: string | null
+          manual_intervention_required: boolean | null
+          retry_attempt: number | null
+          rollback_completed: boolean | null
+          rollback_steps: Json | null
+          started_at: string
+          steps_completed: number | null
+          steps_total: number | null
+          tenant_id: string
+          triggered_by: string | null
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          context_data?: Json | null
+          current_step?: Json | null
+          duration_ms?: number | null
+          error_details?: Json | null
+          error_message?: string | null
+          error_step?: number | null
+          execution_log?: Json | null
+          execution_status?: string
+          id?: string
+          intervention_message?: string | null
+          manual_intervention_required?: boolean | null
+          retry_attempt?: number | null
+          rollback_completed?: boolean | null
+          rollback_steps?: Json | null
+          started_at?: string
+          steps_completed?: number | null
+          steps_total?: number | null
+          tenant_id: string
+          triggered_by?: string | null
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          context_data?: Json | null
+          current_step?: Json | null
+          duration_ms?: number | null
+          error_details?: Json | null
+          error_message?: string | null
+          error_step?: number | null
+          execution_log?: Json | null
+          execution_status?: string
+          id?: string
+          intervention_message?: string | null
+          manual_intervention_required?: boolean | null
+          retry_attempt?: number | null
+          rollback_completed?: boolean | null
+          rollback_steps?: Json | null
+          started_at?: string
+          steps_completed?: number | null
+          steps_total?: number | null
+          tenant_id?: string
+          triggered_by?: string | null
+          workflow_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
