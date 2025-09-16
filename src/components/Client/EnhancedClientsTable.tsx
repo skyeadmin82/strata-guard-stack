@@ -52,6 +52,7 @@ import { ClientSummaryStats } from './ClientSummaryStats';
 import { useEnhancedClientManagement } from '@/hooks/useEnhancedClientManagement';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ContactsManager } from './ContactsManager';
 
 interface EnhancedClientsTableProps {
   onCreateClient: () => void;
@@ -571,7 +572,7 @@ export const EnhancedClientsTable: React.FC<EnhancedClientsTableProps> = ({
           </DialogHeader>
           
           {selectedClientForDetails && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" role="tabpanel" aria-label="Client details">
+              <div className="grid grid-cols-1 gap-6" role="tabpanel" aria-label="Client details">
                 {/* Stats Column */}
                 <div role="region" aria-label="Client statistics">
                   {clientStats.has(selectedClientForDetails) ? (
@@ -586,9 +587,17 @@ export const EnhancedClientsTable: React.FC<EnhancedClientsTableProps> = ({
                   )}
                 </div>
                 
-                {/* Timeline Column */}
+                {/* Activity Timeline */}
                 <div role="region" aria-label="Client activity timeline">
                   <ClientActivityTimeline clientId={selectedClientForDetails} />
+                </div>
+                
+                {/* Contacts Management */}
+                <div role="region" aria-label="Client contacts">
+                  {(() => {
+                    const client = clients.find(c => c.id === selectedClientForDetails);
+                    return client ? <ContactsManager client={client} /> : null;
+                  })()}
                 </div>
               </div>
           )}
