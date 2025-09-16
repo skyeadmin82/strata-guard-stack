@@ -97,13 +97,20 @@ export const useContactManagement = (clientId: string) => {
           .eq('client_id', clientId);
       }
 
+      // Clean up the contact data - convert empty strings to null for optional fields
+      const cleanedContactData = {
+        ...contactData,
+        phone: contactData.phone?.trim() || null,
+        title: contactData.title?.trim() || null,
+        department: contactData.department?.trim() || null,
+        notes: contactData.notes?.trim() || null,
+        tenant_id: userProfile?.tenant_id,
+        created_by: currentUser.user?.id,
+      };
+
       const { data, error } = await supabase
         .from('contacts')
-        .insert({
-          ...contactData,
-          tenant_id: userProfile?.tenant_id,
-          created_by: currentUser.user?.id,
-        })
+        .insert(cleanedContactData)
         .select()
         .single();
 
@@ -138,9 +145,18 @@ export const useContactManagement = (clientId: string) => {
           .neq('id', contactId);
       }
 
+      // Clean up the contact data - convert empty strings to null for optional fields
+      const cleanedContactData = {
+        ...contactData,
+        phone: contactData.phone?.trim() || null,
+        title: contactData.title?.trim() || null,
+        department: contactData.department?.trim() || null,
+        notes: contactData.notes?.trim() || null,
+      };
+
       const { data, error } = await supabase
         .from('contacts')
-        .update(contactData)
+        .update(cleanedContactData)
         .eq('id', contactId)
         .select()
         .single();
