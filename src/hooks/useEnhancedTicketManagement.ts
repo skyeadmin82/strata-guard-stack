@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useErrorLogger } from '@/hooks/useErrorLogger';
 import { useEnvironment } from '@/contexts/EnvironmentContext';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 type TicketPriority = 'low' | 'medium' | 'high' | 'urgent' | 'critical';
 type TicketStatus = 'draft' | 'submitted' | 'in_review' | 'approved' | 'rejected' | 'in_progress' | 'pending_client' | 'resolved' | 'closed';
@@ -53,6 +53,7 @@ interface BulkTicketAction {
 export const useEnhancedTicketManagement = () => {
   const { environment } = useEnvironment();
   const { logError } = useErrorLogger(environment);
+  const { toast } = useToast();
   
   const [tickets, setTickets] = useState<EnhancedTicket[]>([]);
   const [users, setUsers] = useState<any[]>([]);
