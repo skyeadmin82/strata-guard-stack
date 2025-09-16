@@ -20,6 +20,7 @@ import {
 import { DashboardMetric } from '@/types';
 import { useErrorLogger } from '@/hooks/useErrorLogger';
 import { toast } from '@/hooks/use-toast';
+import { DemoDataGenerator } from '@/components/Environment/DemoDataGenerator';
 import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
@@ -314,6 +315,11 @@ const Index = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Demo Data Generator */}
+        {isDemo && (
+          <DemoDataGenerator />
+        )}
 
         {/* Retry Data Loading */}
         {retryCount > 0 && (
