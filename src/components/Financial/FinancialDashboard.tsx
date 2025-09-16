@@ -10,13 +10,17 @@ import {
   FileText, 
   CreditCard,
   Plus,
-  Download
+  Download,
+  RotateCcw
 } from 'lucide-react';
 import { useFinancialManagement } from '@/hooks/useFinancialManagement';
 import { RecurringInvoiceManager } from '@/components/Financial/RecurringInvoiceManager';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export const FinancialDashboard: React.FC = () => {
+  const { toast } = useToast();
   const { 
     invoices,
     payments,
@@ -27,6 +31,33 @@ export const FinancialDashboard: React.FC = () => {
   useEffect(() => {
     loadFinancialData();
   }, [loadFinancialData]);
+
+  const testRecurringInvoices = async () => {
+    try {
+      toast({
+        title: "Testing Recurring Invoices",
+        description: "Triggering manual invoice generation...",
+      });
+
+      const { data, error } = await supabase.functions.invoke('generate-recurring-invoices', {
+        body: { trigger: 'manual_test', timestamp: new Date().toISOString() }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Processed ${data.processed || 0} recurring invoices`,
+      });
+    } catch (error) {
+      console.error('Error testing recurring invoices:', error);
+      toast({
+        title: "Error",
+        description: "Failed to test recurring invoices. Check logs for details.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Calculate real metrics from database data
   const metrics = useMemo(() => {
@@ -104,6 +135,10 @@ export const FinancialDashboard: React.FC = () => {
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export Report
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => testRecurringInvoices()}>
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Test Recurring
           </Button>
           <Button size="sm">
             <Plus className="h-4 w-4 mr-2" />
