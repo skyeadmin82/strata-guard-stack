@@ -128,7 +128,7 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
         title: formData.title,
         description: formData.description,
         client_id: formData.client_id,
-        template_id: formData.template_id || null,
+        template_id: formData.template_id === 'none' ? null : formData.template_id || null,
         status: 'draft' as const,
         total_amount: totalAmount,
         currency: formData.currency as 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD',
@@ -221,7 +221,7 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
                   <SelectValue placeholder="Select template" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No template</SelectItem>
+                  <SelectItem value="none">No template</SelectItem>
                   {templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
