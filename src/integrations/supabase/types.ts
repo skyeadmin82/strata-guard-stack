@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_access_tokens: {
+        Row: {
+          allowed_ips: unknown[] | null
+          allowed_origins: string[] | null
+          created_at: string | null
+          current_day_count: number | null
+          current_hour_count: number | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          last_reset_day: string | null
+          last_reset_hour: string | null
+          last_used_at: string | null
+          last_used_ip: unknown | null
+          rate_limit_per_day: number | null
+          rate_limit_per_hour: number | null
+          scopes: string[]
+          tenant_id: string
+          token_hash: string
+          token_name: string
+          token_preview: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          allowed_ips?: unknown[] | null
+          allowed_origins?: string[] | null
+          created_at?: string | null
+          current_day_count?: number | null
+          current_hour_count?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_reset_day?: string | null
+          last_reset_hour?: string | null
+          last_used_at?: string | null
+          last_used_ip?: unknown | null
+          rate_limit_per_day?: number | null
+          rate_limit_per_hour?: number | null
+          scopes?: string[]
+          tenant_id: string
+          token_hash: string
+          token_name: string
+          token_preview: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          allowed_ips?: unknown[] | null
+          allowed_origins?: string[] | null
+          created_at?: string | null
+          current_day_count?: number | null
+          current_hour_count?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_reset_day?: string | null
+          last_reset_hour?: string | null
+          last_used_at?: string | null
+          last_used_ip?: unknown | null
+          rate_limit_per_day?: number | null
+          rate_limit_per_hour?: number | null
+          scopes?: string[]
+          tenant_id?: string
+          token_hash?: string
+          token_name?: string
+          token_preview?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_access_tokens_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_access_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_error_logs: {
         Row: {
           assessment_id: string | null
@@ -427,6 +514,166 @@ export type Database = {
           validation_errors?: Json | null
         }
         Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          additional_context: Json | null
+          api_endpoint: string | null
+          changes_summary: string | null
+          created_at: string | null
+          http_method: string | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          request_id: string | null
+          resource_id: string | null
+          resource_name: string | null
+          resource_type: string
+          risk_factors: string[] | null
+          risk_level: string | null
+          session_id: string | null
+          tenant_id: string
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+          user_role: string | null
+        }
+        Insert: {
+          action: string
+          additional_context?: Json | null
+          api_endpoint?: string | null
+          changes_summary?: string | null
+          created_at?: string | null
+          http_method?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          request_id?: string | null
+          resource_id?: string | null
+          resource_name?: string | null
+          resource_type: string
+          risk_factors?: string[] | null
+          risk_level?: string | null
+          session_id?: string | null
+          tenant_id: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+          user_role?: string | null
+        }
+        Update: {
+          action?: string
+          additional_context?: Json | null
+          api_endpoint?: string | null
+          changes_summary?: string | null
+          created_at?: string | null
+          http_method?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          request_id?: string | null
+          resource_id?: string | null
+          resource_name?: string | null
+          resource_type?: string
+          risk_factors?: string[] | null
+          risk_level?: string | null
+          session_id?: string | null
+          tenant_id?: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+          user_role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "user_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auth_events: {
+        Row: {
+          additional_data: Json | null
+          created_at: string | null
+          device_fingerprint: string | null
+          error_code: string | null
+          error_message: string | null
+          event_type: Database["public"]["Enums"]["auth_event_type"]
+          id: string
+          ip_address: unknown | null
+          location_data: Json | null
+          success: boolean
+          tenant_id: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          additional_data?: Json | null
+          created_at?: string | null
+          device_fingerprint?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          event_type: Database["public"]["Enums"]["auth_event_type"]
+          id?: string
+          ip_address?: unknown | null
+          location_data?: Json | null
+          success: boolean
+          tenant_id: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          additional_data?: Json | null
+          created_at?: string | null
+          device_fingerprint?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          event_type?: Database["public"]["Enums"]["auth_event_type"]
+          id?: string
+          ip_address?: unknown | null
+          location_data?: Json | null
+          success?: boolean
+          tenant_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auth_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auth_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       clients: {
         Row: {
@@ -1019,6 +1266,109 @@ export type Database = {
           },
         ]
       }
+      data_export_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          completed_at: string | null
+          created_at: string | null
+          date_range: Json | null
+          download_count: number | null
+          download_url: string | null
+          error_details: Json | null
+          error_message: string | null
+          estimated_completion: string | null
+          expires_at: string | null
+          export_format: string | null
+          export_type: string
+          file_path: string | null
+          file_size: number | null
+          filters: Json | null
+          id: string
+          include_sensitive_data: boolean | null
+          processing_started_at: string | null
+          progress_percentage: number | null
+          requested_by: string
+          status: Database["public"]["Enums"]["data_export_status"] | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          date_range?: Json | null
+          download_count?: number | null
+          download_url?: string | null
+          error_details?: Json | null
+          error_message?: string | null
+          estimated_completion?: string | null
+          expires_at?: string | null
+          export_format?: string | null
+          export_type: string
+          file_path?: string | null
+          file_size?: number | null
+          filters?: Json | null
+          id?: string
+          include_sensitive_data?: boolean | null
+          processing_started_at?: string | null
+          progress_percentage?: number | null
+          requested_by: string
+          status?: Database["public"]["Enums"]["data_export_status"] | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          date_range?: Json | null
+          download_count?: number | null
+          download_url?: string | null
+          error_details?: Json | null
+          error_message?: string | null
+          estimated_completion?: string | null
+          expires_at?: string | null
+          export_format?: string | null
+          export_type?: string
+          file_path?: string | null
+          file_size?: number | null
+          filters?: Json | null
+          id?: string
+          include_sensitive_data?: boolean | null
+          processing_started_at?: string | null
+          progress_percentage?: number | null
+          requested_by?: string
+          status?: Database["public"]["Enums"]["data_export_status"] | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_export_requests_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_export_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_export_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       error_logs: {
         Row: {
           context: Json | null
@@ -1069,6 +1419,397 @@ export type Database = {
           },
           {
             foreignKeyName: "error_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      file_uploads: {
+        Row: {
+          access_permissions: Json | null
+          created_at: string | null
+          download_count: number | null
+          expires_at: string | null
+          file_hash: string
+          file_path: string
+          file_size: number
+          filename: string
+          id: string
+          is_public: boolean | null
+          max_downloads: number | null
+          mime_type: string
+          original_filename: string
+          related_entity_id: string | null
+          related_entity_type: string | null
+          scan_completed_at: string | null
+          scan_result: Json | null
+          scan_started_at: string | null
+          scan_status: Database["public"]["Enums"]["file_scan_status"] | null
+          tenant_id: string
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          access_permissions?: Json | null
+          created_at?: string | null
+          download_count?: number | null
+          expires_at?: string | null
+          file_hash: string
+          file_path: string
+          file_size: number
+          filename: string
+          id?: string
+          is_public?: boolean | null
+          max_downloads?: number | null
+          mime_type: string
+          original_filename: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          scan_completed_at?: string | null
+          scan_result?: Json | null
+          scan_started_at?: string | null
+          scan_status?: Database["public"]["Enums"]["file_scan_status"] | null
+          tenant_id: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          access_permissions?: Json | null
+          created_at?: string | null
+          download_count?: number | null
+          expires_at?: string | null
+          file_hash?: string
+          file_path?: string
+          file_size?: number
+          filename?: string
+          id?: string
+          is_public?: boolean | null
+          max_downloads?: number | null
+          mime_type?: string
+          original_filename?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          scan_completed_at?: string | null
+          scan_result?: Json | null
+          scan_started_at?: string | null
+          scan_status?: Database["public"]["Enums"]["file_scan_status"] | null
+          tenant_id?: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_uploads_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "file_uploads_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      help_articles: {
+        Row: {
+          category: string
+          content: string
+          content_hash: string | null
+          created_at: string | null
+          created_by: string | null
+          excerpt: string | null
+          helpful_votes: number | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          meta_description: string | null
+          meta_title: string | null
+          not_helpful_votes: number | null
+          previous_version_id: string | null
+          published_at: string | null
+          published_by: string | null
+          required_permissions: string[] | null
+          slug: string
+          subcategory: string | null
+          tags: string[] | null
+          tenant_id: string
+          title: string
+          updated_at: string | null
+          updated_by: string | null
+          version: number | null
+          view_count: number | null
+          visibility_level: string | null
+        }
+        Insert: {
+          category: string
+          content: string
+          content_hash?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          excerpt?: string | null
+          helpful_votes?: number | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          not_helpful_votes?: number | null
+          previous_version_id?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          required_permissions?: string[] | null
+          slug: string
+          subcategory?: string | null
+          tags?: string[] | null
+          tenant_id: string
+          title: string
+          updated_at?: string | null
+          updated_by?: string | null
+          version?: number | null
+          view_count?: number | null
+          visibility_level?: string | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          content_hash?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          excerpt?: string | null
+          helpful_votes?: number | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          not_helpful_votes?: number | null
+          previous_version_id?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          required_permissions?: string[] | null
+          slug?: string
+          subcategory?: string | null
+          tags?: string[] | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          version?: number | null
+          view_count?: number | null
+          visibility_level?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "help_articles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "help_articles_previous_version_id_fkey"
+            columns: ["previous_version_id"]
+            isOneToOne: false
+            referencedRelation: "help_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "help_articles_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "help_articles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "help_articles_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          attachments: Json | null
+          bounce_details: Json | null
+          bounce_reason: string | null
+          content: string
+          created_at: string | null
+          delivered_at: string | null
+          delivery_attempts: number | null
+          delivery_errors: Json | null
+          id: string
+          message_type: string | null
+          read_at: string | null
+          read_receipt_requested: boolean | null
+          recipient_id: string | null
+          recipient_type: string | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          sender_id: string | null
+          sender_type: string | null
+          status: Database["public"]["Enums"]["message_status"] | null
+          subject: string | null
+          tenant_id: string
+          thread_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          bounce_details?: Json | null
+          bounce_reason?: string | null
+          content: string
+          created_at?: string | null
+          delivered_at?: string | null
+          delivery_attempts?: number | null
+          delivery_errors?: Json | null
+          id?: string
+          message_type?: string | null
+          read_at?: string | null
+          read_receipt_requested?: boolean | null
+          recipient_id?: string | null
+          recipient_type?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          sender_id?: string | null
+          sender_type?: string | null
+          status?: Database["public"]["Enums"]["message_status"] | null
+          subject?: string | null
+          tenant_id: string
+          thread_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          bounce_details?: Json | null
+          bounce_reason?: string | null
+          content?: string
+          created_at?: string | null
+          delivered_at?: string | null
+          delivery_attempts?: number | null
+          delivery_errors?: Json | null
+          id?: string
+          message_type?: string | null
+          read_at?: string | null
+          read_receipt_requested?: boolean | null
+          recipient_id?: string | null
+          recipient_type?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          sender_id?: string | null
+          sender_type?: string | null
+          status?: Database["public"]["Enums"]["message_status"] | null
+          subject?: string | null
+          tenant_id?: string
+          thread_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          booking_reminders: Json | null
+          created_at: string | null
+          email_enabled: boolean | null
+          frequency_limits: Json | null
+          id: string
+          in_app_enabled: boolean | null
+          promotional: Json | null
+          push_enabled: boolean | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          sms_enabled: boolean | null
+          system_alerts: Json | null
+          tenant_id: string
+          ticket_updates: Json | null
+          timezone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_reminders?: Json | null
+          created_at?: string | null
+          email_enabled?: boolean | null
+          frequency_limits?: Json | null
+          id?: string
+          in_app_enabled?: boolean | null
+          promotional?: Json | null
+          push_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sms_enabled?: boolean | null
+          system_alerts?: Json | null
+          tenant_id: string
+          ticket_updates?: Json | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_reminders?: Json | null
+          created_at?: string | null
+          email_enabled?: boolean | null
+          frequency_limits?: Json | null
+          id?: string
+          in_app_enabled?: boolean | null
+          promotional?: Json | null
+          push_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sms_enabled?: boolean | null
+          system_alerts?: Json | null
+          tenant_id?: string
+          ticket_updates?: Json | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -1761,6 +2502,516 @@ export type Database = {
         }
         Relationships: []
       }
+      service_bookings: {
+        Row: {
+          all_day: boolean | null
+          assigned_technician: string | null
+          booking_number: string
+          client_id: string
+          confirmation_sent: boolean | null
+          confirmation_sent_at: string | null
+          conflict_details: Json | null
+          conflicts_checked_at: string | null
+          contact_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          end_time: string
+          has_conflicts: boolean | null
+          id: string
+          location_details: Json | null
+          location_type: string | null
+          original_booking_id: string | null
+          reminder_sent: boolean | null
+          reminder_sent_at: string | null
+          required_resources: Json | null
+          reschedule_count: number | null
+          reschedule_reason: string | null
+          service_id: string | null
+          start_time: string
+          status: Database["public"]["Enums"]["booking_status"] | null
+          tenant_id: string
+          timezone: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          all_day?: boolean | null
+          assigned_technician?: string | null
+          booking_number: string
+          client_id: string
+          confirmation_sent?: boolean | null
+          confirmation_sent_at?: string | null
+          conflict_details?: Json | null
+          conflicts_checked_at?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          end_time: string
+          has_conflicts?: boolean | null
+          id?: string
+          location_details?: Json | null
+          location_type?: string | null
+          original_booking_id?: string | null
+          reminder_sent?: boolean | null
+          reminder_sent_at?: string | null
+          required_resources?: Json | null
+          reschedule_count?: number | null
+          reschedule_reason?: string | null
+          service_id?: string | null
+          start_time: string
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          tenant_id: string
+          timezone: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          all_day?: boolean | null
+          assigned_technician?: string | null
+          booking_number?: string
+          client_id?: string
+          confirmation_sent?: boolean | null
+          confirmation_sent_at?: string | null
+          conflict_details?: Json | null
+          conflicts_checked_at?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          end_time?: string
+          has_conflicts?: boolean | null
+          id?: string
+          location_details?: Json | null
+          location_type?: string | null
+          original_booking_id?: string | null
+          reminder_sent?: boolean | null
+          reminder_sent_at?: string | null
+          required_resources?: Json | null
+          reschedule_count?: number | null
+          reschedule_reason?: string | null
+          service_id?: string | null
+          start_time?: string
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          tenant_id?: string
+          timezone?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_bookings_assigned_technician_fkey"
+            columns: ["assigned_technician"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_original_booking_id_fkey"
+            columns: ["original_booking_id"]
+            isOneToOne: false
+            referencedRelation: "service_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_catalog: {
+        Row: {
+          approval_required: boolean | null
+          auto_assignment_rules: Json | null
+          availability_schedule: Json | null
+          base_price: number | null
+          category: string
+          created_at: string | null
+          created_by: string | null
+          current_active_requests: number | null
+          description: string
+          id: string
+          is_active: boolean | null
+          is_available: boolean | null
+          max_concurrent_requests: number | null
+          name: string
+          pricing_model: string | null
+          required_fields: Json | null
+          required_permissions: string[] | null
+          sla_resolution_hours: number | null
+          sla_response_hours: number | null
+          subcategory: string | null
+          tenant_id: string
+          updated_at: string | null
+          workflow_template: Json | null
+        }
+        Insert: {
+          approval_required?: boolean | null
+          auto_assignment_rules?: Json | null
+          availability_schedule?: Json | null
+          base_price?: number | null
+          category: string
+          created_at?: string | null
+          created_by?: string | null
+          current_active_requests?: number | null
+          description: string
+          id?: string
+          is_active?: boolean | null
+          is_available?: boolean | null
+          max_concurrent_requests?: number | null
+          name: string
+          pricing_model?: string | null
+          required_fields?: Json | null
+          required_permissions?: string[] | null
+          sla_resolution_hours?: number | null
+          sla_response_hours?: number | null
+          subcategory?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          workflow_template?: Json | null
+        }
+        Update: {
+          approval_required?: boolean | null
+          auto_assignment_rules?: Json | null
+          availability_schedule?: Json | null
+          base_price?: number | null
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          current_active_requests?: number | null
+          description?: string
+          id?: string
+          is_active?: boolean | null
+          is_available?: boolean | null
+          max_concurrent_requests?: number | null
+          name?: string
+          pricing_model?: string | null
+          required_fields?: Json | null
+          required_permissions?: string[] | null
+          sla_resolution_hours?: number | null
+          sla_response_hours?: number | null
+          subcategory?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          workflow_template?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_catalog_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_catalog_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_requests: {
+        Row: {
+          actual_completion_date: string | null
+          actual_start_date: string | null
+          approval_workflow: Json | null
+          assigned_to: string | null
+          business_justification: string | null
+          client_id: string
+          contact_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string
+          estimated_cost: number | null
+          estimated_effort_hours: number | null
+          id: string
+          impact_assessment: Json | null
+          priority: Database["public"]["Enums"]["ticket_priority"] | null
+          received_approvals: number | null
+          request_number: string
+          request_type: Database["public"]["Enums"]["request_type"]
+          requested_completion_date: string | null
+          required_approvals: number | null
+          scheduled_end_date: string | null
+          scheduled_start_date: string | null
+          status: Database["public"]["Enums"]["ticket_status"] | null
+          tenant_id: string
+          title: string
+          updated_at: string | null
+          validation_errors: Json | null
+        }
+        Insert: {
+          actual_completion_date?: string | null
+          actual_start_date?: string | null
+          approval_workflow?: Json | null
+          assigned_to?: string | null
+          business_justification?: string | null
+          client_id: string
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          estimated_cost?: number | null
+          estimated_effort_hours?: number | null
+          id?: string
+          impact_assessment?: Json | null
+          priority?: Database["public"]["Enums"]["ticket_priority"] | null
+          received_approvals?: number | null
+          request_number: string
+          request_type: Database["public"]["Enums"]["request_type"]
+          requested_completion_date?: string | null
+          required_approvals?: number | null
+          scheduled_end_date?: string | null
+          scheduled_start_date?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"] | null
+          tenant_id: string
+          title: string
+          updated_at?: string | null
+          validation_errors?: Json | null
+        }
+        Update: {
+          actual_completion_date?: string | null
+          actual_start_date?: string | null
+          approval_workflow?: Json | null
+          assigned_to?: string | null
+          business_justification?: string | null
+          client_id?: string
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          estimated_cost?: number | null
+          estimated_effort_hours?: number | null
+          id?: string
+          impact_assessment?: Json | null
+          priority?: Database["public"]["Enums"]["ticket_priority"] | null
+          received_approvals?: number | null
+          request_number?: string
+          request_type?: Database["public"]["Enums"]["request_type"]
+          requested_completion_date?: string | null
+          required_approvals?: number | null
+          scheduled_end_date?: string | null
+          scheduled_start_date?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"] | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string | null
+          validation_errors?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          approval_required: boolean | null
+          approved_at: string | null
+          approved_by: string | null
+          assigned_to: string | null
+          category: string | null
+          client_id: string
+          client_satisfaction_rating: number | null
+          closed_at: string | null
+          contact_id: string | null
+          created_at: string | null
+          created_by: string | null
+          custom_fields: Json | null
+          description: string
+          first_response_at: string | null
+          id: string
+          internal_notes: string | null
+          priority: Database["public"]["Enums"]["ticket_priority"] | null
+          rejection_reason: string | null
+          required_fields_completed: boolean | null
+          resolution_target: string | null
+          resolved_at: string | null
+          sla_due_date: string | null
+          status: Database["public"]["Enums"]["ticket_status"] | null
+          subcategory: string | null
+          tags: string[] | null
+          tenant_id: string
+          ticket_number: string
+          title: string
+          updated_at: string | null
+          validation_errors: Json | null
+        }
+        Insert: {
+          approval_required?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          assigned_to?: string | null
+          category?: string | null
+          client_id: string
+          client_satisfaction_rating?: number | null
+          closed_at?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          custom_fields?: Json | null
+          description: string
+          first_response_at?: string | null
+          id?: string
+          internal_notes?: string | null
+          priority?: Database["public"]["Enums"]["ticket_priority"] | null
+          rejection_reason?: string | null
+          required_fields_completed?: boolean | null
+          resolution_target?: string | null
+          resolved_at?: string | null
+          sla_due_date?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"] | null
+          subcategory?: string | null
+          tags?: string[] | null
+          tenant_id: string
+          ticket_number: string
+          title: string
+          updated_at?: string | null
+          validation_errors?: Json | null
+        }
+        Update: {
+          approval_required?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          assigned_to?: string | null
+          category?: string | null
+          client_id?: string
+          client_satisfaction_rating?: number | null
+          closed_at?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          custom_fields?: Json | null
+          description?: string
+          first_response_at?: string | null
+          id?: string
+          internal_notes?: string | null
+          priority?: Database["public"]["Enums"]["ticket_priority"] | null
+          rejection_reason?: string | null
+          required_fields_completed?: boolean | null
+          resolution_target?: string | null
+          resolved_at?: string | null
+          sla_due_date?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"] | null
+          subcategory?: string | null
+          tags?: string[] | null
+          tenant_id?: string
+          ticket_number?: string
+          title?: string
+          updated_at?: string | null
+          validation_errors?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           created_at: string
@@ -1790,6 +3041,165 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      user_auth_security: {
+        Row: {
+          backup_codes: Json | null
+          created_at: string | null
+          failed_login_attempts: number | null
+          id: string
+          is_locked: boolean | null
+          last_2fa_verification: string | null
+          last_activity: string | null
+          last_failed_login: string | null
+          last_password_change: string | null
+          lockout_reason: Database["public"]["Enums"]["lockout_reason"] | null
+          lockout_until: string | null
+          max_concurrent_sessions: number | null
+          password_history: Json | null
+          password_reset_attempts: number | null
+          password_reset_expires: string | null
+          password_reset_token: string | null
+          session_timeout_minutes: number | null
+          tenant_id: string
+          two_factor_enabled: boolean | null
+          two_factor_secret: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          backup_codes?: Json | null
+          created_at?: string | null
+          failed_login_attempts?: number | null
+          id?: string
+          is_locked?: boolean | null
+          last_2fa_verification?: string | null
+          last_activity?: string | null
+          last_failed_login?: string | null
+          last_password_change?: string | null
+          lockout_reason?: Database["public"]["Enums"]["lockout_reason"] | null
+          lockout_until?: string | null
+          max_concurrent_sessions?: number | null
+          password_history?: Json | null
+          password_reset_attempts?: number | null
+          password_reset_expires?: string | null
+          password_reset_token?: string | null
+          session_timeout_minutes?: number | null
+          tenant_id: string
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          backup_codes?: Json | null
+          created_at?: string | null
+          failed_login_attempts?: number | null
+          id?: string
+          is_locked?: boolean | null
+          last_2fa_verification?: string | null
+          last_activity?: string | null
+          last_failed_login?: string | null
+          last_password_change?: string | null
+          lockout_reason?: Database["public"]["Enums"]["lockout_reason"] | null
+          lockout_until?: string | null
+          max_concurrent_sessions?: number | null
+          password_history?: Json | null
+          password_reset_attempts?: number | null
+          password_reset_expires?: string | null
+          password_reset_token?: string | null
+          session_timeout_minutes?: number | null
+          tenant_id?: string
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_auth_security_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_auth_security_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_sessions: {
+        Row: {
+          created_at: string | null
+          device_info: Json | null
+          expires_at: string
+          id: string
+          ip_address: unknown | null
+          last_activity: string | null
+          location_data: Json | null
+          session_token: string
+          status: Database["public"]["Enums"]["session_status"] | null
+          tenant_id: string
+          terminated_at: string | null
+          terminated_reason: string | null
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_info?: Json | null
+          expires_at: string
+          id?: string
+          ip_address?: unknown | null
+          last_activity?: string | null
+          location_data?: Json | null
+          session_token: string
+          status?: Database["public"]["Enums"]["session_status"] | null
+          tenant_id: string
+          terminated_at?: string | null
+          terminated_reason?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_info?: Json | null
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          last_activity?: string | null
+          location_data?: Json | null
+          session_token?: string
+          status?: Database["public"]["Enums"]["session_status"] | null
+          tenant_id?: string
+          terminated_at?: string | null
+          terminated_reason?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sessions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {
@@ -1858,6 +3268,23 @@ export type Database = {
     Enums: {
       approval_status: "pending" | "approved" | "rejected" | "timeout"
       assessment_status: "draft" | "active" | "completed" | "archived"
+      auth_event_type:
+        | "login_success"
+        | "login_failed"
+        | "password_reset_requested"
+        | "password_reset_completed"
+        | "account_locked"
+        | "account_unlocked"
+        | "2fa_enabled"
+        | "2fa_disabled"
+        | "session_expired"
+      booking_status:
+        | "requested"
+        | "confirmed"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | "rescheduled"
       contract_status:
         | "draft"
         | "pending_approval"
@@ -1874,6 +3301,26 @@ export type Database = {
         | "retainer"
         | "license"
       currency_code: "USD" | "EUR" | "GBP" | "CAD" | "AUD"
+      data_export_status:
+        | "requested"
+        | "processing"
+        | "completed"
+        | "failed"
+        | "expired"
+      file_scan_status: "pending" | "scanning" | "clean" | "infected" | "error"
+      lockout_reason:
+        | "failed_attempts"
+        | "security_violation"
+        | "admin_action"
+        | "suspicious_activity"
+      message_status:
+        | "draft"
+        | "sent"
+        | "delivered"
+        | "read"
+        | "failed"
+        | "bounced"
+      notification_type: "email" | "sms" | "push" | "in_app"
       opportunity_priority: "low" | "medium" | "high" | "critical"
       opportunity_status:
         | "identified"
@@ -1933,13 +3380,31 @@ export type Database = {
         | "completed"
         | "failed"
         | "retrying"
+      request_type:
+        | "access_request"
+        | "service_request"
+        | "change_request"
+        | "incident_report"
+        | "general_inquiry"
       response_status: "in_progress" | "completed" | "validated" | "flagged"
+      session_status: "active" | "expired" | "terminated" | "locked"
       signature_type:
         | "electronic"
         | "digital"
         | "wet_signature"
         | "api_signature"
       tenant_plan: "starter" | "professional" | "enterprise"
+      ticket_priority: "low" | "medium" | "high" | "urgent" | "critical"
+      ticket_status:
+        | "draft"
+        | "submitted"
+        | "in_review"
+        | "approved"
+        | "rejected"
+        | "in_progress"
+        | "pending_client"
+        | "resolved"
+        | "closed"
       user_role: "admin" | "manager" | "technician"
     }
     CompositeTypes: {
@@ -2070,6 +3535,25 @@ export const Constants = {
     Enums: {
       approval_status: ["pending", "approved", "rejected", "timeout"],
       assessment_status: ["draft", "active", "completed", "archived"],
+      auth_event_type: [
+        "login_success",
+        "login_failed",
+        "password_reset_requested",
+        "password_reset_completed",
+        "account_locked",
+        "account_unlocked",
+        "2fa_enabled",
+        "2fa_disabled",
+        "session_expired",
+      ],
+      booking_status: [
+        "requested",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "rescheduled",
+      ],
       contract_status: [
         "draft",
         "pending_approval",
@@ -2088,6 +3572,29 @@ export const Constants = {
         "license",
       ],
       currency_code: ["USD", "EUR", "GBP", "CAD", "AUD"],
+      data_export_status: [
+        "requested",
+        "processing",
+        "completed",
+        "failed",
+        "expired",
+      ],
+      file_scan_status: ["pending", "scanning", "clean", "infected", "error"],
+      lockout_reason: [
+        "failed_attempts",
+        "security_violation",
+        "admin_action",
+        "suspicious_activity",
+      ],
+      message_status: [
+        "draft",
+        "sent",
+        "delivered",
+        "read",
+        "failed",
+        "bounced",
+      ],
+      notification_type: ["email", "sms", "push", "in_app"],
       opportunity_priority: ["low", "medium", "high", "critical"],
       opportunity_status: [
         "identified",
@@ -2155,7 +3662,15 @@ export const Constants = {
         "failed",
         "retrying",
       ],
+      request_type: [
+        "access_request",
+        "service_request",
+        "change_request",
+        "incident_report",
+        "general_inquiry",
+      ],
       response_status: ["in_progress", "completed", "validated", "flagged"],
+      session_status: ["active", "expired", "terminated", "locked"],
       signature_type: [
         "electronic",
         "digital",
@@ -2163,6 +3678,18 @@ export const Constants = {
         "api_signature",
       ],
       tenant_plan: ["starter", "professional", "enterprise"],
+      ticket_priority: ["low", "medium", "high", "urgent", "critical"],
+      ticket_status: [
+        "draft",
+        "submitted",
+        "in_review",
+        "approved",
+        "rejected",
+        "in_progress",
+        "pending_client",
+        "resolved",
+        "closed",
+      ],
       user_role: ["admin", "manager", "technician"],
     },
   },
