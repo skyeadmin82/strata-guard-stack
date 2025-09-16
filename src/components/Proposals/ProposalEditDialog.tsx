@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { EnhancedProposalItemsManager } from './EnhancedProposalItemsManager';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -23,6 +24,7 @@ export const ProposalEditDialog: React.FC<ProposalEditDialogProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<Array<{id: string, name: string}>>([]);
+  const [proposalItems, setProposalItems] = useState<any[]>([]);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -41,6 +43,11 @@ export const ProposalEditDialog: React.FC<ProposalEditDialogProps> = ({
 
   useEffect(() => {
     if (proposal) {
+      // Convert tax_amount back to percentage if it exists
+      const taxPercentage = proposal.tax_amount && proposal.total_amount 
+        ? ((proposal.tax_amount / proposal.total_amount) * 100).toString()
+        : '';
+        
       setFormData({
         title: proposal.title || '',
         description: proposal.description || '',
@@ -48,14 +55,59 @@ export const ProposalEditDialog: React.FC<ProposalEditDialogProps> = ({
         status: proposal.status || 'draft',
         total_amount: proposal.total_amount?.toString() || '',
         currency: proposal.currency || 'USD',
-        tax_amount: proposal.tax_amount?.toString() || '',
+        tax_amount: taxPercentage, // This is now percentage
         discount_amount: proposal.discount_amount?.toString() || '',
         valid_until: proposal.valid_until ? proposal.valid_until.split('T')[0] : '',
         terms_and_conditions: proposal.terms_and_conditions || '',
         payment_terms: proposal.payment_terms || '',
       });
+      
+      // Fetch existing proposal items
+      fetchProposalItems();
     }
   }, [proposal]);
+
+  const fetchProposalItems = async () => {
+    if (!proposal?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('proposal_items')
+        .select('*')
+        .eq('proposal_id', proposal.id)
+        .order('item_order', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching proposal items:', error);
+        return;
+      }
+
+      const items = (data || []).map(item => ({
+        id: item.id,
+        item_order: item.item_order || 1,
+        item_type: item.item_type || 'product',
+        category: (item.metadata as any)?.category || '',
+        name: item.name || '',
+        description: item.description || '',
+        sku: (item.metadata as any)?.sku || undefined,
+        quantity: item.quantity || 1,
+        unit_price: parseFloat(String(item.unit_price || 0)),
+        discount_percent: parseFloat(String(item.discount_percent || 0)),
+        discount_amount: (item.metadata as any)?.discount_amount ? parseFloat(String((item.metadata as any).discount_amount)) : 0,
+        tax_percent: parseFloat(String(item.tax_percent || 0)),
+        total_price: parseFloat(String(item.total_price || 0)),
+        billing_cycle: (item.metadata as any)?.billing_cycle,
+        setup_fee: (item.metadata as any)?.setup_fee ? parseFloat(String((item.metadata as any).setup_fee)) : undefined,
+        renewal_price: (item.metadata as any)?.renewal_price ? parseFloat(String((item.metadata as any).renewal_price)) : undefined,
+        vendor: (item.metadata as any)?.vendor || undefined,
+        margin_percent: (item.metadata as any)?.margin_percent ? parseFloat(String((item.metadata as any).margin_percent)) : undefined
+      }));
+
+      setProposalItems(items);
+    } catch (error) {
+      console.error('Error fetching proposal items:', error);
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -91,8 +143,11 @@ export const ProposalEditDialog: React.FC<ProposalEditDialogProps> = ({
       setLoading(true);
 
       const totalAmount = parseFloat(formData.total_amount) || 0;
-      const taxAmount = parseFloat(formData.tax_amount) || 0;
+      const taxRate = parseFloat(formData.tax_amount) || 0; // This is now percentage
       const discountAmount = parseFloat(formData.discount_amount) || 0;
+      
+      // Calculate tax amount from percentage
+      const taxAmount = totalAmount * (taxRate / 100);
       const finalAmount = totalAmount + taxAmount - discountAmount;
 
       const updateData = {
@@ -118,6 +173,56 @@ export const ProposalEditDialog: React.FC<ProposalEditDialogProps> = ({
 
       if (error) throw error;
 
+      // Update proposal items if any changes were made
+      if (proposalItems.length > 0) {
+        // First, delete existing items
+        await supabase
+          .from('proposal_items')
+          .delete()
+          .eq('proposal_id', proposal.id);
+
+        // Then insert updated items
+        const { data: currentUser } = await supabase.auth.getUser();
+        const { data: userProfile } = await supabase
+          .from('users')
+          .select('tenant_id')
+          .eq('auth_user_id', currentUser.user?.id)
+          .single();
+
+        const itemsWithProposalId = proposalItems.map((item, index) => ({
+          tenant_id: userProfile?.tenant_id,
+          proposal_id: proposal.id,
+          item_order: index + 1,
+          item_type: item.item_type || 'product',
+          name: item.name || '',
+          description: item.description || '',
+          quantity: item.quantity || 1,
+          unit_price: item.unit_price || 0,
+          discount_percent: item.discount_percent || 0,
+          tax_percent: item.tax_percent || 0,
+          total_price: item.total_price || 0,
+          metadata: {
+            category: item.category,
+            sku: item.sku,
+            discount_amount: item.discount_amount,
+            billing_cycle: item.billing_cycle,
+            setup_fee: item.setup_fee,
+            renewal_price: item.renewal_price,
+            vendor: item.vendor,
+            margin_percent: item.margin_percent
+          },
+          created_at: new Date().toISOString(),
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('proposal_items')
+          .insert(itemsWithProposalId);
+
+        if (itemsError) {
+          console.warn('Failed to save proposal items:', itemsError);
+        }
+      }
+
       toast({
         title: 'Success',
         description: 'Proposal updated successfully',
@@ -141,12 +246,25 @@ export const ProposalEditDialog: React.FC<ProposalEditDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto" aria-describedby="edit-proposal-description">
         <DialogHeader>
-          <DialogTitle>Edit Proposal</DialogTitle>
+          <DialogTitle>Edit Proposal - Enhanced Features</DialogTitle>
+          <div id="edit-proposal-description" className="sr-only">
+            Edit proposal with enhanced features including items, pricing, and payment terms
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* ENHANCED FEATURES BANNER */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-semibold text-green-800">✨ Editing with Enhanced Features</span>
+            </div>
+            <p className="text-xs text-green-600">
+              • Manage line items • Percentage-based tax rates • Standard payment terms • Enhanced workflow
+            </p>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="title">Title *</Label>
@@ -236,14 +354,17 @@ export const ProposalEditDialog: React.FC<ProposalEditDialogProps> = ({
             </div>
             
             <div>
-              <Label htmlFor="tax_amount">Tax Amount</Label>
+              <Label htmlFor="tax_rate">Tax Rate (%) ✨ Enhanced</Label>
               <Input
-                id="tax_amount"
+                id="tax_rate"
                 type="number"
-                step="0.01"
+                step="0.1"
+                min="0"
+                max="100"
                 value={formData.tax_amount}
                 onChange={(e) => setFormData({ ...formData, tax_amount: e.target.value })}
-                placeholder="0.00"
+                placeholder="0.0"
+                className="border-green-200 focus:border-green-400"
               />
             </div>
             
@@ -282,13 +403,35 @@ export const ProposalEditDialog: React.FC<ProposalEditDialogProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="payment_terms">Payment Terms</Label>
-            <Input
-              id="payment_terms"
-              value={formData.payment_terms}
-              onChange={(e) => setFormData({ ...formData, payment_terms: e.target.value })}
-              placeholder="e.g., Net 30 days"
-            />
+            <Label htmlFor="payment_terms">Payment Terms ✨ Enhanced</Label>
+            <Select value={formData.payment_terms} onValueChange={(value) => setFormData({ ...formData, payment_terms: value })}>
+              <SelectTrigger className="border-green-200 focus:border-green-400">
+                <SelectValue placeholder="Select payment terms" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="due_on_receipt">Due on Receipt</SelectItem>
+                <SelectItem value="net_15">Net 15 Days</SelectItem>
+                <SelectItem value="net_30">Net 30 Days</SelectItem>
+                <SelectItem value="net_45">Net 45 Days</SelectItem>
+                <SelectItem value="net_60">Net 60 Days</SelectItem>
+                <SelectItem value="net_90">Net 90 Days</SelectItem>
+                <SelectItem value="50_50_split">50% Upfront, 50% on Completion</SelectItem>
+                <SelectItem value="monthly">Monthly Payments</SelectItem>
+                <SelectItem value="quarterly">Quarterly Payments</SelectItem>
+                <SelectItem value="custom">Custom Terms</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Enhanced Proposal Items Manager */}
+          <div className="border-2 border-dashed border-green-300 rounded-lg p-1 bg-gradient-to-r from-green-50 to-blue-50">
+            <div className="bg-white rounded-lg">
+              <EnhancedProposalItemsManager
+                items={proposalItems}
+                onItemsChange={setProposalItems}
+                currency={formData.currency}
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
