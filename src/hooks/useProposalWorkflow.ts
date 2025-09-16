@@ -147,7 +147,7 @@ export const useProposalWorkflow = () => {
           tenant_id: 'demo-tenant-id',
           error_type: 'approval_initiation_failed',
           error_message: error.message,
-          context: { proposal_id: proposalId, approval_config: approvalConfig }
+          context: { proposal_id: proposalId, approval_config: JSON.stringify(approvalConfig) } as any
         });
 
       toast({
@@ -420,7 +420,7 @@ export const useProposalWorkflow = () => {
       if (signatureError) throw signatureError;
 
       // Send signature request notification
-      await sendSignatureNotification(proposalId, signature, signatureRequest.custom_message);
+      await sendSignatureNotification(proposalId, signature as ProposalSignature, signatureRequest.custom_message);
 
       toast({
         title: "Signature Request Sent",

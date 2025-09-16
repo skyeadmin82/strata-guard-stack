@@ -260,7 +260,7 @@ export const usePaymentProcessor = () => {
 
       if (createError) throw createError;
 
-      setCurrentTransaction(transaction);
+      setCurrentTransaction(transaction as PaymentTransaction);
 
       // Process payment based on card type and demo mode
       if (validation.isDemo) {

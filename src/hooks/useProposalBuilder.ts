@@ -682,7 +682,7 @@ export const useProposalBuilder = () => {
         updated_at: undefined
       };
 
-      const result = await saveProposal(newProposal, originalItems);
+      const result = await saveProposal(newProposal as Proposal, originalItems as ProposalItem[]);
 
       if (result.success) {
         toast({
