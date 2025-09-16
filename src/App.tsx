@@ -28,7 +28,7 @@ import TestingPage from "./pages/TestingPage";
 import { EmailMarketingPage } from "./pages/EmailMarketingPage";
 import { FieldServicePage } from "./pages/FieldServicePage";
 import { FinancialManagementPage } from "./pages/FinancialManagementPage";
-import IntegrationsPage from "./pages/IntegrationsPage";
+import Integrations from "./pages/Integrations";
 import LaunchPage from "./pages/LaunchPage";
 import DatabaseDiagnosticPage from "./pages/DatabaseDiagnosticPage";
 import NotFound from "./pages/NotFound";
