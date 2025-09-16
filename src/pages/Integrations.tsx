@@ -27,11 +27,16 @@ import {
   CheckCircle
 } from 'lucide-react';
 
+// Import integration components
+import PSAMigration from '@/components/Integrations/PSAMigration';
+import { useIntegrations } from '@/hooks/useIntegrations';
+
 export default function Integrations() {
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
+  const { integrations: dbIntegrations, loading, connectIntegration, disconnectIntegration } = useIntegrations();
 
-  const integrations = [
+  const staticIntegrations = [
     // PSA Migration Tools
     {
       id: 'connectwise',
@@ -229,7 +234,7 @@ export default function Integrations() {
     }
   ];
 
-  const filteredIntegrations = integrations.filter(integration =>
+  const filteredIntegrations = staticIntegrations.filter(integration =>
     integration.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     integration.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -390,29 +395,7 @@ export default function Integrations() {
 
         {/* PSA Migration Tab */}
         <TabsContent value="migration">
-          <Card>
-            <CardHeader>
-              <CardTitle>PSA Migration Tools</CardTitle>
-              <CardDescription>
-                Migrate from existing PSA platforms with zero downtime
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 border rounded-lg">
-                  <h3 className="font-medium mb-2">Migration Benefits</h3>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Zero downtime - continue working while migrating</li>
-                    <li>• Data validation and mapping assistance</li>
-                    <li>• Automatic field matching with manual override</li>
-                    <li>• Full audit trail of migrated data</li>
-                    <li>• Rollback capability within 30 days</li>
-                  </ul>
-                </div>
-                <Button className="w-full">Start Migration Wizard</Button>
-              </div>
-            </CardContent>
-          </Card>
+          <PSAMigration />
         </TabsContent>
 
         {/* Financial Tab */}
