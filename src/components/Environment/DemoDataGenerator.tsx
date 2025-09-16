@@ -287,64 +287,71 @@ export const DemoDataGenerator: React.FC = () => {
   };
 
   const generateContracts = async (): Promise<void> => {
-    const { data: clients, error: clientsError } = await supabase
-      .from('clients')
-      .select('id, name, company_size');
-
-    if (clientsError) {
-      throw new Error(`Failed to fetch clients: ${clientsError.message}`);
-    }
-
-    const contractTypes = ['msp', 'project', 'support', 'consulting'];
-    const paymentTerms = ['net_15', 'net_30', 'net_60'];
-    
-    // Select 10 random active clients for contracts
-    const activeClients = clients?.slice(0, 10) || [];
-
-    for (let i = 0; i < activeClients.length; i++) {
-      const client = activeClients[i];
-      const contractType = contractTypes[Math.floor(Math.random() * contractTypes.length)];
-      const paymentTerm = paymentTerms[Math.floor(Math.random() * paymentTerms.length)];
+    try {
+      console.log('Starting contract generation...');
       
-      // Contract values based on company size
-      const baseValue = client.company_size === '1-10' ? 5000 : 
-                       client.company_size === '11-50' ? 15000 :
-                       client.company_size === '51-200' ? 50000 :
-                       client.company_size === '201-1000' ? 150000 : 300000;
-      
-      const totalValue = baseValue + (Math.random() * baseValue * 0.5);
-      
-      const startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - Math.floor(Math.random() * 12));
-      
-      const endDate = new Date(startDate);
-      endDate.setFullYear(endDate.getFullYear() + 1);
+      const { data: clients, error: clientsError } = await supabase
+        .from('clients')
+        .select('id, name');
 
-      const { error } = await supabase
-        .from('contracts')
-        .insert({
-          contract_number: `MSP-${new Date().getFullYear()}-${String(1000 + i).padStart(4, '0')}`,
-          title: `${contractType.toUpperCase()} Service Agreement - ${client.name}`,
-          description: `Comprehensive ${contractType} services contract for ${client.name}`,
-          contract_type: contractType as any,
-          status: 'active' as any,
-          total_value: Math.round(totalValue),
-          currency: 'USD' as any,
-          payment_terms: paymentTerm as any,
-          start_date: startDate.toISOString().split('T')[0],
-          end_date: endDate.toISOString().split('T')[0],
-          auto_renewal: Math.random() > 0.3,
-          approval_status: 'approved' as any,
-          client_id: client.id,
-          tenant_id: profile?.tenant_id
-        });
-
-      if (error) {
-        throw new Error(`Failed to create contract: ${error.message}`);
+      if (clientsError) {
+        console.error('Failed to fetch clients:', clientsError);
+        throw new Error(`Failed to fetch clients: ${clientsError.message}`);
       }
 
-      updateStepStatus('contracts', 'running', ((i + 1) / activeClients.length) * 100);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log(`Found ${clients?.length || 0} clients for contracts`);
+      
+      // Valid enum values from database
+      const contractTypes = ['service', 'maintenance', 'project', 'retainer', 'license'];
+      const contractStatuses = 'active'; // Use active status
+      const approvalStatuses = 'approved'; // Use approved status
+      
+      // Only try to create 3 contracts instead of 10
+      const activeClients = clients?.slice(0, 3) || [];
+      console.log(`Creating ${activeClients.length} contracts`);
+
+      for (let i = 0; i < activeClients.length; i++) {
+        const client = activeClients[i];
+        const contractType = contractTypes[i % contractTypes.length]; // Cycle through types
+        
+        const contractData = {
+          contract_number: `MSP-2025-${String(1001 + i).padStart(4, '0')}`,
+          title: `${contractType.charAt(0).toUpperCase() + contractType.slice(1)} Agreement - ${client.name}`,
+          description: `Professional ${contractType} contract for ${client.name}`,
+          contract_type: contractType as any,
+          status: contractStatuses as any,
+          total_value: 25000 + (i * 15000),
+          currency: 'USD' as any,
+          payment_terms: 'net_30' as any,
+          start_date: '2024-01-01',
+          end_date: '2024-12-31',
+          auto_renewal: true,
+          approval_status: approvalStatuses as any,
+          client_id: client.id,
+          tenant_id: profile?.tenant_id
+        };
+
+        console.log(`Creating contract ${i + 1} for client ${client.name}:`, contractData);
+
+        const { data, error } = await supabase
+          .from('contracts')
+          .insert(contractData)
+          .select();
+
+        if (error) {
+          console.error(`Contract creation failed:`, error);
+          throw new Error(`Failed to create contract: ${error.message}`);
+        }
+
+        console.log(`Successfully created contract:`, data);
+        updateStepStatus('contracts', 'running', ((i + 1) / activeClients.length) * 100);
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      
+      console.log('All contracts created successfully');
+    } catch (error) {
+      console.error('Contract generation failed:', error);
+      throw error;
     }
   };
 
