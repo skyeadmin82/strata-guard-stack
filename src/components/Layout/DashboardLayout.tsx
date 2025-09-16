@@ -21,14 +21,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           <MSPSidebar />
           <div className="flex-1 flex flex-col">
             {/* Header */}
-            <header className="h-14 border-b border-border bg-card flex items-center justify-between px-comfortable shadow-subtle enterprise-card">
-              <div className="flex items-center gap-comfortable">
+            <header className="h-14 border-b border-border bg-card flex items-center justify-between px-6 shadow-sm enterprise-card">
+              <div className="flex items-center gap-4">
                 <SidebarTrigger />
                 <h1 className="font-semibold text-foreground text-lg">
                   MSP Dashboard
                 </h1>
               </div>
-              <div className="flex items-center gap-comfortable">
+              <div className="flex items-center gap-4">
                 <EnvironmentSwitcher />
                 {profile && (
                   <div className="text-sm text-muted-foreground">
@@ -39,7 +39,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             </header>
 
             {/* Main Content */}
-            <main className="flex-1 p-spacious bg-secondary/20">
+            <main className="flex-1 p-8 bg-secondary/20">
               <ErrorBoundary>
                 {children}
               </ErrorBoundary>

@@ -142,18 +142,18 @@ All colors MUST be HSL.
 /* Enterprise Component Styles */
 @layer components {
   .enterprise-card {
-    @apply bg-card border border-border rounded-lg shadow-[var(--shadow-subtle-md)] p-[var(--spacing-comfortable)];
+    @apply bg-card border border-border rounded-lg shadow-md p-6;
   }
   
   .enterprise-button {
-    @apply transition-all duration-[var(--duration-normal)] shadow-[var(--shadow-subtle)];
+    @apply transition-all duration-300 shadow-sm;
   }
   
   .enterprise-button:hover {
-    @apply shadow-[var(--shadow-subtle-md)] transform translate-y-[-1px];
+    @apply shadow-md transform translate-y-[-1px];
   }
   
   .enterprise-input {
-    @apply transition-all duration-[var(--duration-fast)] focus:shadow-[var(--shadow-subtle-md)];
+    @apply transition-all duration-200 focus:shadow-md;
   }
 }
