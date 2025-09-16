@@ -30,6 +30,7 @@ import {
   ClipboardCheck,
   FileCheck,
   BarChart3,
+  Package,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -75,6 +76,11 @@ const navigationItems = [
     title: 'Proposals',
     url: '/proposals',
     icon: FileCheck,
+  },
+  {
+    title: 'Products & Services',
+    url: '/products-services',
+    icon: Package,
   },
   {
     title: 'Email Marketing',

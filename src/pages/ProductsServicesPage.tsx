@@ -21,7 +21,7 @@ import {
   Download, 
   Upload, 
   Settings, 
-  Sync,
+  RotateCcw,
   Edit,
   Trash2,
   DollarSign,
@@ -75,7 +75,7 @@ const ProductsServicesPage = () => {
     name: '',
     description: '',
     category: '',
-    item_type: 'product' as const,
+    item_type: 'product' as 'product' | 'service' | 'subscription' | 'bundle',
     sku: '',
     unit_price: '',
     cost_price: '',
@@ -105,19 +105,19 @@ const ProductsServicesPage = () => {
         name: item.name,
         description: item.description || '',
         category: item.category,
-        item_type: item.item_type,
+        item_type: item.item_type as ProductService['item_type'],
         sku: item.sku || '',
         unit_price: parseFloat(String(item.unit_price || '0')),
-        cost_price: item.cost_price ? parseFloat(String(item.cost_price)) : undefined,
+        cost_price: (item as any).cost_price ? parseFloat(String((item as any).cost_price)) : undefined,
         margin_percent: parseFloat(String(item.margin_percent || '0')),
         vendor: item.vendor || '',
         is_active: item.is_active !== false,
-        inventory_qty: item.inventory_qty || 0,
-        min_stock_level: item.min_stock_level || 0,
-        tax_code: item.tax_code || '',
-        qbo_item_id: item.qbo_item_id || '',
-        qbo_sync_status: item.qbo_sync_status || 'pending',
-        last_synced_at: item.last_synced_at || '',
+        inventory_qty: (item as any).inventory_qty || 0,
+        min_stock_level: (item as any).min_stock_level || 0,
+        tax_code: (item as any).tax_code || '',
+        qbo_item_id: (item as any).qbo_item_id || '',
+        qbo_sync_status: ((item as any).qbo_sync_status || 'pending') as ProductService['qbo_sync_status'],
+        last_synced_at: (item as any).last_synced_at || '',
         created_at: item.created_at,
         updated_at: item.updated_at
       }));
@@ -167,15 +167,10 @@ const ProductsServicesPage = () => {
           item_type: formData.item_type,
           sku: formData.sku,
           unit_price: unitPrice,
-          cost_price: costPrice || null,
           margin_percent: marginPercent,
           vendor: formData.vendor || null,
-          inventory_qty: parseInt(formData.inventory_qty) || 0,
-          min_stock_level: parseInt(formData.min_stock_level) || 0,
-          tax_code: formData.tax_code || null,
-          is_active: formData.is_active,
-          qbo_sync_status: 'pending'
-        });
+          is_active: formData.is_active
+        } as any);
 
       if (error) throw error;
 
@@ -214,16 +209,11 @@ const ProductsServicesPage = () => {
           item_type: formData.item_type,
           sku: formData.sku,
           unit_price: unitPrice,
-          cost_price: costPrice || null,
           margin_percent: marginPercent,
           vendor: formData.vendor || null,
-          inventory_qty: parseInt(formData.inventory_qty) || 0,
-          min_stock_level: parseInt(formData.min_stock_level) || 0,
-          tax_code: formData.tax_code || null,
           is_active: formData.is_active,
-          qbo_sync_status: 'pending',
           updated_at: new Date().toISOString()
-        })
+        } as any)
         .eq('id', editingItem.id);
 
       if (error) throw error;
@@ -394,7 +384,7 @@ const ProductsServicesPage = () => {
               {syncStatus === 'syncing' ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <Sync className="w-4 h-4 mr-2" />
+                <RotateCcw className="w-4 h-4 mr-2" />
               )}
               Sync QuickBooks
             </Button>
@@ -453,7 +443,7 @@ const ProductsServicesPage = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">QB Sync</CardTitle>
-              <Sync className="h-4 w-4 text-muted-foreground" />
+              <RotateCcw className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">

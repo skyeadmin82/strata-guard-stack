@@ -5811,14 +5811,21 @@ export type Database = {
       proposal_catalog: {
         Row: {
           category: string
+          cost_price: number | null
           created_at: string
           description: string | null
           id: string
+          inventory_qty: number | null
           is_active: boolean | null
           item_type: string
+          last_synced_at: string | null
           margin_percent: number | null
+          min_stock_level: number | null
           name: string
+          qbo_item_id: string | null
+          qbo_sync_status: string | null
           sku: string | null
+          tax_code: string | null
           tenant_id: string
           unit_price: number
           updated_at: string
@@ -5826,14 +5833,21 @@ export type Database = {
         }
         Insert: {
           category: string
+          cost_price?: number | null
           created_at?: string
           description?: string | null
           id?: string
+          inventory_qty?: number | null
           is_active?: boolean | null
           item_type: string
+          last_synced_at?: string | null
           margin_percent?: number | null
+          min_stock_level?: number | null
           name: string
+          qbo_item_id?: string | null
+          qbo_sync_status?: string | null
           sku?: string | null
+          tax_code?: string | null
           tenant_id: string
           unit_price?: number
           updated_at?: string
@@ -5841,14 +5855,21 @@ export type Database = {
         }
         Update: {
           category?: string
+          cost_price?: number | null
           created_at?: string
           description?: string | null
           id?: string
+          inventory_qty?: number | null
           is_active?: boolean | null
           item_type?: string
+          last_synced_at?: string | null
           margin_percent?: number | null
+          min_stock_level?: number | null
           name?: string
+          qbo_item_id?: string | null
+          qbo_sync_status?: string | null
           sku?: string | null
+          tax_code?: string | null
           tenant_id?: string
           unit_price?: number
           updated_at?: string
