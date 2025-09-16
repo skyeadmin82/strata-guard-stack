@@ -28,22 +28,50 @@ export const DemoDataGenerator: React.FC = () => {
   const [steps, setSteps] = useState<GenerationStep[]>([
     {
       id: 'clients',
-      label: 'Generate Clients',
-      description: 'Creating sample client companies with realistic data',
+      label: 'Generate Clients (23)',
+      description: 'Creating diverse client companies across various industries',
       progress: 0,
       status: 'pending'
     },
     {
       id: 'contacts',
-      label: 'Generate Contacts',
-      description: 'Adding contact persons for each client',
+      label: 'Generate Contacts (50+)',
+      description: 'Adding multiple contact persons for each client',
       progress: 0,
       status: 'pending'
     },
     {
-      id: 'relationships',
-      label: 'Link Data',
-      description: 'Establishing relationships between entities',
+      id: 'tickets',
+      label: 'Generate Tickets (50)',
+      description: 'Creating support tickets with varied statuses and priorities',
+      progress: 0,
+      status: 'pending'
+    },
+    {
+      id: 'contracts',
+      label: 'Generate Contracts (10)',
+      description: 'Creating active contracts with different values and terms',
+      progress: 0,
+      status: 'pending'
+    },
+    {
+      id: 'assessments',
+      label: 'Generate Assessments (5)',
+      description: 'Creating completed assessments with realistic scores',
+      progress: 0,
+      status: 'pending'
+    },
+    {
+      id: 'proposals',
+      label: 'Generate Proposals (3)',
+      description: 'Creating proposals in different stages',
+      progress: 0,
+      status: 'pending'
+    },
+    {
+      id: 'activity',
+      label: 'Generate Activity Data',
+      description: 'Creating historical data for trends over last 30 days',
       progress: 0,
       status: 'pending'
     }
@@ -63,59 +91,54 @@ export const DemoDataGenerator: React.FC = () => {
   };
 
   const generateClients = async (): Promise<void> => {
-    const sampleClients = [
-      {
-        name: 'TechCorp Solutions',
-        email: 'contact@techcorp.com',
-        phone: '+1-555-0101',
-        industry: 'Technology',
-        company_size: '50-200',
-        status: 'active',
-        website: 'https://techcorp.com',
-        address: {
-          street: '123 Tech Street',
-          city: 'San Francisco',
-          state: 'CA',
-          zipCode: '94105',
-          country: 'USA'
-        },
-        notes: 'Leading technology company focusing on cloud solutions'
-      },
-      {
-        name: 'Global Manufacturing Inc',
-        email: 'info@globalmfg.com',
-        phone: '+1-555-0102',
-        industry: 'Manufacturing',
-        company_size: '200-500',
-        status: 'active',
-        website: 'https://globalmfg.com',
-        address: {
-          street: '456 Industrial Ave',
-          city: 'Detroit',
-          state: 'MI',
-          zipCode: '48201',
-          country: 'USA'
-        },
-        notes: 'Automotive parts manufacturer with international presence'
-      },
-      {
-        name: 'Healthcare Plus',
-        email: 'admin@healthcareplus.com',
-        phone: '+1-555-0103',
-        industry: 'Healthcare',
-        company_size: '20-50',
-        status: 'active',
-        website: 'https://healthcareplus.com',
-        address: {
-          street: '789 Medical Center Dr',
-          city: 'Chicago',
-          state: 'IL',
-          zipCode: '60601',
-          country: 'USA'
-        },
-        notes: 'Regional healthcare provider with multiple clinics'
-      }
+    const industries = ['Technology', 'Healthcare', 'Manufacturing', 'Financial Services', 'Retail', 'Construction', 'Education', 'Legal', 'Real Estate', 'Hospitality'];
+    const companySizes = ['1-10', '11-50', '51-200', '201-1000', '1000+'];
+    const cities = [
+      { name: 'New York', state: 'NY', zip: '10001' },
+      { name: 'Los Angeles', state: 'CA', zip: '90001' },
+      { name: 'Chicago', state: 'IL', zip: '60601' },
+      { name: 'Houston', state: 'TX', zip: '77001' },
+      { name: 'Phoenix', state: 'AZ', zip: '85001' },
+      { name: 'Philadelphia', state: 'PA', zip: '19101' },
+      { name: 'San Antonio', state: 'TX', zip: '78201' },
+      { name: 'San Diego', state: 'CA', zip: '92101' },
+      { name: 'Dallas', state: 'TX', zip: '75201' },
+      { name: 'San Jose', state: 'CA', zip: '95101' }
     ];
+
+    const companyNames = [
+      'TechCorp Solutions', 'Global Manufacturing Inc', 'Healthcare Plus', 'DataFlow Systems',
+      'Pinnacle Construction', 'Metro Financial Group', 'EduTech Solutions', 'Retail Excellence',
+      'Legal Eagles LLP', 'PropTech Realty', 'Hospitality Masters', 'CloudFirst Technologies',
+      'MedDevice Innovations', 'Steel & Iron Works', 'Investment Partners', 'Style Retailers',
+      'BuildRight Construction', 'Academy Learning Systems', 'Justice & Associates',
+      'Urban Properties', 'Grand Hotels Group', 'AI Dynamics', 'Wellness Clinics Network'
+    ];
+
+    const sampleClients = companyNames.map((name, index) => {
+      const industry = industries[index % industries.length];
+      const city = cities[index % cities.length];
+      const companySize = companySizes[index % companySizes.length];
+      const domain = name.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 10);
+      
+      return {
+        name,
+        email: `contact@${domain}.com`,
+        phone: `+1-555-${String(1000 + index).padStart(4, '0')}`,
+        industry,
+        company_size: companySize,
+        status: Math.random() > 0.1 ? 'active' : (Math.random() > 0.5 ? 'prospect' : 'inactive'),
+        website: `https://${domain}.com`,
+        address: {
+          street: `${100 + index} ${industry} Street`,
+          city: city.name,
+          state: city.state,
+          zipCode: city.zip,
+          country: 'USA'
+        },
+        notes: `${industry} company with ${companySize} employees, established partner since ${2020 + (index % 4)}`
+      };
+    });
 
     for (let i = 0; i < sampleClients.length; i++) {
       const { error } = await supabase
@@ -130,14 +153,65 @@ export const DemoDataGenerator: React.FC = () => {
       }
 
       updateStepStatus('clients', 'running', ((i + 1) / sampleClients.length) * 100);
-      
-      // Simulate realistic generation time
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
   };
 
   const generateContacts = async (): Promise<void> => {
-    // First get the clients we just created
+    const { data: clients, error: clientsError } = await supabase
+      .from('clients')
+      .select('id, name, industry');
+
+    if (clientsError) {
+      throw new Error(`Failed to fetch clients: ${clientsError.message}`);
+    }
+
+    const firstNames = ['John', 'Sarah', 'Michael', 'Emma', 'David', 'Lisa', 'Robert', 'Jennifer', 'William', 'Amanda', 'James', 'Michelle', 'Christopher', 'Ashley', 'Daniel', 'Jessica', 'Matthew', 'Stephanie', 'Anthony', 'Melissa'];
+    const lastNames = ['Smith', 'Johnson', 'Brown', 'Davis', 'Miller', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Thompson', 'Garcia', 'Martinez', 'Robinson', 'Clark', 'Rodriguez'];
+    const titles = ['CEO', 'CTO', 'CFO', 'COO', 'VP Operations', 'IT Director', 'Operations Manager', 'Project Manager', 'Account Manager', 'Technical Lead'];
+    const departments = ['Executive', 'Technology', 'Operations', 'Finance', 'Sales', 'Marketing', 'Human Resources', 'Administration'];
+
+    let contactCount = 0;
+    const totalContacts = (clients?.length || 0) * 2.5; // Average 2-3 contacts per client
+
+    for (const client of clients || []) {
+      const numContacts = Math.floor(Math.random() * 3) + 2; // 2-4 contacts per client
+      
+      for (let i = 0; i < numContacts; i++) {
+        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+        const title = titles[Math.floor(Math.random() * titles.length)];
+        const department = departments[Math.floor(Math.random() * departments.length)];
+        const domain = client.name.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 10);
+
+        const { error } = await supabase
+          .from('contacts')
+          .insert({
+            first_name: firstName,
+            last_name: lastName,
+            email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${domain}.com`,
+            phone: `+1-555-${String(2000 + contactCount).padStart(4, '0')}`,
+            title,
+            department,
+            is_primary: i === 0,
+            is_active: Math.random() > 0.1,
+            notes: i === 0 ? 'Primary contact for all technical issues' : `${title} in ${department} department`,
+            client_id: client.id,
+            tenant_id: profile?.tenant_id
+          });
+
+        if (error) {
+          throw new Error(`Failed to create contact: ${error.message}`);
+        }
+
+        contactCount++;
+        updateStepStatus('contacts', 'running', (contactCount / totalContacts) * 100);
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+    }
+  };
+
+  const generateTickets = async (): Promise<void> => {
     const { data: clients, error: clientsError } = await supabase
       .from('clients')
       .select('id, name');
@@ -146,63 +220,284 @@ export const DemoDataGenerator: React.FC = () => {
       throw new Error(`Failed to fetch clients: ${clientsError.message}`);
     }
 
-    const sampleContacts = [
-      {
-        first_name: 'John',
-        last_name: 'Smith',
-        email: 'john.smith@techcorp.com',
-        phone: '+1-555-0201',
-        title: 'CTO',
-        department: 'Technology',
-        is_primary: true,
-        notes: 'Primary technical contact'
-      },
-      {
-        first_name: 'Sarah',
-        last_name: 'Johnson',
-        email: 'sarah.johnson@globalmfg.com',
-        phone: '+1-555-0202',
-        title: 'Operations Manager',
-        department: 'Operations',
-        is_primary: true,
-        notes: 'Handles day-to-day operations'
-      },
-      {
-        first_name: 'Dr. Michael',
-        last_name: 'Brown',
-        email: 'michael.brown@healthcareplus.com',
-        phone: '+1-555-0203',
-        title: 'Medical Director',
-        department: 'Administration',
-        is_primary: true,
-        notes: 'Primary medical decision maker'
-      }
+    const { data: contacts, error: contactsError } = await supabase
+      .from('contacts')
+      .select('id, client_id, first_name, last_name');
+
+    if (contactsError) {
+      throw new Error(`Failed to fetch contacts: ${contactsError.message}`);
+    }
+
+    const ticketTitles = [
+      'Server Performance Issues', 'Email System Down', 'Network Connectivity Problems', 'Software License Renewal',
+      'Backup System Failure', 'Printer Configuration', 'VPN Access Request', 'Password Reset Required',
+      'Database Optimization Needed', 'Security Audit Request', 'New User Setup', 'Hardware Replacement',
+      'Application Error', 'File Server Access', 'Firewall Configuration', 'Mobile Device Setup',
+      'Cloud Storage Issues', 'Video Conferencing Problems', 'Website Maintenance', 'System Updates Required'
     ];
 
-    for (let i = 0; i < sampleContacts.length; i++) {
-      if (clients && clients[i]) {
-        const { error } = await supabase
-          .from('contacts')
-          .insert({
-            ...sampleContacts[i],
-            client_id: clients[i].id,
-            tenant_id: profile?.tenant_id
-          });
+    const priorities = ['low', 'medium', 'high', 'critical'];
+    const statuses = ['open', 'in_progress', 'waiting', 'resolved', 'closed'];
+    const categories = ['hardware', 'software', 'network', 'security', 'other'];
 
-        if (error) {
-          throw new Error(`Failed to create contact: ${error.message}`);
-        }
+    const tickets = [];
+    for (let i = 0; i < 50; i++) {
+      const client = clients?.[Math.floor(Math.random() * (clients?.length || 1))];
+      const clientContacts = contacts?.filter(c => c.client_id === client?.id) || [];
+      const contact = clientContacts[Math.floor(Math.random() * clientContacts.length)];
+      const title = ticketTitles[Math.floor(Math.random() * ticketTitles.length)];
+      const priority = priorities[Math.floor(Math.random() * priorities.length)];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      const category = categories[Math.floor(Math.random() * categories.length)];
+      
+      // Create tickets spread over last 30 days
+      const daysAgo = Math.floor(Math.random() * 30);
+      const createdAt = new Date();
+      createdAt.setDate(createdAt.getDate() - daysAgo);
 
-        updateStepStatus('contacts', 'running', ((i + 1) / sampleContacts.length) * 100);
-        await new Promise(resolve => setTimeout(resolve, 300));
+      tickets.push({
+        title: `${title} - ${client?.name || 'Unknown'}`,
+        description: `${category} issue reported by ${contact?.first_name} ${contact?.last_name}. Requires immediate attention to resolve ${title.toLowerCase()}.`,
+        priority,
+        status,
+        category,
+        estimated_hours: Math.floor(Math.random() * 8) + 1,
+        actual_hours: status === 'resolved' || status === 'closed' ? Math.floor(Math.random() * 10) + 1 : null,
+        created_at: createdAt.toISOString(),
+        due_date: status === 'closed' || status === 'resolved' ? null : new Date(Date.now() + Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        resolved_at: status === 'resolved' || status === 'closed' ? new Date(createdAt.getTime() + Math.random() * 5 * 24 * 60 * 60 * 1000).toISOString() : null,
+        client_id: client?.id,
+        contact_id: contact?.id,
+        tenant_id: profile?.tenant_id
+      });
+    }
+
+    for (let i = 0; i < tickets.length; i++) {
+      const { error } = await supabase
+        .from('support_tickets')
+        .insert(tickets[i]);
+
+      if (error) {
+        throw new Error(`Failed to create ticket: ${error.message}`);
       }
+
+      updateStepStatus('tickets', 'running', ((i + 1) / tickets.length) * 100);
+      await new Promise(resolve => setTimeout(resolve, 50));
     }
   };
 
-  const linkData = async (): Promise<void> => {
-    updateStepStatus('relationships', 'running', 50);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    updateStepStatus('relationships', 'running', 100);
+  const generateContracts = async (): Promise<void> => {
+    const { data: clients, error: clientsError } = await supabase
+      .from('clients')
+      .select('id, name, company_size');
+
+    if (clientsError) {
+      throw new Error(`Failed to fetch clients: ${clientsError.message}`);
+    }
+
+    const contractTypes = ['msp', 'project', 'support', 'consulting'];
+    const paymentTerms = ['net_15', 'net_30', 'net_60'];
+    
+    // Select 10 random active clients for contracts
+    const activeClients = clients?.slice(0, 10) || [];
+
+    for (let i = 0; i < activeClients.length; i++) {
+      const client = activeClients[i];
+      const contractType = contractTypes[Math.floor(Math.random() * contractTypes.length)];
+      const paymentTerm = paymentTerms[Math.floor(Math.random() * paymentTerms.length)];
+      
+      // Contract values based on company size
+      const baseValue = client.company_size === '1-10' ? 5000 : 
+                       client.company_size === '11-50' ? 15000 :
+                       client.company_size === '51-200' ? 50000 :
+                       client.company_size === '201-1000' ? 150000 : 300000;
+      
+      const totalValue = baseValue + (Math.random() * baseValue * 0.5);
+      
+      const startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - Math.floor(Math.random() * 12));
+      
+      const endDate = new Date(startDate);
+      endDate.setFullYear(endDate.getFullYear() + 1);
+
+      const { error } = await supabase
+        .from('contracts')
+        .insert({
+          contract_number: `MSP-${new Date().getFullYear()}-${String(1000 + i).padStart(4, '0')}`,
+          title: `${contractType.toUpperCase()} Service Agreement - ${client.name}`,
+          description: `Comprehensive ${contractType} services contract for ${client.name}`,
+          contract_type: contractType as any,
+          status: 'active' as any,
+          total_value: Math.round(totalValue),
+          currency: 'USD' as any,
+          payment_terms: paymentTerm as any,
+          start_date: startDate.toISOString().split('T')[0],
+          end_date: endDate.toISOString().split('T')[0],
+          auto_renewal: Math.random() > 0.3,
+          approval_status: 'approved' as any,
+          client_id: client.id,
+          tenant_id: profile?.tenant_id
+        });
+
+      if (error) {
+        throw new Error(`Failed to create contract: ${error.message}`);
+      }
+
+      updateStepStatus('contracts', 'running', ((i + 1) / activeClients.length) * 100);
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  };
+
+  const generateAssessments = async (): Promise<void> => {
+    const { data: clients, error: clientsError } = await supabase
+      .from('clients')
+      .select('id, name');
+
+    if (clientsError) {
+      throw new Error(`Failed to fetch clients: ${clientsError.message}`);
+    }
+
+    const { data: templates, error: templatesError } = await supabase
+      .from('assessment_templates')
+      .select('id, name');
+
+    if (templatesError) {
+      throw new Error(`Failed to fetch assessment templates: ${templatesError.message}`);
+    }
+
+    // Select 5 clients for completed assessments
+    const selectedClients = clients?.slice(0, 5) || [];
+    const template = templates?.[0];
+
+    if (!template) {
+      throw new Error('No assessment template available');
+    }
+
+    for (let i = 0; i < selectedClients.length; i++) {
+      const client = selectedClients[i];
+      const overallScore = Math.floor(Math.random() * 40) + 60; // 60-100 score range
+      
+      const completedAt = new Date();
+      completedAt.setDate(completedAt.getDate() - Math.floor(Math.random() * 15));
+
+      const { error } = await supabase
+        .from('assessments')
+        .insert({
+          client_id: client.id,
+          template_id: template.id,
+          status: 'completed',
+          total_score: overallScore,
+          max_possible_score: 100,
+          percentage_score: overallScore,
+          started_at: new Date(completedAt.getTime() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours earlier
+          completed_at: completedAt.toISOString(),
+          tenant_id: profile?.tenant_id
+        });
+
+      if (error) {
+        throw new Error(`Failed to create assessment: ${error.message}`);
+      }
+
+      updateStepStatus('assessments', 'running', ((i + 1) / selectedClients.length) * 100);
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+  };
+
+  const generateProposals = async (): Promise<void> => {
+    const { data: clients, error: clientsError } = await supabase
+      .from('clients')
+      .select('id, name');
+
+    if (clientsError) {
+      throw new Error(`Failed to fetch clients: ${clientsError.message}`);
+    }
+
+    const proposalStatuses = ['sent', 'viewed', 'pending_approval'];
+    const selectedClients = clients?.slice(0, 3) || [];
+
+    for (let i = 0; i < selectedClients.length; i++) {
+      const client = selectedClients[i];
+      const status = proposalStatuses[i];
+      const totalAmount = Math.floor(Math.random() * 50000) + 10000;
+      
+      const createdDate = new Date();
+      createdDate.setDate(createdDate.getDate() - Math.floor(Math.random() * 10));
+
+      const { error } = await supabase
+        .from('proposals')
+        .insert({
+          proposal_number: `PROP-${new Date().getFullYear()}-${String(100 + i).padStart(3, '0')}`,
+          title: `IT Infrastructure Upgrade Proposal - ${client.name}`,
+          description: `Comprehensive IT infrastructure upgrade and modernization proposal for ${client.name}`,
+          status: status as any,
+          total_amount: totalAmount,
+          currency: 'USD' as any,
+          tax_amount: Math.round(totalAmount * 0.08),
+          discount_amount: Math.round(totalAmount * 0.05),
+          final_amount: Math.round(totalAmount * 1.03),
+          valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          created_date: createdDate.toISOString().split('T')[0],
+          sent_date: status !== 'draft' ? createdDate.toISOString() : null,
+          viewed_date: status === 'viewed' ? new Date(createdDate.getTime() + 24 * 60 * 60 * 1000).toISOString() : null,
+          view_count: status === 'viewed' ? Math.floor(Math.random() * 5) + 1 : 0,
+          tracking_pixel_id: crypto.randomUUID(),
+          validation_errors: [],
+          generation_errors: [],
+          delivery_errors: [],
+          client_id: client.id,
+          tenant_id: profile?.tenant_id
+        });
+
+      if (error) {
+        throw new Error(`Failed to create proposal: ${error.message}`);
+      }
+
+      updateStepStatus('proposals', 'running', ((i + 1) / selectedClients.length) * 100);
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+  };
+
+  const generateActivityData = async (): Promise<void> => {
+    // Generate historical user activity logs
+    const activities = [];
+    
+    for (let i = 0; i < 30; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      
+      // Generate 5-15 activities per day
+      const activitiesPerDay = Math.floor(Math.random() * 10) + 5;
+      
+      for (let j = 0; j < activitiesPerDay; j++) {
+        const activityDate = new Date(date);
+        activityDate.setHours(Math.floor(Math.random() * 24), Math.floor(Math.random() * 60));
+        
+        activities.push({
+          action: ['login', 'view_client', 'create_ticket', 'update_contract', 'run_assessment'][Math.floor(Math.random() * 5)],
+          resource_type: ['user', 'client', 'ticket', 'contract', 'assessment'][Math.floor(Math.random() * 5)],
+          created_at: activityDate.toISOString(),
+          tenant_id: profile?.tenant_id,
+          user_id: profile?.id
+        });
+      }
+    }
+
+    // Insert in batches of 50
+    for (let i = 0; i < activities.length; i += 50) {
+      const batch = activities.slice(i, i + 50);
+      
+      const { error } = await supabase
+        .from('user_activity_logs')
+        .insert(batch);
+
+      if (error) {
+        // Don't fail if activity logs table doesn't exist
+        console.warn('Failed to create activity logs:', error.message);
+      }
+
+      updateStepStatus('activity', 'running', ((i + 50) / activities.length) * 100);
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
   };
 
   const generateDemoData = async (): Promise<void> => {
@@ -227,14 +522,34 @@ export const DemoDataGenerator: React.FC = () => {
       await generateContacts();
       updateStepStatus('contacts', 'completed', 100);
 
-      // Step 3: Link Data
-      updateStepStatus('relationships', 'running');
-      await linkData();
-      updateStepStatus('relationships', 'completed', 100);
+      // Step 3: Generate Tickets
+      updateStepStatus('tickets', 'running');
+      await generateTickets();
+      updateStepStatus('tickets', 'completed', 100);
+
+      // Step 4: Generate Contracts
+      updateStepStatus('contracts', 'running');
+      await generateContracts();
+      updateStepStatus('contracts', 'completed', 100);
+
+      // Step 5: Generate Assessments
+      updateStepStatus('assessments', 'running');
+      await generateAssessments();
+      updateStepStatus('assessments', 'completed', 100);
+
+      // Step 6: Generate Proposals
+      updateStepStatus('proposals', 'running');
+      await generateProposals();
+      updateStepStatus('proposals', 'completed', 100);
+
+      // Step 7: Generate Activity Data
+      updateStepStatus('activity', 'running');
+      await generateActivityData();
+      updateStepStatus('activity', 'completed', 100);
 
       toast({
-        title: "Demo Data Generated",
-        description: "Sample data has been successfully created for testing",
+        title: "Demo Data Generated Successfully!",
+        description: "Generated 23 clients, 50+ contacts, 50 tickets, 10 contracts, 5 assessments, and 3 proposals with 30 days of activity data",
       });
 
     } catch (error) {
@@ -268,15 +583,18 @@ export const DemoDataGenerator: React.FC = () => {
     try {
       setIsGenerating(true);
       
-      // Delete all contacts first (foreign key dependency)
+      // Delete in reverse order of dependencies
+      await supabase.from('user_activity_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('proposals').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('assessments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('contracts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('support_tickets').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       await supabase.from('contacts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      
-      // Then delete all clients
       await supabase.from('clients').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
       toast({
         title: "Demo Data Reset",
-        description: "All sample data has been cleared",
+        description: "All sample data has been cleared successfully",
       });
 
       // Reset steps
