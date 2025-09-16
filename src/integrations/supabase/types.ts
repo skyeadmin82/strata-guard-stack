@@ -14,16 +14,160 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      error_logs: {
+        Row: {
+          context: Json | null
+          created_at: string
+          environment: string
+          error_message: string
+          error_stack: string | null
+          error_type: string
+          id: string
+          tenant_id: string | null
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          environment?: string
+          error_message: string
+          error_stack?: string | null
+          error_type: string
+          id?: string
+          tenant_id?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          environment?: string
+          error_message?: string
+          error_stack?: string | null
+          error_type?: string
+          id?: string
+          tenant_id?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "error_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "error_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          plan: Database["public"]["Enums"]["tenant_plan"]
+          settings: Json | null
+          subdomain: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          plan?: Database["public"]["Enums"]["tenant_plan"]
+          settings?: Json | null
+          subdomain: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          plan?: Database["public"]["Enums"]["tenant_plan"]
+          settings?: Json | null
+          subdomain?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          auth_user_id: string
+          avatar_url: string | null
+          created_at: string
+          email: string
+          first_name: string | null
+          id: string
+          is_active: boolean
+          last_name: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          auth_user_id: string
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          first_name?: string | null
+          id?: string
+          is_active?: boolean
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          auth_user_id?: string
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          id?: string
+          is_active?: boolean
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_current_user_tenant_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      user_has_role: {
+        Args: { _role: Database["public"]["Enums"]["user_role"] }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      tenant_plan: "starter" | "professional" | "enterprise"
+      user_role: "admin" | "manager" | "technician"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +294,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      tenant_plan: ["starter", "professional", "enterprise"],
+      user_role: ["admin", "manager", "technician"],
+    },
   },
 } as const

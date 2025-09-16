@@ -6,6 +6,21 @@
 All colors MUST be HSL.
 */
 
+/* Environment indicator colors */
+:root {
+  --demo-env: 25 95% 53%; /* Orange */
+  --production-env: 142 76% 36%; /* Green */
+  --warning: 38 92% 50%; /* Amber */
+  --success: 142 76% 36%; /* Green */
+}
+
+.dark {
+  --demo-env: 25 95% 53%;
+  --production-env: 142 76% 36%;
+  --warning: 38 92% 50%;
+  --success: 142 76% 36%;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
