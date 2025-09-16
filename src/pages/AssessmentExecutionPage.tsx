@@ -166,18 +166,41 @@ export const AssessmentExecutionPage = () => {
         throw new Error('Failed to get user profile');
       }
 
-      const { error } = await supabase
+      // First, try to update existing response
+      const { data: existingResponse } = await supabase
         .from('assessment_responses')
-        .upsert({
-          tenant_id: userProfile.tenant_id,
-          assessment_id: assessmentId!,
-          question_id: questionId,
-          response_value: value.toString(),
-          score: score,
-          response_data: { selectedValue: value }
-        });
+        .select('id')
+        .eq('assessment_id', assessmentId!)
+        .eq('question_id', questionId)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (existingResponse) {
+        // Update existing response
+        const { error } = await supabase
+          .from('assessment_responses')
+          .update({
+            response_value: value.toString(),
+            score: score,
+            response_data: { selectedValue: value }
+          })
+          .eq('id', existingResponse.id);
+
+        if (error) throw error;
+      } else {
+        // Insert new response
+        const { error } = await supabase
+          .from('assessment_responses')
+          .insert({
+            tenant_id: userProfile.tenant_id,
+            assessment_id: assessmentId!,
+            question_id: questionId,
+            response_value: value.toString(),
+            score: score,
+            response_data: { selectedValue: value }
+          });
+
+        if (error) throw error;
+      }
 
       // Update local state
       setResponses(prev => ({

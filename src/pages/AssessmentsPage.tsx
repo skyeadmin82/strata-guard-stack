@@ -18,6 +18,8 @@ import { AssessmentComparison } from '@/components/Assessments/AssessmentCompari
 import { ActionItemsManager } from '@/components/Assessments/ActionItemsManager';
 import { AssessmentDetailDialog } from '@/components/Assessments/AssessmentDetailDialog';
 import { AssessmentCreateDialog } from '@/components/Assessments/AssessmentCreateDialog';
+import { AssessmentTemplateBuilder } from '@/components/Assessments/AssessmentTemplateBuilder';
+import { AssessmentAnalytics } from '@/components/Assessments/AssessmentAnalytics';
 import { Assessment } from '@/types/database';
 import { 
   Search, 
@@ -47,6 +49,7 @@ export const AssessmentsPage = () => {
   const [showSchedulingDialog, setShowSchedulingDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [showTemplateBuilder, setShowTemplateBuilder] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState<AssessmentWithRelations | null>(null);
   const [clients, setClients] = useState<Array<{id: string, name: string}>>([]);
   const [templates, setTemplates] = useState<Array<{id: string, name: string, category?: string}>>([]);
@@ -193,6 +196,10 @@ export const AssessmentsPage = () => {
             <p className="text-muted-foreground">Monitor client assessments and scores</p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowTemplateBuilder(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              New Template
+            </Button>
             <Button variant="outline" onClick={() => setShowSchedulingDialog(true)}>
               <Calendar className="w-4 h-4 mr-2" />
               Schedule
@@ -454,38 +461,27 @@ export const AssessmentsPage = () => {
           <TabsContent value="reports">
             <Card>
               <CardHeader>
-                <CardTitle>Assessment Reports</CardTitle>
+                <CardTitle>Assessment Reports & Analytics</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredAssessments.map((assessment) => (
-                    <Card key={assessment.id} className="p-4">
-                      <div className="space-y-3">
-                        <div>
-                          <h4 className="font-medium">{assessment.clients?.name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {assessment.assessment_templates?.name}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleGeneratePDFReport(assessment.id)}
-                            disabled={isGenerating || isExporting}
-                          >
-                            <FileText className="w-4 h-4 mr-1" />
-                            {isGenerating ? 'Generating...' : 'PDF Report'}
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                <AssessmentAnalytics />
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Template Builder Dialog */}
+        <AssessmentTemplateBuilder
+          open={showTemplateBuilder}
+          onOpenChange={setShowTemplateBuilder}
+          onSaved={() => {
+            fetchAssessments();
+            toast({
+              title: "Template Created",
+              description: "Assessment template has been created successfully.",
+            });
+          }}
+        />
 
         {/* Create Assessment Dialog */}
         <AssessmentCreateDialog
