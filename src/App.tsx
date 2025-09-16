@@ -5,7 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { EnvironmentProvider } from "@/contexts/EnvironmentContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorRecoveryProvider } from "@/components/ErrorRecovery/ErrorRecoveryProvider";
+import { SessionTimeoutWarning } from "@/components/ErrorRecovery/SessionTimeoutWarning";
 import Index from "./pages/Index";
 import { AuthPage } from "./pages/AuthPage";
 import { ClientsPage } from "./pages/ClientsPage";
@@ -24,7 +25,7 @@ const App = () => {
   }), []);
 
   return (
-    <ErrorBoundary>
+    <ErrorRecoveryProvider>
       <QueryClientProvider client={queryClient}>
         <EnvironmentProvider>
           <AuthProvider>
@@ -32,6 +33,7 @@ const App = () => {
               <BrowserRouter>
                 <Toaster />
                 <Sonner />
+                <SessionTimeoutWarning />
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<AuthPage />} />
@@ -44,7 +46,7 @@ const App = () => {
           </AuthProvider>
         </EnvironmentProvider>
       </QueryClientProvider>
-    </ErrorBoundary>
+    </ErrorRecoveryProvider>
   );
 };
 
