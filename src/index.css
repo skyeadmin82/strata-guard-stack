@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Enterprise Design System - All colors, gradients, fonts, shadows, etc defined here. 
 All colors MUST be HSL.
 */
 
@@ -12,6 +12,32 @@ All colors MUST be HSL.
   --production-env: 142 76% 36%; /* Green */
   --warning: 38 92% 50%; /* Amber */
   --success: 142 76% 36%; /* Green */
+  
+  /* Enterprise Theme Colors - Indigo Primary */
+  --enterprise-primary: 243 79% 57%; /* #4F46E5 Indigo */
+  --enterprise-primary-light: 243 79% 67%;
+  --enterprise-primary-dark: 243 79% 47%;
+  --enterprise-secondary: 220 14% 96%;
+  --enterprise-accent: 217 91% 60%;
+  
+  /* Enterprise Shadows - Subtle */
+  --shadow-subtle: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-subtle-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-subtle-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-subtle-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  
+  /* Enterprise Border Radius */
+  --radius-enterprise: 0.5rem; /* 8px rounded-lg */
+  
+  /* Enterprise Animation Timings */
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  
+  /* Enterprise Spacing - Comfortable */
+  --spacing-tight: 0.5rem;
+  --spacing-comfortable: 1rem;
+  --spacing-spacious: 1.5rem;
 }
 
 .dark {
@@ -32,42 +58,35 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 243 79% 57%; /* Enterprise Indigo */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 14% 96%; /* Enterprise Secondary */
+    --secondary-foreground: 222.2 84% 4.9%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 220 14% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 217 91% 60%; /* Enterprise Accent */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 243 79% 57%; /* Match primary */
 
-    --radius: 0.5rem;
+    --radius: var(--radius-enterprise);
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
+    --sidebar-primary: 243 79% 57%; /* Enterprise Primary */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 222.2 84% 4.9%;
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 243 79% 57%; /* Enterprise Primary */
   }
 
   .dark {
@@ -80,8 +99,8 @@ All colors MUST be HSL.
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 243 79% 67%; /* Lighter indigo for dark mode */
+    --primary-foreground: 222.2 84% 4.9%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -89,23 +108,24 @@ All colors MUST be HSL.
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 217 91% 70%; /* Brighter accent for dark mode */
+    --accent-foreground: 222.2 84% 4.9%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 243 79% 67%; /* Match primary */
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary: 243 79% 67%; /* Enterprise Primary for dark */
+    --sidebar-primary-foreground: 222.2 84% 4.9%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 243 79% 67%; /* Enterprise Primary for dark */
   }
 }
 
@@ -116,5 +136,24 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Enterprise Component Styles */
+@layer components {
+  .enterprise-card {
+    @apply bg-card border border-border rounded-lg shadow-[var(--shadow-subtle-md)] p-[var(--spacing-comfortable)];
+  }
+  
+  .enterprise-button {
+    @apply transition-all duration-[var(--duration-normal)] shadow-[var(--shadow-subtle)];
+  }
+  
+  .enterprise-button:hover {
+    @apply shadow-[var(--shadow-subtle-md)] transform translate-y-[-1px];
+  }
+  
+  .enterprise-input {
+    @apply transition-all duration-[var(--duration-fast)] focus:shadow-[var(--shadow-subtle-md)];
   }
 }

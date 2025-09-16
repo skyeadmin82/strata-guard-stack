@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { EnvironmentProvider } from "@/contexts/EnvironmentContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ErrorRecoveryProvider } from "@/components/ErrorRecovery/ErrorRecoveryProvider";
 import { SessionTimeoutWarning } from "@/components/ErrorRecovery/SessionTimeoutWarning";
 import Index from "./pages/Index";
@@ -37,37 +38,39 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <EnvironmentProvider>
-        <AuthProvider>
-          <ErrorRecoveryProvider>
-            <TooltipProvider>
-              <BrowserRouter>
-                <Toaster />
-                <Sonner />
-                <SessionTimeoutWarning />
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/clients" element={<ClientsPage />} />
-                  <Route path="/users" element={<UsersPage />} />
-                  <Route path="/tickets" element={<TicketsPage />} />
-                  <Route path="/monitoring" element={<MonitoringPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                  <Route path="/help" element={<HelpPage />} />
-                  <Route path="/testing" element={<TestingPage />} />
-                  <Route path="/launch" element={<LaunchPage />} />
-                  <Route path="/integrations" element={<IntegrationsPage />} />
-                  <Route path="/email" element={<EmailMarketingPage />} />
-                  <Route path="/field-service" element={<FieldServicePage />} />
-                  <Route path="/financial" element={<FinancialManagementPage />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </ErrorRecoveryProvider>
-        </AuthProvider>
-      </EnvironmentProvider>
+      <ThemeProvider>
+        <EnvironmentProvider>
+          <AuthProvider>
+            <ErrorRecoveryProvider>
+              <TooltipProvider>
+                <BrowserRouter>
+                  <Toaster />
+                  <Sonner />
+                  <SessionTimeoutWarning />
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/clients" element={<ClientsPage />} />
+                    <Route path="/users" element={<UsersPage />} />
+                    <Route path="/tickets" element={<TicketsPage />} />
+                    <Route path="/monitoring" element={<MonitoringPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/help" element={<HelpPage />} />
+                    <Route path="/testing" element={<TestingPage />} />
+                    <Route path="/launch" element={<LaunchPage />} />
+                    <Route path="/integrations" element={<IntegrationsPage />} />
+                    <Route path="/email" element={<EmailMarketingPage />} />
+                    <Route path="/field-service" element={<FieldServicePage />} />
+                    <Route path="/financial" element={<FinancialManagementPage />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </TooltipProvider>
+            </ErrorRecoveryProvider>
+          </AuthProvider>
+        </EnvironmentProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 };

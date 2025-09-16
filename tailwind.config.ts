@@ -57,6 +57,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        enterprise: {
+          primary: "hsl(var(--enterprise-primary))",
+          "primary-light": "hsl(var(--enterprise-primary-light))",
+          "primary-dark": "hsl(var(--enterprise-primary-dark))",
+          secondary: "hsl(var(--enterprise-secondary))",
+          accent: "hsl(var(--enterprise-accent))",
+        },
+        shadow: {
+          subtle: "var(--shadow-subtle)",
+          "subtle-md": "var(--shadow-subtle-md)",
+          "subtle-lg": "var(--shadow-subtle-lg)",
+          "subtle-xl": "var(--shadow-subtle-xl)",
+        },
         demo: "hsl(var(--demo-env))",
         production: "hsl(var(--production-env))",
         warning: "hsl(var(--warning))",
@@ -88,6 +101,16 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      transitionDuration: {
+        'fast': '200ms',
+        'normal': '300ms',
+        'slow': '500ms',
+      },
+      spacing: {
+        'tight': '0.5rem',
+        'comfortable': '1rem',
+        'spacious': '1.5rem',
       },
     },
   },
