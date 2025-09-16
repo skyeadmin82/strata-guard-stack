@@ -35,12 +35,59 @@ export const SettingsPage: React.FC = () => {
   const [showApiKey, setShowApiKey] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
 
-  const handleSaveUserSettings = async (category: string, settings: any) => {
+  const handleSaveUserSettings = async (category: string, formData: FormData) => {
+    const settings = Object.fromEntries(formData.entries());
     await saveUserSettings(category as any, settings);
   };
 
-  const handleSaveCompanySettings = async (category: string, settings: any) => {
+  const handleSaveCompanySettings = async (category: string, formData: FormData) => {
+    const settings = Object.fromEntries(formData.entries());
     await saveCompanySettings(category as any, settings);
+  };
+
+  const handleProfileSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const preferences = {
+      theme: formData.get('theme'),
+      timezone: formData.get('timezone'),
+      date_format: formData.get('dateFormat'),
+      time_format: formData.get('timeFormat')
+    };
+    
+    await saveUserSettings('preferences', preferences);
+  };
+
+  const handleNotificationSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const notifications = {
+      email_enabled: formData.has('email_enabled'),
+      ticket_updates: formData.has('ticket_updates'),
+      client_updates: formData.has('client_updates'),
+      system_alerts: formData.has('system_alerts'),
+      marketing: formData.has('marketing'),
+      frequency: formData.get('frequency')
+    };
+    
+    await saveUserSettings('notifications', notifications);
+  };
+
+  const handleCompanySave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const general = {
+      company_name: formData.get('companyName'),
+      industry: formData.get('industry'),
+      website: formData.get('website'),
+      phone: formData.get('phone'),
+      address: formData.get('address')
+    };
+    
+    await saveCompanySettings('general', general);
   };
 
   return (
@@ -88,125 +135,130 @@ export const SettingsPage: React.FC = () => {
                 <CardHeader>
                   <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center gap-6">
-                    <Avatar className="w-20 h-20">
-                      <AvatarImage src={profile?.avatar_url} />
-                      <AvatarFallback className="text-lg">
-                        {profile?.first_name?.[0]}{profile?.last_name?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <Button variant="outline" size="sm">
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload Photo
-                      </Button>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        JPG, PNG or GIF. Max 2MB.
-                      </p>
+                <form onSubmit={handleProfileSave}>
+                  <CardContent className="space-y-6">
+                    <div className="flex items-center gap-6">
+                      <Avatar className="w-20 h-20">
+                        <AvatarImage src={profile?.avatar_url} />
+                        <AvatarFallback className="text-lg">
+                          {profile?.first_name?.[0]}{profile?.last_name?.[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <Button variant="outline" size="sm" type="button">
+                          <Upload className="w-4 h-4 mr-2" />
+                          Upload Photo
+                        </Button>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          JPG, PNG or GIF. Max 2MB.
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        defaultValue={profile?.first_name || ''}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        defaultValue={profile?.last_name || ''}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        defaultValue={profile?.email || ''}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="role">Role</Label>
-                      <Input
-                        id="role"
-                        defaultValue={profile?.role || ''}
-                        disabled
-                      />
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Preferences</h3>
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="theme">Theme</Label>
-                        <Select defaultValue={userSettings?.preferences?.theme || 'system'}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="light">Light</SelectItem>
-                            <SelectItem value="dark">Dark</SelectItem>
-                            <SelectItem value="system">System</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input
+                          id="firstName"
+                          name="firstName"
+                          defaultValue={profile?.first_name || ''}
+                        />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="timezone">Timezone</Label>
-                        <Select defaultValue={userSettings?.preferences?.timezone}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                            <SelectItem value="America/Chicago">Central Time</SelectItem>
-                            <SelectItem value="America/Denver">Mountain Time</SelectItem>
-                            <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input
+                          id="lastName"
+                          name="lastName"
+                          defaultValue={profile?.last_name || ''}
+                        />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="dateFormat">Date Format</Label>
-                        <Select defaultValue={userSettings?.preferences?.date_format || 'MM/dd/yyyy'}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="MM/dd/yyyy">MM/DD/YYYY</SelectItem>
-                            <SelectItem value="dd/MM/yyyy">DD/MM/YYYY</SelectItem>
-                            <SelectItem value="yyyy-MM-dd">YYYY-MM-DD</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          defaultValue={profile?.email || ''}
+                        />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="timeFormat">Time Format</Label>
-                        <Select defaultValue={userSettings?.preferences?.time_format || '12h'}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="12h">12 Hour</SelectItem>
-                            <SelectItem value="24h">24 Hour</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="role">Role</Label>
+                        <Input
+                          id="role"
+                          defaultValue={profile?.role || ''}
+                          disabled
+                        />
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex justify-end">
-                    <Button>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Changes
-                    </Button>
-                  </div>
-                </CardContent>
+                    <Separator />
+
+                    <div>
+                      <h3 className="text-lg font-medium mb-4">Preferences</h3>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="theme">Theme</Label>
+                          <Select name="theme" defaultValue={userSettings?.preferences?.theme || 'system'}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="light">Light</SelectItem>
+                              <SelectItem value="dark">Dark</SelectItem>
+                              <SelectItem value="system">System</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="timezone">Timezone</Label>
+                          <Select name="timezone" defaultValue={userSettings?.preferences?.timezone}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                              <SelectItem value="America/Chicago">Central Time</SelectItem>
+                              <SelectItem value="America/Denver">Mountain Time</SelectItem>
+                              <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="dateFormat">Date Format</Label>
+                          <Select name="dateFormat" defaultValue={userSettings?.preferences?.date_format || 'MM/dd/yyyy'}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="MM/dd/yyyy">MM/DD/YYYY</SelectItem>
+                              <SelectItem value="dd/MM/yyyy">DD/MM/YYYY</SelectItem>
+                              <SelectItem value="yyyy-MM-dd">YYYY-MM-DD</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="timeFormat">Time Format</Label>
+                          <Select name="timeFormat" defaultValue={userSettings?.preferences?.time_format || '12h'}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="12h">12 Hour</SelectItem>
+                              <SelectItem value="24h">24 Hour</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={loading}>
+                        <Save className="w-4 h-4 mr-2" />
+                        {loading ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </form>
               </Card>
             </TabsContent>
 
@@ -216,65 +268,71 @@ export const SettingsPage: React.FC = () => {
                 <CardHeader>
                   <CardTitle>Company Information</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="companyName">Company Name</Label>
-                      <Input
-                        id="companyName"
-                        defaultValue={companySettings?.general?.company_name || ''}
-                      />
+                <form onSubmit={handleCompanySave}>
+                  <CardContent className="space-y-6">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="companyName">Company Name</Label>
+                        <Input
+                          id="companyName"
+                          name="companyName"
+                          defaultValue={companySettings?.general?.company_name || ''}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="industry">Industry</Label>
+                        <Select name="industry" defaultValue={companySettings?.general?.industry}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select industry" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="technology">Technology</SelectItem>
+                            <SelectItem value="healthcare">Healthcare</SelectItem>
+                            <SelectItem value="finance">Finance</SelectItem>
+                            <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                            <SelectItem value="retail">Retail</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="website">Website</Label>
+                        <Input
+                          id="website"
+                          name="website"
+                          type="url"
+                          defaultValue={companySettings?.general?.website || ''}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          defaultValue={companySettings?.general?.phone || ''}
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="industry">Industry</Label>
-                      <Select defaultValue={companySettings?.general?.industry}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select industry" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="technology">Technology</SelectItem>
-                          <SelectItem value="healthcare">Healthcare</SelectItem>
-                          <SelectItem value="finance">Finance</SelectItem>
-                          <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                          <SelectItem value="retail">Retail</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="website">Website</Label>
-                      <Input
-                        id="website"
-                        type="url"
-                        defaultValue={companySettings?.general?.website || ''}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        defaultValue={companySettings?.general?.phone || ''}
-                      />
-                    </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Address</Label>
-                    <Textarea
-                      id="address"
-                      placeholder="Company address"
-                      defaultValue={companySettings?.general?.address || ''}
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="address">Address</Label>
+                      <Textarea
+                        id="address"
+                        name="address"
+                        placeholder="Company address"
+                        defaultValue={companySettings?.general?.address || ''}
+                      />
+                    </div>
 
-                  <div className="flex justify-end">
-                    <Button>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Changes
-                    </Button>
-                  </div>
-                </CardContent>
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={loading}>
+                        <Save className="w-4 h-4 mr-2" />
+                        {loading ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </form>
               </Card>
             </TabsContent>
 
@@ -284,92 +342,99 @@ export const SettingsPage: React.FC = () => {
                 <CardHeader>
                   <CardTitle>Notification Preferences</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Email Notifications</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Receive notifications via email
-                        </p>
+                <form onSubmit={handleNotificationSave}>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">Email Notifications</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Receive notifications via email
+                          </p>
+                        </div>
+                        <Switch
+                          name="email_enabled"
+                          defaultChecked={userSettings?.notifications?.email_enabled ?? true}
+                        />
                       </div>
-                      <Switch
-                        defaultChecked={userSettings?.notifications?.email_enabled ?? true}
-                      />
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">Ticket Updates</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Get notified when tickets are updated
+                          </p>
+                        </div>
+                        <Switch
+                          name="ticket_updates"
+                          defaultChecked={userSettings?.notifications?.ticket_updates ?? true}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">Client Updates</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Receive notifications for client changes
+                          </p>
+                        </div>
+                        <Switch
+                          name="client_updates"
+                          defaultChecked={userSettings?.notifications?.client_updates ?? true}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">System Alerts</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Important system notifications
+                          </p>
+                        </div>
+                        <Switch
+                          name="system_alerts"
+                          defaultChecked={userSettings?.notifications?.system_alerts ?? true}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">Marketing</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Product updates and promotional content
+                          </p>
+                        </div>
+                        <Switch
+                          name="marketing"
+                          defaultChecked={userSettings?.notifications?.marketing ?? false}
+                        />
+                      </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Ticket Updates</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Get notified when tickets are updated
-                        </p>
-                      </div>
-                      <Switch
-                        defaultChecked={userSettings?.notifications?.ticket_updates ?? true}
-                      />
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <Label htmlFor="frequency">Notification Frequency</Label>
+                      <Select name="frequency" defaultValue={userSettings?.notifications?.frequency || 'immediate'}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="immediate">Immediate</SelectItem>
+                          <SelectItem value="daily">Daily Digest</SelectItem>
+                          <SelectItem value="weekly">Weekly Summary</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Client Updates</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Receive notifications for client changes
-                        </p>
-                      </div>
-                      <Switch
-                        defaultChecked={userSettings?.notifications?.client_updates ?? true}
-                      />
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={loading}>
+                        <Save className="w-4 h-4 mr-2" />
+                        {loading ? 'Saving...' : 'Save Changes'}
+                      </Button>
                     </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">System Alerts</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Important system notifications
-                        </p>
-                      </div>
-                      <Switch
-                        defaultChecked={userSettings?.notifications?.system_alerts ?? true}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Marketing</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Product updates and promotional content
-                        </p>
-                      </div>
-                      <Switch
-                        defaultChecked={userSettings?.notifications?.marketing ?? false}
-                      />
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-2">
-                    <Label htmlFor="frequency">Notification Frequency</Label>
-                    <Select defaultValue={userSettings?.notifications?.frequency || 'immediate'}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="immediate">Immediate</SelectItem>
-                        <SelectItem value="daily">Daily Digest</SelectItem>
-                        <SelectItem value="weekly">Weekly Summary</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex justify-end">
-                    <Button>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Changes
-                    </Button>
-                  </div>
-                </CardContent>
+                  </CardContent>
+                </form>
               </Card>
             </TabsContent>
 
