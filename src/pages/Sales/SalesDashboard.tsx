@@ -384,14 +384,22 @@ export default function SalesDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => navigate('/sales/leads')}
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  Manage Leads
-                </Button>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate('/sales/pipeline')}
+              >
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Sales Pipeline
+              </Button>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate('/sales/leads')}
+              >
+                <Users className="mr-2 h-4 w-4" />
+                Manage Leads
+              </Button>
                 <Button 
                   className="w-full justify-start" 
                   variant="outline"
