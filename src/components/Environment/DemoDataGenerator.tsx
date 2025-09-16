@@ -69,6 +69,13 @@ export const DemoDataGenerator: React.FC = () => {
       status: 'pending'
     },
     {
+      id: 'financial',
+      label: 'Generate Financial Data (15)',
+      description: 'Creating invoices and payments for financial dashboard',
+      progress: 0,
+      status: 'pending'
+    },
+    {
       id: 'activity',
       label: 'Generate Activity Data',
       description: 'Creating historical data for trends over last 30 days',
@@ -530,6 +537,129 @@ export const DemoDataGenerator: React.FC = () => {
     }
   };
 
+  const generateFinancialData = async (): Promise<void> => {
+    const { data: clients, error: clientsError } = await supabase
+      .from('clients')
+      .select('id, name');
+
+    if (clientsError) {
+      throw new Error(`Failed to fetch clients: ${clientsError.message}`);
+    }
+
+    if (!clients || clients.length === 0) {
+      throw new Error('No clients found. Please generate clients first.');
+    }
+
+    const invoiceStatuses = ['sent', 'viewed', 'paid', 'overdue'];
+    const paymentMethods = ['credit_card', 'bank_transfer', 'check', 'cash'];
+    const paymentStatuses = ['completed', 'processing', 'failed'];
+
+    // Generate 10 invoices
+    const invoices = [];
+    for (let i = 0; i < 10; i++) {
+      const client = clients[Math.floor(Math.random() * clients.length)];
+      const subtotal = Math.floor(Math.random() * 5000) + 1000; // $1,000 - $6,000
+      const taxRate = 0.08; // 8% tax
+      const taxAmount = Math.round(subtotal * taxRate * 100) / 100;
+      const totalAmount = subtotal + taxAmount;
+      const status = invoiceStatuses[Math.floor(Math.random() * invoiceStatuses.length)];
+      
+      // Create invoice dates (last 60 days)
+      const issueDate = new Date();
+      issueDate.setDate(issueDate.getDate() - Math.floor(Math.random() * 60));
+      const dueDate = new Date(issueDate);
+      dueDate.setDate(dueDate.getDate() + 30);
+
+      const invoice = {
+        client_id: client.id,
+        invoice_number: `INV-2025-${String(1000 + i).padStart(4, '0')}`,
+        status,
+        issue_date: issueDate.toISOString().split('T')[0],
+        due_date: dueDate.toISOString().split('T')[0],
+        subtotal,
+        tax_amount: taxAmount,
+        discount_amount: 0,
+        total_amount: totalAmount,
+        currency: 'USD',
+        payment_terms: 'NET_30',
+        notes: `Professional services invoice for ${client.name}`,
+        tenant_id: profile?.tenant_id
+      };
+
+      const { data: createdInvoice, error } = await supabase
+        .from('invoices')
+        .insert(invoice)
+        .select()
+        .single();
+
+      if (error) {
+        console.warn(`Failed to create invoice INV-2025-${String(1000 + i).padStart(4, '0')}: ${error.message}`);
+      } else {
+        invoices.push(createdInvoice);
+        console.log(`Created invoice: ${createdInvoice.invoice_number}`);
+      }
+
+      updateStepStatus('financial', 'running', ((i + 1) / 15) * 50); // First 50% for invoices
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    // Generate 5 payments for some of the invoices
+    const paymentsToCreate = Math.min(5, invoices.length);
+    for (let i = 0; i < paymentsToCreate; i++) {
+      const invoice = invoices[i];
+      const paymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+      const paymentStatus = paymentStatuses[Math.floor(Math.random() * paymentStatuses.length)];
+      
+      // Payment date should be after invoice date
+      const paymentDate = new Date(invoice.issue_date);
+      paymentDate.setDate(paymentDate.getDate() + Math.floor(Math.random() * 20) + 1);
+
+      const payment = {
+        invoice_id: invoice.id,
+        payment_reference: `PAY-2025-${String(2000 + i).padStart(4, '0')}`,
+        payment_method: paymentMethod.toUpperCase(),
+        amount: invoice.total_amount,
+        currency: 'USD',
+        payment_date: paymentDate.toISOString().split('T')[0],
+        status: paymentStatus,
+        gateway_transaction_id: `txn_${Math.random().toString(36).substr(2, 9)}`,
+        gateway_response: {
+          processed_at: paymentDate.toISOString(),
+          gateway: 'stripe',
+          status: paymentStatus
+        },
+        fraud_score: Math.random() * 30, // Low fraud scores
+        fraud_flags: [],
+        reconciliation_status: paymentStatus === 'completed' ? 'reconciled' : 'pending',
+        notes: `Payment for invoice ${invoice.invoice_number}`,
+        tenant_id: profile?.tenant_id
+      };
+
+      const { error } = await supabase
+        .from('payments')
+        .insert(payment);
+
+      if (error) {
+        console.warn(`Failed to create payment PAY-2025-${String(2000 + i).padStart(4, '0')}: ${error.message}`);
+      } else {
+        console.log(`Created payment: PAY-2025-${String(2000 + i).padStart(4, '0')}`);
+        
+        // Update invoice status to paid if payment is completed
+        if (paymentStatus === 'completed') {
+          await supabase
+            .from('invoices')
+            .update({ status: 'paid' })
+            .eq('id', invoice.id);
+        }
+      }
+
+      updateStepStatus('financial', 'running', 50 + ((i + 1) / paymentsToCreate) * 50); // Last 50% for payments
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    console.log(`Created ${invoices.length} invoices and ${paymentsToCreate} payments`);
+  };
+
   const generateActivityData = async (): Promise<void> => {
     // Generate historical user activity logs
     const activities = [];
@@ -625,14 +755,19 @@ export const DemoDataGenerator: React.FC = () => {
       await generateProposals();
       updateStepStatus('proposals', 'completed', 100);
 
-      // Step 7: Generate Activity Data
+      // Step 7: Generate Financial Data
+      updateStepStatus('financial', 'running');
+      await generateFinancialData();
+      updateStepStatus('financial', 'completed', 100);
+
+      // Step 8: Generate Activity Data
       updateStepStatus('activity', 'running');
       await generateActivityData();
       updateStepStatus('activity', 'completed', 100);
 
       toast({
         title: "Demo Data Generated Successfully!",
-        description: "Generated 23 clients, 50+ contacts, 50 tickets, 3 contracts, 5 assessments, and 3 proposals with 30 days of activity data",
+        description: "Generated 23 clients, 50+ contacts, 50 tickets, 3 contracts, 5 assessments, 3 proposals, 10 invoices, 5 payments, and 30 days of activity data",
       });
 
     } catch (error) {
@@ -680,6 +815,8 @@ export const DemoDataGenerator: React.FC = () => {
         throw new Error('No tenant ID available');
       }
 
+      await supabase.from('payments').delete().eq('tenant_id', tenantId);
+      await supabase.from('invoices').delete().eq('tenant_id', tenantId);
       await supabase.from('user_activity_logs').delete().eq('tenant_id', tenantId);
       await supabase.from('proposals').delete().eq('tenant_id', tenantId);
       await supabase.from('assessments').delete().eq('tenant_id', tenantId);
