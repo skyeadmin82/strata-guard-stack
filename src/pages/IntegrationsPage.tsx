@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useIntegrationPlatform } from '@/hooks/useIntegrationPlatform';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -27,7 +29,12 @@ import {
   FileText,
   ShoppingCart,
   Users,
-  DollarSign
+  DollarSign,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  Info,
+  ArrowRight
 } from 'lucide-react';
 
 const IntegrationsPage = () => {
@@ -42,6 +49,7 @@ const IntegrationsPage = () => {
   const [qboConnected, setQboConnected] = useState(false);
   const [qboSyncStatus, setQboSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
   const [showQboConfig, setShowQboConfig] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   const { toast } = useToast();
 
   const {
@@ -430,6 +438,190 @@ const IntegrationsPage = () => {
                     </CardContent>
                   </Card>
                 </div>
+
+                {/* Setup Tutorial Section */}
+                <Card>
+                  <CardHeader>
+                    <Collapsible open={showTutorial} onOpenChange={setShowTutorial}>
+                      <CollapsibleTrigger asChild>
+                        <div className="flex items-center justify-between cursor-pointer">
+                          <div className="flex items-center gap-2">
+                            <BookOpen className="w-5 h-5 text-primary" />
+                            <CardTitle>QuickBooks Setup Tutorial</CardTitle>
+                          </div>
+                          {showTutorial ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </div>
+                      </CollapsibleTrigger>
+                      <CardDescription className="mt-2">
+                        Step-by-step guide to connect your QuickBooks Online account
+                      </CardDescription>
+                      <CollapsibleContent className="mt-6">
+                        <div className="space-y-6">
+                          {/* Prerequisites */}
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-sm flex items-center gap-2">
+                              <Info className="w-4 h-4 text-blue-500" />
+                              Prerequisites
+                            </h4>
+                            <div className="space-y-2 text-sm text-muted-foreground">
+                              <div className="flex items-start gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                <span>QuickBooks Online subscription (any tier)</span>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                <span>Admin access to your QuickBooks company file</span>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                <span>Intuit Developer account (free to create)</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Step-by-step instructions */}
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-sm">Setup Steps</h4>
+                            <div className="space-y-4">
+                              {/* Step 1 */}
+                              <div className="flex gap-4 p-4 bg-muted/50 rounded-lg">
+                                <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
+                                  1
+                                </div>
+                                <div className="space-y-2">
+                                  <h5 className="font-medium">Create QuickBooks App</h5>
+                                  <p className="text-sm text-muted-foreground">
+                                    Go to <a href="https://developer.intuit.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
+                                      developer.intuit.com <ExternalLink className="w-3 h-3" />
+                                    </a> and create a new app for your MSP platform.
+                                  </p>
+                                  <div className="text-xs text-muted-foreground">
+                                    • Sign in or create a developer account<br/>
+                                    • Click "Create an app"<br/>
+                                    • Select "QuickBooks Online and Payments" platform
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Step 2 */}
+                              <div className="flex gap-4 p-4 bg-muted/50 rounded-lg">
+                                <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
+                                  2
+                                </div>
+                                <div className="space-y-2">
+                                  <h5 className="font-medium">Configure OAuth Settings</h5>
+                                  <p className="text-sm text-muted-foreground">
+                                    Set up the redirect URLs and app permissions in your QuickBooks app dashboard.
+                                  </p>
+                                  <Alert className="mt-2">
+                                    <Info className="h-4 w-4" />
+                                    <AlertDescription className="text-xs">
+                                      <strong>Redirect URL:</strong> https://ghczhzfywivhrcvncffl.supabase.co/functions/v1/quickbooks-integration/oauth/callback<br/>
+                                      <strong>Required Scopes:</strong> Accounting (Read/Write)
+                                    </AlertDescription>
+                                  </Alert>
+                                </div>
+                              </div>
+
+                              {/* Step 3 */}
+                              <div className="flex gap-4 p-4 bg-muted/50 rounded-lg">
+                                <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
+                                  3
+                                </div>
+                                <div className="space-y-2">
+                                  <h5 className="font-medium">Get Your Credentials</h5>
+                                  <p className="text-sm text-muted-foreground">
+                                    Copy your Client ID and Client Secret from the app's "Keys & OAuth" section.
+                                  </p>
+                                  <div className="text-xs text-muted-foreground">
+                                    • Switch to "Production" keys when ready to go live<br/>
+                                    • Keep your Client Secret secure and never share it
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Step 4 */}
+                              <div className="flex gap-4 p-4 bg-muted/50 rounded-lg">
+                                <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
+                                  4
+                                </div>
+                                <div className="space-y-2">
+                                  <h5 className="font-medium">Connect & Test</h5>
+                                  <p className="text-sm text-muted-foreground">
+                                    Enter your credentials above and click "Connect QuickBooks" to authorize the integration.
+                                  </p>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => setShowQboConfig(true)}
+                                    className="mt-2"
+                                  >
+                                    <ArrowRight className="w-3 h-3 mr-1" />
+                                    Start Configuration
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Data Sync Information */}
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-sm">What Gets Synced</h4>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <ShoppingCart className="w-4 h-4 text-blue-500" />
+                                  <span className="font-medium">Products & Services</span>
+                                </div>
+                                <ul className="text-xs text-muted-foreground ml-6 space-y-1">
+                                  <li>• Service catalog items</li>
+                                  <li>• Pricing and descriptions</li>
+                                  <li>• SKUs and categories</li>
+                                </ul>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Users className="w-4 h-4 text-green-500" />
+                                  <span className="font-medium">Customers</span>
+                                </div>
+                                <ul className="text-xs text-muted-foreground ml-6 space-y-1">
+                                  <li>• Client information</li>
+                                  <li>• Contact details</li>
+                                  <li>• Billing addresses</li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Troubleshooting */}
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-sm">Common Issues</h4>
+                            <div className="space-y-3 text-sm">
+                              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div className="font-medium text-yellow-800">Connection Timeout</div>
+                                <div className="text-yellow-700 text-xs mt-1">
+                                  Make sure popup blockers are disabled and try again. The authorization window may have been blocked.
+                                </div>
+                              </div>
+                              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <div className="font-medium text-red-800">Invalid Credentials</div>
+                                <div className="text-red-700 text-xs mt-1">
+                                  Double-check your Client ID and Secret. Make sure you're using the correct environment (Sandbox vs Production).
+                                </div>
+                              </div>
+                              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div className="font-medium text-blue-800">Sync Failures</div>
+                                <div className="text-blue-700 text-xs mt-1">
+                                  Check that your QuickBooks company has the required permissions enabled for third-party apps.
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </CardHeader>
+                </Card>
 
                 {/* QuickBooks Configuration Dialog */}
                 <Dialog open={showQboConfig} onOpenChange={setShowQboConfig}>
