@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Tenant } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { useErrorLogger } from '@/hooks/useErrorLogger';
+import { useEnvironment } from '@/contexts/EnvironmentContext';
 
 interface AuthContextType {
   user: SupabaseUser | null;
@@ -37,7 +38,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const { logError } = useErrorLogger();
+  const { environment } = useEnvironment();
+  const { logError } = useErrorLogger(environment);
 
   useEffect(() => {
     // Set up auth state listener

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEnvironment } from '@/contexts/EnvironmentContext';
 import { DashboardLayout } from '@/components/Layout/DashboardLayout';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { MetricCard } from '@/components/MetricCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,12 +20,11 @@ import {
 import { DashboardMetric } from '@/types';
 import { useErrorLogger } from '@/hooks/useErrorLogger';
 import { toast } from '@/hooks/use-toast';
-import { Link } from 'react-router-dom';
 
 const Index = () => {
-  const { isAuthenticated, profile, tenant, loading: authLoading } = useAuth();
-  const { isDemo } = useEnvironment();
-  const { logError } = useErrorLogger();
+  const { profile, tenant } = useAuth();
+  const { isDemo, environment } = useEnvironment();
+  const { logError } = useErrorLogger(environment);
   const [metrics, setMetrics] = useState<DashboardMetric[]>([]);
   const [loading, setLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
@@ -106,54 +106,12 @@ const Index = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
-      fetchDashboardData();
-    }
-  }, [isAuthenticated, authLoading, isDemo]);
-
-  // Show auth page if not authenticated
-  if (!isAuthenticated && !authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="max-w-md w-full">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-primary rounded-md flex items-center justify-center mb-4">
-              <Building2 className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <CardTitle className="text-2xl">MSP Platform</CardTitle>
-            <CardDescription>
-              Welcome to your managed service provider dashboard
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <p className="text-muted-foreground">
-              Please sign in to access your dashboard and manage your clients.
-            </p>
-            <Link to="/auth">
-              <Button className="w-full">
-                Sign In to Dashboard
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Show loading while authenticating
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+    fetchDashboardData();
+  }, [isDemo]);
 
   return (
-    <DashboardLayout>
+    <ProtectedRoute>
+      <DashboardLayout>
       <div className="space-y-6">
         {/* Welcome Header */}
         <div className="flex items-center justify-between">
@@ -277,6 +235,7 @@ const Index = () => {
         )}
       </div>
     </DashboardLayout>
+    </ProtectedRoute>
   );
 };
 

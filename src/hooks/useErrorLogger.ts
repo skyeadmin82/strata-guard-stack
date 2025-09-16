@@ -1,11 +1,8 @@
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useEnvironment } from '@/contexts/EnvironmentContext';
-import { ErrorLog } from '@/types';
+import { ErrorLog, Environment } from '@/types';
 
-export const useErrorLogger = () => {
-  const { environment } = useEnvironment();
-
+export const useErrorLogger = (environment: Environment = 'demo') => {
   const logError = useCallback(async (
     error: Error,
     errorType: string,
