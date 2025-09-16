@@ -544,9 +544,9 @@ export const EnhancedClientsTable: React.FC<EnhancedClientsTableProps> = ({
       <Dialog open={!!selectedClientForDetails} onOpenChange={(open) => !open && setSelectedClientForDetails(null)}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-4 pr-8">
               <div className="flex-1 min-w-0">
-                <DialogTitle className="pr-8">
+                <DialogTitle>
                   {selectedClientForDetails && clients.find(c => c.id === selectedClientForDetails)?.name}
                 </DialogTitle>
                 <DialogDescription className="mt-2">
@@ -554,7 +554,7 @@ export const EnhancedClientsTable: React.FC<EnhancedClientsTableProps> = ({
                 </DialogDescription>
               </div>
               {selectedClientForDetails && (
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 mr-4">
                   <Button
                     onClick={() => {
                       const client = clients.find(c => c.id === selectedClientForDetails);
