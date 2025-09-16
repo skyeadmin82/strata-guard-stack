@@ -23,6 +23,7 @@ import { FieldServicePage } from "./pages/FieldServicePage";
 import { FinancialManagementPage } from "./pages/FinancialManagementPage";
 import IntegrationsPage from "./pages/IntegrationsPage";
 import LaunchPage from "./pages/LaunchPage";
+import DatabaseDiagnosticPage from "./pages/DatabaseDiagnosticPage";
 import NotFound from "./pages/NotFound";
 import { useMemo } from "react";
 
@@ -69,6 +70,7 @@ const App = () => {
                     <Route path="/email" element={<EmailMarketingPage />} />
                     <Route path="/field-service" element={<FieldServicePage />} />
                     <Route path="/financial" element={<FinancialManagementPage />} />
+                    <Route path="/admin/database" element={<DatabaseDiagnosticPage />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
