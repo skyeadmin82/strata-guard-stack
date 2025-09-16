@@ -119,10 +119,10 @@ export const TimeTrackingManager: React.FC<TimeTrackingManagerProps> = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Get current user's tenant_id
+      // Get current user's tenant_id and user_id
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('tenant_id')
+        .select('tenant_id, id')
         .eq('auth_user_id', user.id)
         .single();
 
@@ -143,7 +143,7 @@ export const TimeTrackingManager: React.FC<TimeTrackingManagerProps> = ({
         .insert({
           tenant_id: userData.tenant_id,
           ticket_id: ticketId,
-          user_id: user.id,
+          user_id: userData.id,
           description: newEntry.description || null,
           hours_worked: hours,
           billable: newEntry.billable,
