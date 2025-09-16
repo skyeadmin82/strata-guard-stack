@@ -24,6 +24,7 @@ import {
   Phone,
   Mail
 } from 'lucide-react';
+import { TimeTrackingManager } from './TimeTrackingManager';
 
 interface Ticket {
   id: string;
@@ -60,6 +61,7 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
+  const [actualHours, setActualHours] = useState(0);
   const [editForm, setEditForm] = useState({
     title: '',
     description: '',
@@ -460,13 +462,17 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
                     {new Date(ticket.created_at).toLocaleTimeString()}
                   </p>
                 </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Last Updated</Label>
-                  <p className="font-medium">
-                    {new Date(ticket.updated_at).toLocaleDateString()} at{' '}
-                    {new Date(ticket.updated_at).toLocaleTimeString()}
-                  </p>
-                </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Last Updated</Label>
+                    <p className="font-medium">
+                      {new Date(ticket.updated_at).toLocaleDateString()} at{' '}
+                      {new Date(ticket.updated_at).toLocaleTimeString()}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Time Tracked</Label>
+                    <p className="font-medium">{actualHours.toFixed(2)} hours</p>
+                  </div>
                 {ticket.resolved_at && (
                   <div>
                     <Label className="text-xs text-muted-foreground">Resolved</Label>
@@ -479,6 +485,12 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
               </div>
             </CardContent>
           </Card>
+
+          {/* Time Tracking Section */}
+          <TimeTrackingManager 
+            ticketId={ticket.id} 
+            onTimeUpdate={(totalHours) => setActualHours(totalHours)}
+          />
         </div>
       </DialogContent>
     </Dialog>
