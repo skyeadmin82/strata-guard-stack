@@ -1,12 +1,15 @@
 import React from 'react';
 import { DashboardLayout } from '@/components/Layout/DashboardLayout';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { TestingDashboard } from '@/components/Testing/TestingDashboard';
 
 const TestingPage: React.FC = () => {
   return (
-    <DashboardLayout>
-      <TestingDashboard />
-    </DashboardLayout>
+    <ProtectedRoute>
+      <DashboardLayout>
+        <TestingDashboard />
+      </DashboardLayout>
+    </ProtectedRoute>
   );
 };
 
