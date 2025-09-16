@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +23,8 @@ import {
   CheckCircle,
   User,
   Building2,
-  Calendar
+  Calendar,
+  Trash2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -70,6 +72,7 @@ export const TicketsTable: React.FC = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [ticketToDelete, setTicketToDelete] = useState<Ticket | null>(null);
   const [newTicket, setNewTicket] = useState({
     title: '',
     description: '',
@@ -210,6 +213,46 @@ export const TicketsTable: React.FC = () => {
 
   const handleTicketUpdate = (updatedTicket: Ticket) => {
     setTickets(tickets.map(t => t.id === updatedTicket.id ? updatedTicket : t));
+  };
+
+  const handleDeleteTicket = async (ticket: Ticket) => {
+    try {
+      const { error } = await supabase
+        .from('support_tickets')
+        .delete()
+        .eq('id', ticket.id);
+
+      if (error) throw error;
+
+      setTickets(tickets.filter(t => t.id !== ticket.id));
+      setTicketToDelete(null);
+      
+      toast({
+        title: "Success",
+        description: "Ticket deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting ticket:', error);
+      let errorMessage = 'Failed to delete ticket';
+      
+      if (error instanceof Error) {
+        const message = error.message.toLowerCase();
+        
+        if (message.includes('permission') || message.includes('access')) {
+          errorMessage = 'You do not have permission to delete this ticket.';
+        } else if (message.includes('foreign key') || message.includes('constraint')) {
+          errorMessage = 'Cannot delete ticket because it has related records. Please remove related data first.';
+        } else if (message.includes('network') || message.includes('connection')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        }
+      }
+      
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
   };
 
   useEffect(() => {
@@ -487,6 +530,14 @@ export const TicketsTable: React.FC = () => {
                           Edit Ticket
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => setTicketToDelete(ticket)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuLabel>Update Status</DropdownMenuLabel>
                         {['submitted', 'in_progress', 'pending_client', 'resolved', 'closed'].map((status) => (
                           <DropdownMenuItem 
@@ -524,6 +575,28 @@ export const TicketsTable: React.FC = () => {
         onOpenChange={setIsDetailDialogOpen}
         onUpdate={handleTicketUpdate}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!ticketToDelete} onOpenChange={(open) => !open && setTicketToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Ticket</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the ticket "{ticketToDelete?.title}"? 
+              This action cannot be undone and will permanently remove the ticket and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => ticketToDelete && handleDeleteTicket(ticketToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Ticket
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
