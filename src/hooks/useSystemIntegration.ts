@@ -238,7 +238,7 @@ export const useSystemIntegration = () => {
   }, [currentTenant?.id, toast]);
 
   const runPerformanceAnalysis = useCallback(async () => {
-    setIsOptimizing(true);
+    setIsRunningTests(true);
     try {
       // Simulate performance analysis
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -317,13 +317,14 @@ export const useSystemIntegration = () => {
         variant: "destructive",
       });
     } finally {
-      setIsOptimizing(false);
+      setIsRunningTests(false);
     }
   }, [toast]);
 
   const runSecurityScan = useCallback(async () => {
     if (!currentTenant?.id) return;
 
+    setIsRunningTests(true);
     try {
       const scanTypes: SecurityScan['scanType'][] = [
         'vulnerability',
@@ -386,6 +387,8 @@ export const useSystemIntegration = () => {
         description: error instanceof Error ? error.message : 'Unknown error',
         variant: "destructive",
       });
+    } finally {
+      setIsRunningTests(false);
     }
   }, [currentTenant?.id, toast]);
 

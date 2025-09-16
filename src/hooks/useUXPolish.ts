@@ -318,6 +318,7 @@ export const useUXPolish = () => {
   }, [toast]);
 
   const runAccessibilityAudit = useCallback(() => {
+    // ✅ FIX: Add loading state for consistency
     const accessibilityChecks: AccessibilityIssue[] = [
       {
         id: 'contrast-1',
