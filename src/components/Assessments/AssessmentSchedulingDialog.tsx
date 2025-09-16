@@ -93,6 +93,18 @@ export const AssessmentSchedulingDialog: React.FC<AssessmentSchedulingDialogProp
     setIsScheduling(true);
 
     try {
+      // Get current user's tenant_id
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('auth_user_id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
       // Generate dates for recurring assessments
       const dates = frequency === 'once' 
         ? [scheduledDate] 
@@ -100,7 +112,7 @@ export const AssessmentSchedulingDialog: React.FC<AssessmentSchedulingDialogProp
 
       // Create scheduled assessments for each date
       const scheduledAssessments = dates.map(date => ({
-        tenant_id: 'demo-tenant-id', // Would use actual tenant_id from auth
+        tenant_id: profile.tenant_id,
         client_id: selectedClient,
         template_id: selectedTemplate,
         scheduled_date: date.toISOString(),
@@ -112,9 +124,12 @@ export const AssessmentSchedulingDialog: React.FC<AssessmentSchedulingDialogProp
         reminder_days_before: 3
       }));
 
-      // Insert into database (we'll need to create this table)
-      // For now, we'll simulate the scheduling
-      console.log('Scheduling assessments:', scheduledAssessments);
+      // Insert into database
+      const { error: insertError } = await supabase
+        .from('scheduled_assessments')
+        .insert(scheduledAssessments);
+
+      if (insertError) throw insertError;
 
       toast({
         title: "Assessment Scheduled",
@@ -145,28 +160,36 @@ export const AssessmentSchedulingDialog: React.FC<AssessmentSchedulingDialogProp
   };
 
   const loadUpcomingAssessments = async () => {
-    // Simulate loading upcoming assessments
-    // In real implementation, this would query a scheduled_assessments table
-    const mockUpcoming: ScheduledAssessment[] = [
-      {
-        id: '1',
-        clientId: clients[0]?.id || '',
-        templateId: templates[0]?.id || '',
-        scheduledDate: addDays(new Date(), 7),
-        status: 'scheduled',
-        frequency: 'monthly'
-      },
-      {
-        id: '2', 
-        clientId: clients[1]?.id || '',
-        templateId: templates[1]?.id || '',
-        scheduledDate: addDays(new Date(), -2),
-        status: 'overdue'
-      }
-    ];
-    
-    setUpcomingAssessments(mockUpcoming);
-    setShowUpcoming(true);
+    try {
+      const { data, error } = await supabase
+        .from('scheduled_assessments')
+        .select(`
+          *,
+          clients:client_id(name),
+          assessment_templates:template_id(name)
+        `)
+        .order('scheduled_date', { ascending: true })
+        .limit(10);
+
+      if (error) throw error;
+
+      const upcomingItems: ScheduledAssessment[] = data?.map((item: any) => ({
+        id: item.id,
+        clientId: item.client_id,
+        templateId: item.template_id,
+        scheduledDate: new Date(item.scheduled_date),
+        status: item.status as ScheduledAssessment['status'],
+        frequency: item.frequency as ScheduledAssessment['frequency']
+      })) || [];
+      
+      setUpcomingAssessments(upcomingItems);
+      setShowUpcoming(true);
+    } catch (error) {
+      console.error('Failed to load upcoming assessments:', error);
+      // Fallback to empty array
+      setUpcomingAssessments([]);
+      setShowUpcoming(true);
+    }
   };
 
   const getStatusColor = (status: string) => {

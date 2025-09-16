@@ -76,47 +76,43 @@ export const ActionItemsManager: React.FC<ActionItemsManagerProps> = ({
   }, []);
 
   const loadActionItems = async () => {
-    // In a real implementation, this would load from database
-    // For now, we'll simulate some action items
-    const mockActionItems: ActionItem[] = [
-      {
-        id: '1',
-        assessmentId: assessments[0]?.id || '',
-        title: 'Update Firewall Rules',
-        description: 'Review and update firewall rules based on security assessment findings',
-        priority: 'high',
-        status: 'open',
-        dueDate: addDays(new Date(), 7),
-        estimatedEffort: 4,
-        estimatedValue: 5000,
-        category: 'Network Security',
-        tags: ['firewall', 'network', 'security'],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        findings: ['Outdated firewall rules detected', 'Some ports unnecessarily exposed'],
-        recommendations: ['Update firewall ruleset', 'Close unused ports', 'Review access controls']
-      },
-      {
-        id: '2', 
-        assessmentId: assessments[0]?.id || '',
-        title: 'Implement MFA',
-        description: 'Deploy multi-factor authentication across all user accounts',
-        priority: 'critical',
-        status: 'in_progress',
-        assignedTo: 'john.doe@company.com',
-        dueDate: addDays(new Date(), 14),
-        estimatedEffort: 16,
-        estimatedValue: 15000,
-        category: 'Identity & Access',
-        tags: ['mfa', 'authentication', 'security'],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        findings: ['No MFA implementation found', 'Password-only authentication is insufficient'],
-        recommendations: ['Deploy MFA solution', 'Enforce MFA policy', 'Train users on MFA usage']
-      }
-    ];
+    try {
+      const { data, error } = await supabase
+        .from('action_items')
+        .select(`
+          *,
+          assessments:assessment_id(id, clients:client_id(name))
+        `)
+        .order('created_at', { ascending: false });
 
-    setActionItems(mockActionItems);
+      if (error) throw error;
+
+      const items: ActionItem[] = data?.map((item: any) => ({
+        id: item.id,
+        assessmentId: item.assessment_id,
+        title: item.title,
+        description: item.description,
+        priority: item.priority as ActionItem['priority'],
+        status: item.status as ActionItem['status'],
+        assignedTo: item.assigned_to,
+        dueDate: item.due_date ? new Date(item.due_date) : undefined,
+        estimatedEffort: item.estimated_effort,
+        estimatedValue: item.estimated_value,
+        category: item.category,
+        tags: item.tags || [],
+        createdAt: new Date(item.created_at),
+        updatedAt: new Date(item.updated_at),
+        completedAt: item.completed_at ? new Date(item.completed_at) : undefined,
+        findings: item.findings || [],
+        recommendations: item.recommendations || []
+      })) || [];
+
+      setActionItems(items);
+    } catch (error) {
+      console.error('Failed to load action items:', error);
+      // Fallback to empty array for now
+      setActionItems([]);
+    }
   };
 
   const generateActionItemsFromAssessment = async (assessmentId: string) => {
@@ -176,12 +172,57 @@ export const ActionItemsManager: React.FC<ActionItemsManagerProps> = ({
       });
 
       // Add generated items to existing ones
-      const newActionItems = generatedItems.map((item, index) => ({
-        ...item,
-        id: `generated-${assessmentId}-${index}`,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }));
+      const newActionItems: ActionItem[] = [];
+      
+      for (const item of generatedItems) {
+        try {
+          const { data: insertedItem, error: insertError } = await supabase
+            .from('action_items')
+            .insert({
+              tenant_id: assessment.tenant_id,
+              assessment_id: assessmentId,
+              title: item.title,
+              description: item.description,
+              priority: item.priority,
+              status: item.status,
+              due_date: item.dueDate?.toISOString(),
+              estimated_effort: item.estimatedEffort,
+              estimated_value: item.estimatedValue,
+              category: item.category,
+              tags: item.tags,
+              findings: item.findings,
+              recommendations: item.recommendations
+            })
+            .select()
+            .single();
+
+          if (insertError) throw insertError;
+
+          if (insertedItem) {
+            newActionItems.push({
+              id: insertedItem.id,
+              assessmentId: insertedItem.assessment_id,
+              title: insertedItem.title,
+              description: insertedItem.description,
+              priority: insertedItem.priority as ActionItem['priority'],
+              status: insertedItem.status as ActionItem['status'],
+              assignedTo: insertedItem.assigned_to,
+              dueDate: insertedItem.due_date ? new Date(insertedItem.due_date) : undefined,
+              estimatedEffort: insertedItem.estimated_effort,
+              estimatedValue: insertedItem.estimated_value,
+              category: insertedItem.category,
+              tags: insertedItem.tags || [],
+              createdAt: new Date(insertedItem.created_at),
+              updatedAt: new Date(insertedItem.updated_at),
+              completedAt: insertedItem.completed_at ? new Date(insertedItem.completed_at) : undefined,
+              findings: insertedItem.findings || [],
+              recommendations: insertedItem.recommendations || []
+            });
+          }
+        } catch (itemError) {
+          console.error('Failed to insert action item:', itemError);
+        }
+      }
 
       setActionItems(prev => [...prev, ...newActionItems]);
       onActionItemUpdate?.([...actionItems, ...newActionItems]);
@@ -203,14 +244,45 @@ export const ActionItemsManager: React.FC<ActionItemsManagerProps> = ({
     }
   };
 
-  const updateActionItem = (id: string, updates: Partial<ActionItem>) => {
-    const updatedItems = actionItems.map(item => 
-      item.id === id 
-        ? { ...item, ...updates, updatedAt: new Date() }
-        : item
-    );
-    setActionItems(updatedItems);
-    onActionItemUpdate?.(updatedItems);
+  const updateActionItem = async (id: string, updates: Partial<ActionItem>) => {
+    try {
+      const { error } = await supabase
+        .from('action_items')
+        .update({
+          title: updates.title,
+          description: updates.description,
+          priority: updates.priority,
+          status: updates.status,
+          assigned_to: updates.assignedTo,
+          due_date: updates.dueDate?.toISOString(),
+          estimated_effort: updates.estimatedEffort,
+          estimated_value: updates.estimatedValue,
+          category: updates.category,
+          tags: updates.tags,
+          completed_at: updates.completedAt?.toISOString(),
+          findings: updates.findings,
+          recommendations: updates.recommendations,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      const updatedItems = actionItems.map(item => 
+        item.id === id 
+          ? { ...item, ...updates, updatedAt: new Date() }
+          : item
+      );
+      setActionItems(updatedItems);
+      onActionItemUpdate?.(updatedItems);
+    } catch (error) {
+      console.error('Failed to update action item:', error);
+      toast({
+        title: "Update Failed",
+        description: "Failed to update action item. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getPriorityColor = (priority: string) => {
