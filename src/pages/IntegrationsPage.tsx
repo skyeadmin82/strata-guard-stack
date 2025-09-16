@@ -303,14 +303,287 @@ const IntegrationsPage = () => {
             </Button>
           </div>
 
-            <Tabs defaultValue="quickbooks" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-5">
+            <Tabs defaultValue="overview" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-6">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="quickbooks">QuickBooks</TabsTrigger>
                 <TabsTrigger value="connections">Connections</TabsTrigger>
                 <TabsTrigger value="sync-jobs">Sync Jobs</TabsTrigger>
                 <TabsTrigger value="alerts">Alerts</TabsTrigger>
                 <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
               </TabsList>
+
+              {/* Overview Tab */}
+              <TabsContent value="overview" className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {/* QuickBooks Online */}
+                  <Card className="border-2 border-dashed hover:border-solid transition-all">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Database className="w-4 h-4 text-blue-600" />
+                          </div>
+                          QuickBooks Online
+                        </CardTitle>
+                        <Badge variant={qboConnected ? 'default' : 'secondary'}>
+                          {qboConnected ? 'Connected' : 'Available'}
+                        </Badge>
+                      </div>
+                      <CardDescription>
+                        Sync accounting data, invoices, customers, and products with QuickBooks Online
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="text-sm">
+                          <span className="font-medium">Features:</span>
+                          <ul className="text-muted-foreground text-xs mt-1 space-y-1">
+                            <li>• Real-time invoice syncing</li>
+                            <li>• Customer & product catalog sync</li>
+                            <li>• Payment tracking</li>
+                            <li>• Automated recurring billing</li>
+                          </ul>
+                        </div>
+                        <Button 
+                          className="w-full" 
+                          variant={qboConnected ? 'outline' : 'default'}
+                          onClick={() => {
+                            const tab = document.querySelector('[value="quickbooks"]') as HTMLElement;
+                            tab?.click();
+                          }}
+                        >
+                          {qboConnected ? 'Manage Connection' : 'Connect QuickBooks'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* ConnectWise Manage */}
+                  <Card className="border-2 border-dashed hover:border-solid transition-all">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <Settings className="w-4 h-4 text-green-600" />
+                          </div>
+                          ConnectWise Manage
+                        </CardTitle>
+                        <Badge variant="secondary">Coming Soon</Badge>
+                      </div>
+                      <CardDescription>
+                        Sync tickets, projects, time entries, and client data with ConnectWise Manage
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="text-sm">
+                          <span className="font-medium">Features:</span>
+                          <ul className="text-muted-foreground text-xs mt-1 space-y-1">
+                            <li>• Ticket management sync</li>
+                            <li>• Time tracking integration</li>
+                            <li>• Project & task sync</li>
+                            <li>• Client contact management</li>
+                          </ul>
+                        </div>
+                        <Button className="w-full" variant="outline" disabled>
+                          Coming Soon
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Mailchimp */}
+                  <Card className="border-2 border-dashed hover:border-solid transition-all">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <Users className="w-4 h-4 text-yellow-600" />
+                          </div>
+                          Mailchimp
+                        </CardTitle>
+                        <Badge variant="secondary">Coming Soon</Badge>
+                      </div>
+                      <CardDescription>
+                        Sync customer lists and automate marketing campaigns
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="text-sm">
+                          <span className="font-medium">Features:</span>
+                          <ul className="text-muted-foreground text-xs mt-1 space-y-1">
+                            <li>• Customer list sync</li>
+                            <li>• Automated campaigns</li>
+                            <li>• Newsletter management</li>
+                            <li>• Analytics tracking</li>
+                          </ul>
+                        </div>
+                        <Button className="w-full" variant="outline" disabled>
+                          Coming Soon
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Stripe */}
+                  <Card className="border-2 border-dashed hover:border-solid transition-all">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <DollarSign className="w-4 h-4 text-purple-600" />
+                          </div>
+                          Stripe
+                        </CardTitle>
+                        <Badge variant="secondary">Coming Soon</Badge>
+                      </div>
+                      <CardDescription>
+                        Process payments, subscriptions, and manage billing
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="text-sm">
+                          <span className="font-medium">Features:</span>
+                          <ul className="text-muted-foreground text-xs mt-1 space-y-1">
+                            <li>• Payment processing</li>
+                            <li>• Subscription management</li>
+                            <li>• Invoice automation</li>
+                            <li>• Revenue tracking</li>
+                          </ul>
+                        </div>
+                        <Button className="w-full" variant="outline" disabled>
+                          Coming Soon
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Microsoft 365 */}
+                  <Card className="border-2 border-dashed hover:border-solid transition-all">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <FileText className="w-4 h-4 text-blue-600" />
+                          </div>
+                          Microsoft 365
+                        </CardTitle>
+                        <Badge variant="secondary">Coming Soon</Badge>
+                      </div>
+                      <CardDescription>
+                        Sync calendar, contacts, and email with Microsoft 365
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="text-sm">
+                          <span className="font-medium">Features:</span>
+                          <ul className="text-muted-foreground text-xs mt-1 space-y-1">
+                            <li>• Calendar synchronization</li>
+                            <li>• Contact management</li>
+                            <li>• Email integration</li>
+                            <li>• File sharing</li>
+                          </ul>
+                        </div>
+                        <Button className="w-full" variant="outline" disabled>
+                          Coming Soon
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Slack */}
+                  <Card className="border-2 border-dashed hover:border-solid transition-all">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                            <Activity className="w-4 h-4 text-indigo-600" />
+                          </div>
+                          Slack
+                        </CardTitle>
+                        <Badge variant="secondary">Coming Soon</Badge>
+                      </div>
+                      <CardDescription>
+                        Send notifications and manage team communication
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="text-sm">
+                          <span className="font-medium">Features:</span>
+                          <ul className="text-muted-foreground text-xs mt-1 space-y-1">
+                            <li>• Automated notifications</li>
+                            <li>• Team collaboration</li>
+                            <li>• Alert management</li>
+                            <li>• Workflow automation</li>
+                          </ul>
+                        </div>
+                        <Button className="w-full" variant="outline" disabled>
+                          Coming Soon
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Integration Categories */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Integration Categories</h3>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                          <DollarSign className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Accounting & Finance</h4>
+                          <p className="text-xs text-muted-foreground">1 available</p>
+                        </div>
+                      </div>
+                    </Card>
+                    
+                    <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Settings className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">PSA Tools</h4>
+                          <p className="text-xs text-muted-foreground">Coming soon</p>
+                        </div>
+                      </div>
+                    </Card>
+                    
+                    <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Users className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">CRM & Marketing</h4>
+                          <p className="text-xs text-muted-foreground">Coming soon</p>
+                        </div>
+                      </div>
+                    </Card>
+                    
+                    <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                          <Activity className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Communication</h4>
+                          <p className="text-xs text-muted-foreground">Coming soon</p>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+              </TabsContent>
 
               {/* QuickBooks Integration Tab */}
               <TabsContent value="quickbooks" className="space-y-6">
