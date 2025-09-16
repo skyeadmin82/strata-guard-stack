@@ -166,10 +166,30 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
       // Save proposal items if any
       if (proposalItems.length > 0 && insertedProposal?.id) {
         const itemsWithProposalId = proposalItems.map((item, index) => ({
-          ...item,
           tenant_id: userProfile?.tenant_id,
           proposal_id: insertedProposal.id,
+          catalog_item_id: item.catalog_item_id || null,
           item_order: index + 1,
+          item_type: item.item_type,
+          name: item.name,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          discount_percent: item.discount_percent,
+          tax_percent: item.tax_percent,
+          total_price: item.total_price,
+          metadata: {
+            sku: item.sku,
+            vendor: item.vendor,
+            category: item.category,
+            margin_percent: item.margin_percent,
+            billing_cycle: item.billing_cycle,
+            setup_fee: item.setup_fee,
+            renewal_price: item.renewal_price,
+            discount_amount: item.discount_amount
+          },
+          qbo_item_ref: item.qbo_item_ref,
+          qbo_sync_status: 'pending',
           created_at: new Date().toISOString(),
         }));
 

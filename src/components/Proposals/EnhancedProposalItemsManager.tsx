@@ -29,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ProposalItem {
   id?: string;
+  catalog_item_id?: string; // Link to proposal_catalog for QBO integration
   item_order: number;
   item_type: 'product' | 'service' | 'subscription' | 'one-time';
   category: string;
@@ -46,6 +47,8 @@ interface ProposalItem {
   renewal_price?: number;
   vendor?: string;
   margin_percent?: number;
+  qbo_item_ref?: string;
+  qbo_sync_status?: string;
 }
 
 interface CatalogItem {
@@ -166,6 +169,8 @@ export const EnhancedProposalItemsManager: React.FC<EnhancedProposalItemsManager
 
   const addItemFromCatalog = (catalogItem: CatalogItem) => {
     const newItem: ProposalItem = {
+      id: undefined, // Will be set when saved to database
+      catalog_item_id: catalogItem.id, // Link to catalog item for QBO sync
       item_order: items.length + 1,
       item_type: catalogItem.item_type as ProposalItem['item_type'],
       category: catalogItem.category,

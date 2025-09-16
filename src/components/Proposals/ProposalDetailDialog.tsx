@@ -40,6 +40,7 @@ interface Proposal {
 
 interface ProposalItem {
   id: string;
+  catalog_item_id?: string; // Link to proposal_catalog for QBO integration
   item_order: number;
   item_type: string;
   category: string;
@@ -57,6 +58,8 @@ interface ProposalItem {
   renewal_price?: number;
   vendor?: string;
   margin_percent?: number;
+  qbo_item_ref?: string;
+  qbo_sync_status?: string;
 }
 
 interface ProposalDetailDialogProps {
@@ -117,6 +120,7 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
 
       const items: ProposalItem[] = (data || []).map(item => ({
         id: item.id,
+        catalog_item_id: (item as any).catalog_item_id || undefined,
         item_order: item.item_order || 1,
         item_type: item.item_type || 'product',
         category: (item.metadata as any)?.category || '',
@@ -133,7 +137,9 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
         setup_fee: (item.metadata as any)?.setup_fee ? parseFloat(String((item.metadata as any).setup_fee)) : undefined,
         renewal_price: (item.metadata as any)?.renewal_price ? parseFloat(String((item.metadata as any).renewal_price)) : undefined,
         vendor: (item.metadata as any)?.vendor || undefined,
-        margin_percent: (item.metadata as any)?.margin_percent ? parseFloat(String((item.metadata as any).margin_percent)) : undefined
+        margin_percent: (item.metadata as any)?.margin_percent ? parseFloat(String((item.metadata as any).margin_percent)) : undefined,
+        qbo_item_ref: (item as any).qbo_item_ref || undefined,
+        qbo_sync_status: (item as any).qbo_sync_status || 'pending'
       }));
 
       setProposalItems(items);
