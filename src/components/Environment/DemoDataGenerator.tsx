@@ -334,6 +334,13 @@ export const DemoDataGenerator: React.FC = () => {
       const activeClients = clients?.slice(0, 3) || [];
       console.log(`Creating ${activeClients.length} contracts`);
 
+      // Handle case where no clients are available
+      if (activeClients.length === 0) {
+        console.log('No clients available for contract generation');
+        updateStepStatus('contracts', 'completed', 100);
+        return;
+      }
+
       for (let i = 0; i < activeClients.length; i++) {
         const client = activeClients[i];
         const contractType = contractTypes[i % contractTypes.length]; // Cycle through types
@@ -374,8 +381,9 @@ export const DemoDataGenerator: React.FC = () => {
           console.log(`Successfully created contract:`, data);
         }
 
-        console.log(`Successfully created contract:`, data);
-        updateStepStatus('contracts', 'running', ((i + 1) / activeClients.length) * 100);
+        // Calculate progress safely, ensuring it never exceeds 100%
+        const progress = Math.min(((i + 1) / activeClients.length) * 100, 100);
+        updateStepStatus('contracts', 'running', progress);
         await new Promise(resolve => setTimeout(resolve, 200));
       }
       
