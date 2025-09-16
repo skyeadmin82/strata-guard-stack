@@ -81,12 +81,56 @@ export const useAssessmentExecution = (assessmentId: string) => {
       const currentQuestionIndex = Math.min(assessment.current_question - 1, totalQuestions - 1);
       const currentQuestion = questions?.[currentQuestionIndex] || null;
 
+      // Type cast database results to match our interfaces
+      const assessmentTyped: Assessment = {
+        ...assessment,
+        // Map database fields to expected interface fields
+        assessed_by: assessment.assessor_id || '',
+        assessment_type: 'general' as const,
+        title: `Assessment ${assessment.id}`,
+        description: 'IT Security Assessment',
+        overall_score: assessment.total_score || 0,
+        findings: [],
+        recommendations: [],
+        session_data: (assessment.session_data as any) || {},
+        validation_errors: (assessment.validation_errors as any) || [],
+        recovery_data: (assessment.recovery_data as any) || {}
+      };
+
+      const templateTyped: AssessmentTemplate = {
+        ...template,
+        scoring_rules: (template.scoring_rules as any) || {},
+        threshold_rules: (template.threshold_rules as any) || {},
+        conditional_logic: (template.conditional_logic as any) || {},
+        validation_rules: (template.validation_rules as any) || {}
+      };
+
+      const questionsTyped: AssessmentQuestion[] = questions?.map(q => ({
+        ...q,
+        options: (q.options as any) || [],
+        validation_rules: (q.validation_rules as any) || {},
+        conditional_logic: (q.conditional_logic as any) || {}
+      })) || [];
+
+      const responsesTyped: AssessmentResponse[] = responses?.map(r => ({
+        ...r,
+        response_data: (r.response_data as any) || {},
+        validation_errors: (r.validation_errors as any) || []
+      })) || [];
+
+      const currentQuestionTyped: AssessmentQuestion | null = currentQuestion ? {
+        ...currentQuestion,
+        options: (currentQuestion.options as any) || [],
+        validation_rules: (currentQuestion.validation_rules as any) || {},
+        conditional_logic: (currentQuestion.conditional_logic as any) || {}
+      } : null;
+
       setSession({
-        assessment,
-        template,
-        questions: questions || [],
-        responses: responses || [],
-        currentQuestion,
+        assessment: assessmentTyped,
+        template: templateTyped,
+        questions: questionsTyped,
+        responses: responsesTyped,
+        currentQuestion: currentQuestionTyped,
         isComplete: assessment.status === 'completed',
         progress
       });

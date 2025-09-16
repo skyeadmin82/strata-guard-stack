@@ -96,7 +96,8 @@ export const useOpportunityGeneration = () => {
       }
 
       // Consider client value/size if available in assessment data
-      if (assessment.session_data?.clientValue === 'enterprise') {
+      const sessionData = (assessment as any).session_data || {};
+      if (sessionData.clientValue === 'enterprise') {
         if (priority === 'low') priority = 'medium';
         else if (priority === 'medium') priority = 'high';
       }
@@ -171,7 +172,7 @@ export const useOpportunityGeneration = () => {
 
       if (templateError) throw templateError;
 
-      // Load responses
+      // Load responses with type casting
       const { data: responses, error: responsesError } = await supabase
         .from('assessment_responses')
         .select('*')
@@ -179,16 +180,22 @@ export const useOpportunityGeneration = () => {
 
       if (responsesError) throw responsesError;
 
-      if (!responses || responses.length === 0) {
+      const responsesTyped: AssessmentResponse[] = responses?.map(r => ({
+        ...r,
+        response_data: (r.response_data as any) || {},
+        validation_errors: (r.validation_errors as any) || []
+      })) || [];
+
+      if (!responsesTyped || responsesTyped.length === 0) {
         return { opportunities: [], errors: ['No responses found'], duplicatesPreveneted: 0 };
       }
 
       // Extract opportunity rules from template
-      const thresholdRules = template.threshold_rules || {};
+      const thresholdRules = (template.threshold_rules as any) || {};
       const opportunityRules: OpportunityRule[] = [];
 
       if (thresholdRules.opportunities) {
-        Object.entries(thresholdRules.opportunities).forEach(([key, rule]: [string, any]) => {
+        Object.entries(thresholdRules.opportunities as any).forEach(([key, rule]: [string, any]) => {
           opportunityRules.push({
             type: key,
             title: rule.title || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
@@ -208,8 +215,16 @@ export const useOpportunityGeneration = () => {
       // Generate opportunities based on rules
       for (const rule of opportunityRules) {
         try {
-          // Evaluate threshold
-          const evaluation = evaluateThreshold(responses, rule, template);
+          // Evaluate threshold with type casting
+          const templateTyped: AssessmentTemplate = {
+            ...template,
+            scoring_rules: (template.scoring_rules as any) || {},
+            threshold_rules: (template.threshold_rules as any) || {},
+            conditional_logic: (template.conditional_logic as any) || {},
+            validation_rules: (template.validation_rules as any) || {}
+          };
+          
+          const evaluation = evaluateThreshold(responsesTyped, rule, templateTyped);
 
           if (evaluation.meets) {
             // Check for duplicates
@@ -225,10 +240,29 @@ export const useOpportunityGeneration = () => {
             }
 
             // Calculate priority
-            const priority = calculatePriority(rule, evaluation.score, assessment);
+            const assessmentWithSession: Assessment = {
+              ...assessment,
+              assessed_by: assessment.assessor_id || '',
+              assessment_type: 'general',
+              title: `Assessment ${assessment.id}`,
+              description: 'Assessment',
+              overall_score: assessment.total_score || 0,
+              findings: [],
+              recommendations: [],
+              status: (assessment.status === 'in_progress' ? 'draft' : 
+                      assessment.status === 'validated' ? 'completed' : 
+                      assessment.status === 'flagged' ? 'draft' : 
+                      assessment.status) as Assessment['status'],
+              session_data: (assessment.session_data as any) || {},
+              validation_errors: (assessment.validation_errors as any) || [],
+              recovery_data: (assessment.recovery_data as any) || {}
+            };
+            
+            const priority = calculatePriority(rule, evaluation.score, assessmentWithSession);
 
             // Create opportunity
             const opportunityData = {
+              tenant_id: assessment.tenant_id,
               assessment_id: assessmentId,
               client_id: assessment.client_id,
               opportunity_type: rule.type,
@@ -242,12 +276,13 @@ export const useOpportunityGeneration = () => {
                 threshold: rule.threshold,
                 actualScore: evaluation.score,
                 evaluationDetails: evaluation.details
-              },
+              } as any,
               detection_rules: {
                 rule: rule,
                 conditions: rule.conditions,
                 evaluationResult: evaluation
-              }
+              } as any,
+              automation_errors: [] as any
             };
 
             const { data: newOpportunity, error: createError } = await supabase
@@ -261,7 +296,15 @@ export const useOpportunityGeneration = () => {
               continue;
             }
 
-            opportunities.push(newOpportunity);
+            // Type cast the result
+            const opportunityTyped: AssessmentOpportunity = {
+              ...newOpportunity,
+              threshold_data: (newOpportunity.threshold_data as any) || {},
+              detection_rules: (newOpportunity.detection_rules as any) || {},
+              automation_errors: (newOpportunity.automation_errors as any) || []
+            };
+
+            opportunities.push(opportunityTyped);
 
           }
         } catch (error) {
@@ -335,12 +378,14 @@ export const useOpportunityGeneration = () => {
       await supabase
         .from('assessment_error_logs')
         .insert({
+          tenant_id: '',
           assessment_id: null,
           error_type: 'assignment_failed',
           error_message: `Failed to assign opportunity ${opportunityId}: ${error.message}`,
           error_details: { opportunityId, assignedTo, dueDate },
           context: { action: 'assign_opportunity' },
-          severity: 'error'
+          severity: 'error',
+          resolved: false
         });
 
       toast({

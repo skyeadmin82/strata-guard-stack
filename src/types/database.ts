@@ -72,23 +72,6 @@ export interface Ticket {
   created_by?: string;
 }
 
-export interface Assessment {
-  id: string;
-  tenant_id: string;
-  client_id: string;
-  assessed_by: string;
-  assessment_type: 'security' | 'infrastructure' | 'compliance' | 'general';
-  title: string;
-  description?: string;
-  overall_score: number;
-  findings: any[];
-  recommendations: any[];
-  status: 'draft' | 'completed' | 'reviewed';
-  completed_at?: string;
-  created_at: string;
-  updated_at: string;
-  created_by?: string;
-}
 
 export interface PaginationData {
   page: number;
@@ -262,23 +245,31 @@ export interface AssessmentQuestion {
 export interface Assessment {
   id: string;
   tenant_id: string;
-  template_id: string;
   client_id: string;
-  assessor_id?: string;
-  status: 'in_progress' | 'completed' | 'validated' | 'flagged';
-  started_at: string;
+  assessed_by: string;
+  assessment_type: 'security' | 'infrastructure' | 'compliance' | 'general';
+  title: string;
+  description?: string;
+  overall_score: number;
+  findings: any[];
+  recommendations: any[];
+  status: 'draft' | 'completed' | 'reviewed' | 'in_progress' | 'validated' | 'flagged';
   completed_at?: string;
-  last_saved_at: string;
-  current_question: number;
-  total_score: number;
-  max_possible_score: number;
-  percentage_score: number;
-  session_data: Record<string, any>;
-  validation_errors: Array<any>;
-  recovery_data: Record<string, any>;
-  created_by?: string;
   created_at: string;
   updated_at: string;
+  created_by?: string;
+  // Additional fields for assessment execution
+  assessor_id?: string;
+  template_id?: string;
+  started_at?: string;
+  last_saved_at?: string;
+  current_question?: number;
+  total_score?: number;
+  max_possible_score?: number;
+  percentage_score?: number;
+  session_data?: Record<string, any>;
+  validation_errors?: Array<any>;
+  recovery_data?: Record<string, any>;
 }
 
 export interface AssessmentResponse {

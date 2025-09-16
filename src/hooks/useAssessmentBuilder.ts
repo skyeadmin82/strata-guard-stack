@@ -412,18 +412,27 @@ export const useAssessmentBuilder = () => {
 
       if (questionsError) throw questionsError;
 
-      // Create new template
-      const newTemplate = {
+      // Create new template with proper type casting
+      const newTemplate: Partial<AssessmentTemplate> = {
         ...originalTemplate,
         name: newName,
         status: 'draft' as const,
         version: 1,
         created_at: undefined,
         updated_at: undefined,
-        id: undefined
+        id: undefined,
+        scoring_rules: (originalTemplate.scoring_rules as any) || {},
+        threshold_rules: (originalTemplate.threshold_rules as any) || {},
+        conditional_logic: (originalTemplate.conditional_logic as any) || {},
+        validation_rules: (originalTemplate.validation_rules as any) || {}
       };
 
-      const result = await saveTemplate(newTemplate, originalQuestions || []);
+      const result = await saveTemplate(newTemplate, originalQuestions?.map(q => ({
+        ...q,
+        options: (q.options as any) || [],
+        validation_rules: (q.validation_rules as any) || {},
+        conditional_logic: (q.conditional_logic as any) || {}
+      })) || []);
 
       if (result.success) {
         toast({
