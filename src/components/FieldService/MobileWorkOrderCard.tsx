@@ -15,9 +15,10 @@ import {
   WifiOff
 } from 'lucide-react';
 
+// Use the WorkOrder type from the useFieldServices hook
 interface WorkOrder {
   id?: string;
-  workOrderNumber: string;
+  workOrderNumber?: string;
   title: string;
   description?: string;
   status: 'pending' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
@@ -117,7 +118,7 @@ export const MobileWorkOrderCard: React.FC<MobileWorkOrderCardProps> = ({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg font-semibold truncate">
-              {workOrder.workOrderNumber}
+              {workOrder.workOrderNumber || workOrder.id || 'No Work Order Number'}
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
               {workOrder.title}

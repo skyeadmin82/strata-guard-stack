@@ -7,6 +7,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useTenant } from './useTenant';
 import { useOfflineStorage } from './useOfflineStorage';
+import type { Database } from '@/integrations/supabase/types';
+
+type WorkOrderStatus = 'pending' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
+type WorkOrderPriority = 'low' | 'medium' | 'high' | 'urgent';
+type SyncStatus = 'synced' | 'pending_sync' | 'conflict';
 
 interface WorkOrder {
   id?: string;
@@ -14,8 +19,8 @@ interface WorkOrder {
   work_order_number?: string;
   title: string;
   description?: string;
-  status: 'pending' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: WorkOrderStatus;
+  priority: WorkOrderPriority;
   assignedTechnicianId?: string;
   assigned_technician_id?: string;
   clientId?: string;
@@ -34,17 +39,19 @@ interface WorkOrder {
   service_type?: string;
   equipmentDetails?: any;
   equipment_details?: any;
-  syncStatus?: 'synced' | 'pending_sync' | 'conflict';
+  syncStatus?: SyncStatus;
   sync_status?: string;
   createdAt?: string;
   created_at?: string;
 }
 
+type TimeEntryType = 'work' | 'travel' | 'break' | 'lunch';
+
 interface TimeEntry {
   id?: string;
   workOrderId?: string;
   work_order_id?: string;
-  entryType?: 'work' | 'travel' | 'break' | 'lunch';
+  entryType?: TimeEntryType;
   entry_type?: string;
   startTime?: string;
   start_time?: string;
@@ -60,11 +67,13 @@ interface TimeEntry {
   duration_minutes?: number;
 }
 
+type PhotoType = 'before' | 'during' | 'after' | 'damage' | 'completion' | 'parts' | 'other';
+
 interface PhotoCapture {
   id?: string;
   workOrderId?: string;
   work_order_id?: string;
-  photoType?: 'before' | 'during' | 'after' | 'damage' | 'completion' | 'parts' | 'other';
+  photoType?: PhotoType;
   photo_type?: string;
   filePath?: string;
   file_path?: string;
@@ -170,7 +179,10 @@ export const useFieldServices = () => {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setWorkOrders(data || []);
+        
+        // Transform database results to WorkOrder interface
+        const transformedOrders = (data || []).map(transformDbWorkOrder);
+        setWorkOrders(transformedOrders);
       } else {
         // Load from offline storage
         const offlineOrders = await getOfflineWorkOrders();
@@ -212,20 +224,7 @@ export const useFieldServices = () => {
         if (error) throw error;
 
         // Transform and add to local state
-        const transformedOrder = {
-          ...data,
-          workOrderNumber: data.work_order_number,
-          assignedTechnicianId: data.assigned_technician_id,
-          locationAddress: data.location_address,
-          locationCoordinates: data.location_coordinates,
-          scheduledStartTime: data.scheduled_start_time,
-          scheduledEndTime: data.scheduled_end_time,
-          estimatedDurationMinutes: data.estimated_duration_minutes,
-          serviceType: data.service_type,
-          equipmentDetails: data.equipment_details,
-          syncStatus: data.sync_status
-        };
-
+        const transformedOrder = transformDbWorkOrder(data);
         setWorkOrders(prev => [transformedOrder, ...prev]);
         
         toast({
@@ -286,16 +285,7 @@ export const useFieldServices = () => {
         if (error) throw error;
         
         // Transform response
-        const transformedEntry = {
-          ...data,
-          workOrderId: data.work_order_id,
-          entryType: data.entry_type,
-          startTime: data.start_time,
-          endTime: data.end_time,
-          locationStart: data.location_start,
-          durationMinutes: data.duration_minutes
-        };
-        
+        const transformedEntry = transformDbTimeEntry(data);
         setActiveTimeEntry(transformedEntry);
       } else {
         // Store offline
@@ -446,15 +436,7 @@ export const useFieldServices = () => {
         });
 
         // Transform response
-        const transformedPhoto = {
-          ...data,
-          workOrderId: data.work_order_id,
-          photoType: data.photo_type,
-          filePath: data.file_path,
-          locationCoordinates: data.location_coordinates,
-          fileSize: data.file_size
-        };
-
+        const transformedPhoto = transformDbPhoto(data);
         return transformedPhoto;
       } else {
         // Store offline
@@ -478,7 +460,7 @@ export const useFieldServices = () => {
     }
   };
 
-  const updateWorkOrderStatus = async (workOrderId: string, status: WorkOrder['status'], notes?: string) => {
+  const updateWorkOrderStatus = async (workOrderId: string, status: WorkOrderStatus, notes?: string) => {
     try {
       if (isOnline && tenantId) {
         const { error } = await supabase
@@ -515,6 +497,47 @@ export const useFieldServices = () => {
       });
     }
   };
+
+  // Helper functions to transform database types to our interfaces
+  const transformDbWorkOrder = (dbWorkOrder: Database['public']['Tables']['work_orders']['Row']): WorkOrder => ({
+    ...dbWorkOrder,
+    workOrderNumber: dbWorkOrder.work_order_number,
+    assignedTechnicianId: dbWorkOrder.assigned_technician_id,
+    clientId: dbWorkOrder.client_id,
+    locationAddress: dbWorkOrder.location_address,
+    locationCoordinates: dbWorkOrder.location_coordinates as { lat: number; lng: number } | undefined,
+    scheduledStartTime: dbWorkOrder.scheduled_start_time,
+    scheduledEndTime: dbWorkOrder.scheduled_end_time,
+    estimatedDurationMinutes: dbWorkOrder.estimated_duration_minutes,
+    serviceType: dbWorkOrder.service_type,
+    equipmentDetails: dbWorkOrder.equipment_details,
+    syncStatus: dbWorkOrder.sync_status as SyncStatus,
+    createdAt: dbWorkOrder.created_at,
+    status: dbWorkOrder.status as WorkOrderStatus,
+    priority: dbWorkOrder.priority as WorkOrderPriority
+  });
+
+  const transformDbTimeEntry = (dbTimeEntry: Database['public']['Tables']['time_entries']['Row']): TimeEntry => ({
+    ...dbTimeEntry,
+    workOrderId: dbTimeEntry.work_order_id,
+    entryType: dbTimeEntry.entry_type as TimeEntryType,
+    startTime: dbTimeEntry.start_time,
+    endTime: dbTimeEntry.end_time,
+    locationStart: dbTimeEntry.location_start as { lat: number; lng: number; address?: string } | undefined,
+    technicianId: dbTimeEntry.technician_id,
+    durationMinutes: dbTimeEntry.duration_minutes
+  });
+
+  const transformDbPhoto = (dbPhoto: Database['public']['Tables']['field_service_photos']['Row']): PhotoCapture => ({
+    ...dbPhoto,
+    workOrderId: dbPhoto.work_order_id,
+    photoType: dbPhoto.photo_type as PhotoType,
+    filePath: dbPhoto.file_path,
+    compressedFilePath: dbPhoto.compressed_file_path,
+    locationCoordinates: dbPhoto.location_coordinates as { lat: number; lng: number } | undefined,
+    technicianId: dbPhoto.technician_id,
+    fileSize: dbPhoto.file_size
+  });
 
   return {
     // State
