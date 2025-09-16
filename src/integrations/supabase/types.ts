@@ -1115,6 +1115,64 @@ export type Database = {
         }
         Relationships: []
       }
+      client_activities: {
+        Row: {
+          activity_data: Json | null
+          activity_description: string | null
+          activity_title: string
+          activity_type: string
+          client_id: string
+          created_at: string
+          id: string
+          performed_by: string | null
+          tenant_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_description?: string | null
+          activity_title: string
+          activity_type: string
+          client_id: string
+          created_at?: string
+          id?: string
+          performed_by?: string | null
+          tenant_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_description?: string | null
+          activity_title?: string
+          activity_type?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          performed_by?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_activities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_activities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_activities_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: Json | null
@@ -1122,11 +1180,16 @@ export type Database = {
           created_at: string
           created_by: string | null
           email: string | null
+          health_score: number | null
           id: string
           industry: string | null
+          last_activity_at: string | null
           name: string
           notes: string | null
           phone: string | null
+          response_time_avg_hours: number | null
+          risk_level: string | null
+          satisfaction_rating: number | null
           status: string
           tenant_id: string
           updated_at: string
@@ -1138,11 +1201,16 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email?: string | null
+          health_score?: number | null
           id?: string
           industry?: string | null
+          last_activity_at?: string | null
           name: string
           notes?: string | null
           phone?: string | null
+          response_time_avg_hours?: number | null
+          risk_level?: string | null
+          satisfaction_rating?: number | null
           status?: string
           tenant_id: string
           updated_at?: string
@@ -1154,11 +1222,16 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email?: string | null
+          health_score?: number | null
           id?: string
           industry?: string | null
+          last_activity_at?: string | null
           name?: string
           notes?: string | null
           phone?: string | null
+          response_time_avg_hours?: number | null
+          risk_level?: string | null
+          satisfaction_rating?: number | null
           status?: string
           tenant_id?: string
           updated_at?: string
@@ -1356,6 +1429,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_stats"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contacts_client_id_fkey"
             columns: ["client_id"]
@@ -5794,6 +5874,13 @@ export type Database = {
             foreignKeyName: "service_bookings_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -6027,6 +6114,13 @@ export type Database = {
             foreignKeyName: "service_requests_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -6163,6 +6257,13 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_stats"
             referencedColumns: ["id"]
           },
           {
@@ -7119,9 +7220,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      client_stats: {
+        Row: {
+          active_contracts: number | null
+          avg_assessment_score: number | null
+          contact_count: number | null
+          health_score: number | null
+          id: string | null
+          last_activity_at: string | null
+          name: string | null
+          open_tickets: number | null
+          recent_activities: number | null
+          risk_level: string | null
+          satisfaction_rating: number | null
+          total_contract_value: number | null
+          total_tickets: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      calculate_client_health_score: {
+        Args: { client_uuid: string }
+        Returns: number
+      }
       get_current_user_tenant_id: {
         Args: Record<PropertyKey, never>
         Returns: string
