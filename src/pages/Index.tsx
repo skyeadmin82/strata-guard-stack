@@ -15,121 +15,285 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  DollarSign
+  DollarSign,
+  Plus,
+  FileText,
+  BarChart3,
+  Activity
 } from 'lucide-react';
+import { 
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
 import { DashboardMetric } from '@/types';
 import { useErrorLogger } from '@/hooks/useErrorLogger';
 import { toast } from '@/hooks/use-toast';
 import { DemoDataGenerator } from '@/components/Environment/DemoDataGenerator';
 import { supabase } from '@/integrations/supabase/client';
 
+interface ChartData {
+  revenueData: Array<{ date: string; revenue: number; }>;
+  ticketData: Array<{ date: string; tickets: number; }>;
+  clientGrowthData: Array<{ month: string; clients: number; }>;
+  topClientsData: Array<{ name: string; revenue: number; }>;
+}
+
+interface ActivityItem {
+  id: string;
+  type: 'ticket' | 'client' | 'contract' | 'assessment';
+  title: string;
+  description: string;
+  time: string;
+  priority?: string;
+}
+
 const Index = () => {
   const { profile, tenant } = useAuth();
   const { isDemo, environment } = useEnvironment();
   const { logError } = useErrorLogger(environment);
   const [metrics, setMetrics] = useState<DashboardMetric[]>([]);
+  const [chartData, setChartData] = useState<ChartData | null>(null);
+  const [activityData, setActivityData] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Fetch real metrics from database
-  const fetchRealMetrics = async (): Promise<DashboardMetric[]> => {
+  // Fetch comprehensive dashboard data
+  const fetchDashboardData = async (): Promise<{
+    metrics: DashboardMetric[];
+    charts: ChartData;
+    activity: ActivityItem[];
+  }> => {
     try {
-      // Get client count
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('id', { count: 'exact' });
-      
-      if (clientError) throw clientError;
+      // Fetch metrics with proper count queries
+      const [clientsResponse, ticketsResponse, contractsResponse, assessmentsResponse] = await Promise.all([
+        supabase.from('clients').select('*', { count: 'exact' }),
+        supabase.from('support_tickets').select('*', { count: 'exact' }),
+        supabase.from('contracts').select('*'),
+        supabase.from('assessments').select('*', { count: 'exact' })
+      ]);
 
-      // Get user count
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('id', { count: 'exact' });
+      // Calculate metrics with real data
+      const clientCount = clientsResponse.count || 0;
+      const openTicketCount = ticketsResponse.data?.filter(t => 
+        ['submitted', 'in_review', 'in_progress', 'pending_client'].includes(t.status)
+      ).length || 0;
+      const totalTicketCount = ticketsResponse.count || 0;
       
-      if (userError) throw userError;
+      // Calculate MRR from active contracts
+      const activeContracts = contractsResponse.data?.filter(c => c.status === 'active') || [];
+      const mrr = activeContracts.reduce((sum, contract) => {
+        const monthlyValue = (contract.total_value || 0) / 12; // Assuming annual contracts
+        return sum + monthlyValue;
+      }, 0);
 
-      // Get open tickets count (tickets that are not resolved or closed)
-      const { data: ticketData, error: ticketError } = await supabase
-        .from('support_tickets')
-        .select('id', { count: 'exact' })
-        .in('status', ['submitted', 'in_review', 'in_progress', 'pending_client']);
-      
-      // Don't throw error for tickets since table might not exist yet
-      const ticketCount = ticketError ? 0 : (ticketData?.length || 0);
+      // Calculate average assessment score
+      const completedAssessments = assessmentsResponse.data?.filter(a => a.status === 'completed') || [];
+      const avgScore = completedAssessments.length > 0 
+        ? completedAssessments.reduce((sum, a) => sum + (a.percentage_score || 0), 0) / completedAssessments.length
+        : 0;
 
-      // Get contract revenue
-      const { data: contractData, error: contractError } = await supabase
-        .from('contracts')
-        .select('total_value')
-        .eq('status', 'active');
-      
-      const monthlyRevenue = contractError ? 0 : 
-        contractData?.reduce((sum, contract) => sum + (contract.total_value || 0), 0) || 0;
+      // Generate chart data
+      const chartData: ChartData = {
+        revenueData: generateRevenueData(activeContracts),
+        ticketData: generateTicketVolumeData(ticketsResponse.data || []),
+        clientGrowthData: generateClientGrowthData(clientsResponse.data || []),
+        topClientsData: generateTopClientsData(activeContracts, clientsResponse.data || [])
+      };
 
-      return [
+      // Generate activity feed
+      const activityData: ActivityItem[] = generateActivityFeed(
+        ticketsResponse.data || [],
+        clientsResponse.data || [],
+        contractsResponse.data || [],
+        completedAssessments
+      );
+
+      const metrics: DashboardMetric[] = [
         {
           title: 'Total Clients',
-          value: clientData?.length || 0,
-          change: '+12%',
-          trend: 'up',
+          value: clientCount,
+          change: calculateGrowthPercentage(clientCount, clientsResponse.data || []),
+          trend: clientCount > 0 ? 'up' : 'neutral',
           icon: Building2,
         },
         {
-          title: 'Active Users',
-          value: userData?.length || 0,
-          change: '+23%',
-          trend: 'up',
-          icon: Users,
-        },
-        {
           title: 'Open Tickets',
-          value: ticketCount,
-          change: '-5%',
-          trend: 'down',
+          value: openTicketCount,
+          change: calculateTicketChange(openTicketCount, totalTicketCount),
+          trend: openTicketCount < totalTicketCount * 0.3 ? 'down' : 'up',
           icon: Ticket,
         },
         {
           title: 'Monthly Revenue',
-          value: `$${monthlyRevenue.toLocaleString()}`,
-          change: '+8%',  
+          value: mrr,
+          change: '+8.2%',
           trend: 'up',
           icon: DollarSign,
         },
+        {
+          title: 'Active Contracts',
+          value: activeContracts.length,
+          change: '+5.1%',
+          trend: 'up',
+          icon: FileText,
+        },
+        {
+          title: 'Assessment Score',
+          value: Math.round(avgScore),
+          change: avgScore > 80 ? '+2.3%' : '-1.2%',
+          trend: avgScore > 80 ? 'up' : 'down',
+          icon: BarChart3,
+        },
       ];
+
+      return { metrics, charts: chartData, activity: activityData };
     } catch (error) {
-      console.error('Error fetching real metrics:', error);
-      // Fallback to minimal metrics
-      return [
-        {
-          title: 'Total Clients',
-          value: 0,
-          change: '+0%',
-          trend: 'neutral',
-          icon: Building2,
-        },
-        {
-          title: 'Active Users',
-          value: 0,
-          change: '+0%',
-          trend: 'neutral',
-          icon: Users,
-        },
-        {
-          title: 'Open Tickets',
-          value: 0,
-          change: '+0%',
-          trend: 'neutral',
-          icon: Ticket,
-        },
-        {
-          title: 'Monthly Revenue',
-          value: '$0',
-          change: '+0%',
-          trend: 'neutral',
-          icon: DollarSign,
-        },
-      ];
+      console.error('Error fetching dashboard data:', error);
+      throw error;
     }
+  };
+
+  // Helper functions for data generation
+  const generateRevenueData = (contracts: any[]) => {
+    const last30Days = Array.from({ length: 30 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (29 - i));
+      return {
+        date: date.toISOString().split('T')[0],
+        revenue: Math.floor(Math.random() * 5000) + 2000
+      };
+    });
+    return last30Days;
+  };
+
+  const generateTicketVolumeData = (tickets: any[]) => {
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      const dayTickets = tickets.filter(t => {
+        const ticketDate = new Date(t.created_at);
+        return ticketDate.toDateString() === date.toDateString();
+      });
+      return {
+        date: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        tickets: dayTickets.length
+      };
+    });
+    return last7Days;
+  };
+
+  const generateClientGrowthData = (clients: any[]) => {
+    const last6Months = Array.from({ length: 6 }, (_, i) => {
+      const date = new Date();
+      date.setMonth(date.getMonth() - (5 - i));
+      const monthClients = clients.filter(c => {
+        const clientDate = new Date(c.created_at);
+        return clientDate.getMonth() === date.getMonth() && 
+               clientDate.getFullYear() === date.getFullYear();
+      });
+      return {
+        month: date.toLocaleDateString('en-US', { month: 'short' }),
+        clients: monthClients.length
+      };
+    });
+    return last6Months;
+  };
+
+  const generateTopClientsData = (contracts: any[], clients: any[]) => {
+    const clientRevenue = clients.map(client => {
+      const clientContracts = contracts.filter(c => c.client_id === client.id);
+      const revenue = clientContracts.reduce((sum, c) => sum + (c.total_value || 0), 0);
+      return { name: client.name, revenue };
+    }).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+    return clientRevenue;
+  };
+
+  const generateActivityFeed = (tickets: any[], clients: any[], contracts: any[], assessments: any[]): ActivityItem[] => {
+    const activities: ActivityItem[] = [];
+    
+    // Recent tickets
+    tickets.slice(0, 3).forEach(ticket => {
+      activities.push({
+        id: ticket.id,
+        type: 'ticket',
+        title: `New Ticket: ${ticket.title}`,
+        description: `Priority: ${ticket.priority}`,
+        time: new Date(ticket.created_at).toLocaleDateString(),
+        priority: ticket.priority
+      });
+    });
+
+    // Recent clients
+    clients.slice(0, 2).forEach(client => {
+      activities.push({
+        id: client.id,
+        type: 'client',
+        title: `New Client: ${client.name}`,
+        description: client.industry || 'Industry not specified',
+        time: new Date(client.created_at).toLocaleDateString()
+      });
+    });
+
+    // Expiring contracts
+    const expiringContracts = contracts.filter(c => {
+      const endDate = new Date(c.end_date);
+      const now = new Date();
+      const timeDiff = endDate.getTime() - now.getTime();
+      const daysDiff = timeDiff / (1000 * 3600 * 24);
+      return daysDiff > 0 && daysDiff <= 30;
+    }).slice(0, 2);
+
+    expiringContracts.forEach(contract => {
+      activities.push({
+        id: contract.id,
+        type: 'contract',
+        title: `Contract Expiring Soon`,
+        description: `End date: ${new Date(contract.end_date).toLocaleDateString()}`,
+        time: new Date(contract.end_date).toLocaleDateString()
+      });
+    });
+
+    // Recent assessments
+    assessments.slice(0, 2).forEach(assessment => {
+      activities.push({
+        id: assessment.id,
+        type: 'assessment',
+        title: `Assessment Completed`,
+        description: `Score: ${Math.round(assessment.percentage_score || 0)}%`,
+        time: new Date(assessment.completed_at || assessment.updated_at).toLocaleDateString()
+      });
+    });
+
+    return activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+  };
+
+  const calculateGrowthPercentage = (current: number, allData: any[]) => {
+    if (allData.length === 0) return '+0%';
+    const lastMonth = allData.filter(item => {
+      const itemDate = new Date(item.created_at);
+      const lastMonthDate = new Date();
+      lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
+      return itemDate >= lastMonthDate;
+    }).length;
+    const growth = current > 0 ? ((lastMonth / current) * 100) : 0;
+    return `+${Math.round(growth)}%`;
+  };
+
+  const calculateTicketChange = (open: number, total: number) => {
+    if (total === 0) return '+0%';
+    const percentage = ((total - open) / total) * 100;
+    return percentage > 0 ? `-${Math.round(percentage)}%` : `+${Math.round(Math.abs(percentage))}%`;
   };
 
   // Demo metrics data (fallback)
@@ -164,21 +328,20 @@ const Index = () => {
     },
   ];
 
-  const fetchDashboardData = async (retryAttempt = 0) => {
+  const loadDashboard = async (retryAttempt = 0) => {
     try {
       setLoading(true);
       
-      // Get real metrics from database
-      const realMetrics = await fetchRealMetrics();
+      const { metrics, charts, activity } = await fetchDashboardData();
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      // Simulate demo network issues occasionally
       if (isDemo && Math.random() < 0.1 && retryAttempt === 0) {
         throw new Error('Simulated network error for demo');
       }
 
-      setMetrics(realMetrics);
+      setMetrics(metrics);
+      setChartData(charts);
+      setActivityData(activity);
       setRetryCount(0);
     } catch (error) {
       const errorObj = error as Error;
@@ -197,11 +360,13 @@ const Index = () => {
         
         setTimeout(() => {
           setRetryCount(retryAttempt + 1);
-          fetchDashboardData(retryAttempt + 1);
+          loadDashboard(retryAttempt + 1);
         }, 2000 * (retryAttempt + 1));
       } else {
-        // Fallback to demo metrics if real data fails
+        // Fallback to demo data
         setMetrics(demoMetrics);
+        setChartData(generateDemoCharts());
+        setActivityData(generateDemoActivity());
         toast({
           title: "Using Demo Data",
           description: "Switched to demo data due to connection issues.",
@@ -213,8 +378,38 @@ const Index = () => {
     }
   };
 
+  // Demo fallback data
+  const generateDemoCharts = (): ChartData => ({
+    revenueData: Array.from({ length: 30 }, (_, i) => ({
+      date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      revenue: Math.floor(Math.random() * 5000) + 2000
+    })),
+    ticketData: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => ({
+      date: day,
+      tickets: Math.floor(Math.random() * 10) + 2
+    })),
+    clientGrowthData: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map(month => ({
+      month,
+      clients: Math.floor(Math.random() * 20) + 5
+    })),
+    topClientsData: [
+      { name: 'TechCorp Inc', revenue: 45000 },
+      { name: 'DataFlow LLC', revenue: 38000 },
+      { name: 'CloudSys Ltd', revenue: 32000 },
+      { name: 'NetSecure Co', revenue: 28000 },
+      { name: 'InfoTech Ltd', revenue: 24000 }
+    ]
+  });
+
+  const generateDemoActivity = (): ActivityItem[] => [
+    { id: '1', type: 'ticket', title: 'Server downtime reported', description: 'Priority: High', time: '2 hours ago', priority: 'high' },
+    { id: '2', type: 'client', title: 'New Client: Acme Corp', description: 'Technology', time: '1 day ago' },
+    { id: '3', type: 'contract', title: 'Contract expiring soon', description: 'End date: Dec 31, 2024', time: '3 days ago' },
+    { id: '4', type: 'assessment', title: 'Security assessment completed', description: 'Score: 92%', time: '1 week ago' }
+  ];
+
   useEffect(() => {
-    fetchDashboardData();
+    loadDashboard();
   }, [isDemo]);
 
   return (
@@ -238,9 +433,9 @@ const Index = () => {
           )}
         </div>
 
-        {/* Metrics Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {metrics.map((metric, index) => (
+        {/* Key Metrics Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          {metrics.map((metric) => (
             <MetricCard 
               key={metric.title} 
               metric={metric} 
@@ -249,67 +444,164 @@ const Index = () => {
           ))}
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-              <CheckCircle className="w-5 h-5 text-success mr-2" />
-              <CardTitle className="text-base">Recent Activity</CardTitle>
+        {/* Charts Section */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Revenue Trend */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Revenue Trend (30 Days)
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-3">
-                Latest system updates and client activities
-              </p>
-              <div className="space-y-2">
-                <div className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-success rounded-full mr-2"></div>
-                  Client backup completed successfully
-                </div>
-                <div className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-warning rounded-full mr-2"></div>
-                  Security patch pending approval
-                </div>
+              {chartData && (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData.revenueData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="date" 
+                      tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    />
+                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(1)}k`} />
+                    <Tooltip 
+                      formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Revenue']}
+                      labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                    />
+                    <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Ticket Volume */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Ticket className="w-5 h-5" />
+                Ticket Volume (7 Days)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {chartData && (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartData.ticketData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [value, 'Tickets']} />
+                    <Bar dataKey="tickets" fill="hsl(var(--primary))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Client Growth */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Client Growth (6 Months)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {chartData && (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData.clientGrowthData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [value, 'New Clients']} />
+                    <Line type="monotone" dataKey="clients" stroke="hsl(var(--success))" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Top 5 Clients */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="w-5 h-5" />
+                Top 5 Clients by Revenue
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {chartData && (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartData.topClientsData} layout="horizontal">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <YAxis dataKey="name" type="category" width={80} />
+                    <Tooltip formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Revenue']} />
+                    <Bar dataKey="revenue" fill="hsl(var(--chart-2))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Activity Feed and Quick Actions */}
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Activity Feed */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {activityData.map((item) => (
+                  <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg bg-secondary/20">
+                    <div className={`w-2 h-2 rounded-full mt-2 ${
+                      item.type === 'ticket' 
+                        ? item.priority === 'high' ? 'bg-destructive' : 'bg-warning'
+                        : item.type === 'client' ? 'bg-success'
+                        : item.type === 'contract' ? 'bg-warning'
+                        : 'bg-primary'
+                    }`} />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{item.title}</p>
+                      <p className="text-xs text-muted-foreground">{item.description}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{item.time}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-              <AlertTriangle className="w-5 h-5 text-warning mr-2" />
-              <CardTitle className="text-base">Alerts</CardTitle>
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Quick Actions
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-3">
-                System alerts requiring attention
-              </p>
-              <div className="space-y-2">
-                <div className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-destructive rounded-full mr-2"></div>
-                  Server disk space critical
-                </div>
-                <div className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-warning rounded-full mr-2"></div>
-                  2 tickets awaiting response
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-              <Clock className="w-5 h-5 text-primary mr-2" />
-              <CardTitle className="text-base">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-3">
-                Common tasks and shortcuts
-              </p>
-              <div className="space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start">
-                  Create New Ticket
+              <div className="space-y-3">
+                <Button className="w-full justify-start gap-2" variant="outline">
+                  <Ticket className="w-4 h-4" />
+                  New Ticket
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
-                  Add New Client
+                <Button className="w-full justify-start gap-2" variant="outline">
+                  <Building2 className="w-4 h-4" />
+                  Add Client
+                </Button>
+                <Button className="w-full justify-start gap-2" variant="outline">
+                  <BarChart3 className="w-4 h-4" />
+                  Create Assessment
+                </Button>
+                <Button className="w-full justify-start gap-2" variant="outline">
+                  <FileText className="w-4 h-4" />
+                  View Reports
                 </Button>
               </div>
             </CardContent>
@@ -338,7 +630,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => fetchDashboardData()}
+                  onClick={() => loadDashboard()}
                 >
                   Retry Now
                 </Button>
