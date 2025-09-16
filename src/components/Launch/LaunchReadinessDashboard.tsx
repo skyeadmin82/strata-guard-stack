@@ -299,12 +299,14 @@ export const LaunchReadinessDashboard: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button 
-                  onClick={runComponentTests}
+                  onClick={(e) => {
+                    runComponentTests();
+                    e.currentTarget.blur();
+                  }}
                   disabled={isRunningTests}
                   className="w-full"
                   aria-label="Run integration tests to validate system components"
                   aria-describedby="integration-help"
-                  onBlur={(e) => e.currentTarget.blur()}
                 >
                   <Activity className="mr-2 h-4 w-4" aria-hidden="true" />
                   Run Integration Tests
