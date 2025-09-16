@@ -11,7 +11,7 @@ import { ProposalPDFGenerator } from './ProposalPDFGenerator';
 import { ProposalApprovalWorkflow } from './ProposalApprovalWorkflow';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Edit, Download, Send, Eye, Calendar, Package, ShoppingCart } from 'lucide-react';
+import { Edit, Download, Send, Eye, Calendar, Package, ShoppingCart, EyeOff, DollarSign, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Proposal {
@@ -75,6 +75,7 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
   const [activeTab, setActiveTab] = useState('overview');
   const [proposalItems, setProposalItems] = useState<ProposalItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
+  const [showInternalView, setShowInternalView] = useState(true); // Toggle for internal vs client view
   const { toast } = useToast();
 
   useEffect(() => {
@@ -213,6 +214,15 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
               </div>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant={showInternalView ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowInternalView(!showInternalView)}
+                className="mr-2"
+              >
+                {showInternalView ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
+                {showInternalView ? "Client View" : "Internal View"}
+              </Button>
               <Button variant="outline" size="sm" onClick={() => onEdit?.(proposal)}>
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
@@ -302,7 +312,15 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
               {/* Financial Summary */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Financial Summary</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    Financial Summary
+                    {showInternalView && (
+                      <Badge variant="secondary" className="text-xs">
+                        <TrendingUp className="w-3 h-3 mr-1" />
+                        Internal
+                      </Badge>
+                    )}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -336,6 +354,58 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
                       {formatCurrency(proposal.final_amount || proposal.total_amount || 0, proposal.currency)}
                     </p>
                   </div>
+
+                  {/* INTERNAL MARGIN INFORMATION - HIDDEN FROM CLIENTS */}
+                  {showInternalView && (
+                    <>
+                      <div className="border-t pt-4 bg-orange-50 rounded-lg p-3 mt-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <DollarSign className="w-4 h-4 text-orange-600" />
+                          <label className="text-sm font-bold text-orange-800">Margin Analysis (Internal Only)</label>
+                        </div>
+                        
+                        {proposalItems.length > 0 ? (
+                          <div className="space-y-2">
+                            {(() => {
+                              const totalRevenue = proposal.final_amount || proposal.total_amount || 0;
+                              const totalMargin = proposalItems.reduce((sum, item) => {
+                                const itemMargin = item.total_price * ((item.margin_percent || 0) / 100);
+                                return sum + itemMargin;
+                              }, 0);
+                              const marginPercentage = totalRevenue > 0 ? (totalMargin / totalRevenue) * 100 : 0;
+                              
+                              return (
+                                <>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm text-orange-700">Total Margin:</span>
+                                    <span className="font-semibold text-orange-800">
+                                      {formatCurrency(totalMargin, proposal.currency)}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm text-orange-700">Margin %:</span>
+                                    <span className="font-bold text-orange-800">
+                                      {marginPercentage.toFixed(1)}%
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm text-orange-700">Net Profit:</span>
+                                    <span className="font-bold text-green-700">
+                                      {formatCurrency(totalMargin, proposal.currency)}
+                                    </span>
+                                  </div>
+                                </>
+                              );
+                            })()}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-orange-600">
+                            Add line items to see detailed margin analysis
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -361,6 +431,14 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
                           <TableHead>Type</TableHead>
                           <TableHead className="text-right">Qty</TableHead>
                           <TableHead className="text-right">Unit Price</TableHead>
+                          {showInternalView && (
+                            <TableHead className="text-right bg-orange-50">
+                              <div className="flex items-center justify-end gap-1">
+                                <TrendingUp className="w-3 h-3 text-orange-600" />
+                                <span className="text-orange-800 font-semibold text-xs">Margin %</span>
+                              </div>
+                            </TableHead>
+                          )}
                           <TableHead className="text-right">Total</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -375,6 +453,9 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
                                 )}
                                 {item.sku && (
                                   <div className="text-xs text-muted-foreground">SKU: {item.sku}</div>
+                                )}
+                                {showInternalView && item.vendor && (
+                                  <div className="text-xs text-orange-600">Vendor: {item.vendor}</div>
                                 )}
                               </div>
                             </TableCell>
@@ -391,6 +472,18 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
                             <TableCell className="text-right">
                               {formatCurrency(item.unit_price, proposal.currency)}
                             </TableCell>
+                            {showInternalView && (
+                              <TableCell className="text-right bg-orange-50">
+                                <div className="flex flex-col items-end">
+                                  <span className="font-semibold text-orange-800">
+                                    {(item.margin_percent || 0).toFixed(1)}%
+                                  </span>
+                                  <span className="text-xs text-orange-600">
+                                    {formatCurrency((item.total_price * ((item.margin_percent || 0) / 100)), proposal.currency)}
+                                  </span>
+                                </div>
+                              </TableCell>
+                            )}
                             <TableCell className="text-right font-medium">
                               {formatCurrency(item.total_price, proposal.currency)}
                             </TableCell>
