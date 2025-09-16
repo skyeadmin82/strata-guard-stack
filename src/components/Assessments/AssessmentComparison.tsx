@@ -54,7 +54,7 @@ export const AssessmentComparison: React.FC<AssessmentComparisonProps> = ({
   const [comparisonData, setComparisonData] = useState<ComparisonData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [availableClients, setAvailableClients] = useState<Array<{id: string, name: string}>>([]);
-  const [selectedClient, setSelectedClient] = useState<string>('');
+  const [selectedClient, setSelectedClient] = useState<string>('all');
 
   const { toast } = useToast();
 
@@ -76,7 +76,7 @@ export const AssessmentComparison: React.FC<AssessmentComparisonProps> = ({
     }
   };
 
-  const clientAssessments = selectedClient 
+  const clientAssessments = selectedClient && selectedClient !== 'all'
     ? assessments.filter(a => a.client_id === selectedClient)
     : assessments;
 
@@ -252,7 +252,7 @@ export const AssessmentComparison: React.FC<AssessmentComparisonProps> = ({
                   <SelectValue placeholder="All clients" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All clients</SelectItem>
+                  <SelectItem value="all">All clients</SelectItem>
                   {availableClients.map(client => (
                     <SelectItem key={client.id} value={client.id}>
                       {client.name}
