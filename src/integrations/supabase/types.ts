@@ -6417,6 +6417,203 @@ export type Database = {
           },
         ]
       }
+      qbo_connections: {
+        Row: {
+          access_token: string | null
+          company_info: Json | null
+          company_name: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_sync: string | null
+          realm_id: string
+          refresh_token: string | null
+          sync_settings: Json | null
+          tenant_id: string | null
+          token_expiry: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          company_info?: Json | null
+          company_name?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync?: string | null
+          realm_id: string
+          refresh_token?: string | null
+          sync_settings?: Json | null
+          tenant_id?: string | null
+          token_expiry?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          company_info?: Json | null
+          company_name?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync?: string | null
+          realm_id?: string
+          refresh_token?: string | null
+          sync_settings?: Json | null
+          tenant_id?: string | null
+          token_expiry?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qbo_connections_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qbo_settings: {
+        Row: {
+          client_sync_rules: Json | null
+          created_at: string | null
+          default_expense_account_id: string | null
+          default_income_account_id: string | null
+          default_tax_code_id: string | null
+          id: string
+          invoice_sync_rules: Json | null
+          invoice_template_id: string | null
+          invoice_terms_id: string | null
+          tenant_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_sync_rules?: Json | null
+          created_at?: string | null
+          default_expense_account_id?: string | null
+          default_income_account_id?: string | null
+          default_tax_code_id?: string | null
+          id?: string
+          invoice_sync_rules?: Json | null
+          invoice_template_id?: string | null
+          invoice_terms_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_sync_rules?: Json | null
+          created_at?: string | null
+          default_expense_account_id?: string | null
+          default_income_account_id?: string | null
+          default_tax_code_id?: string | null
+          id?: string
+          invoice_sync_rules?: Json | null
+          invoice_template_id?: string | null
+          invoice_terms_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qbo_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qbo_sync_logs: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          entity_id: string | null
+          entity_type: string | null
+          error_message: string | null
+          id: string
+          status: string | null
+          sync_direction: string | null
+          sync_type: string
+          tenant_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          error_message?: string | null
+          id?: string
+          status?: string | null
+          sync_direction?: string | null
+          sync_type: string
+          tenant_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          error_message?: string | null
+          id?: string
+          status?: string | null
+          sync_direction?: string | null
+          sync_type?: string
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qbo_sync_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qbo_sync_mappings: {
+        Row: {
+          created_at: string | null
+          entity_type: string
+          id: string
+          last_synced: string | null
+          local_id: string
+          metadata: Json | null
+          qbo_id: string
+          sync_status: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_type: string
+          id?: string
+          last_synced?: string | null
+          local_id: string
+          metadata?: Json | null
+          qbo_id: string
+          sync_status?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_type?: string
+          id?: string
+          last_synced?: string | null
+          local_id?: string
+          metadata?: Json | null
+          qbo_id?: string
+          sync_status?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qbo_sync_mappings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recurring_invoice_history: {
         Row: {
           amount: number
