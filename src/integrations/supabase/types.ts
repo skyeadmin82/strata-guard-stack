@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_items: {
+        Row: {
+          assessment_id: string | null
+          assigned_to: string | null
+          category: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          due_date: string | null
+          estimated_effort: number | null
+          estimated_value: number | null
+          findings: string[] | null
+          id: string
+          priority: string
+          recommendations: string[] | null
+          status: string
+          tags: string[] | null
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assessment_id?: string | null
+          assigned_to?: string | null
+          category: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          due_date?: string | null
+          estimated_effort?: number | null
+          estimated_value?: number | null
+          findings?: string[] | null
+          id?: string
+          priority?: string
+          recommendations?: string[] | null
+          status?: string
+          tags?: string[] | null
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string | null
+          assigned_to?: string | null
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          due_date?: string | null
+          estimated_effort?: number | null
+          estimated_value?: number | null
+          findings?: string[] | null
+          id?: string
+          priority?: string
+          recommendations?: string[] | null
+          status?: string
+          tags?: string[] | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_requests: {
         Row: {
           completed_at: string | null
@@ -577,6 +643,63 @@ export type Database = {
           status?: Database["public"]["Enums"]["report_status"] | null
           tenant_id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      assessment_reports_extended: {
+        Row: {
+          assessment_id: string
+          created_at: string
+          created_by: string | null
+          downloaded_count: number | null
+          error_message: string | null
+          file_format: string
+          file_path: string | null
+          file_size_bytes: number | null
+          generated_at: string | null
+          generation_status: string
+          id: string
+          last_downloaded_at: string | null
+          report_name: string
+          report_type: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string
+          created_by?: string | null
+          downloaded_count?: number | null
+          error_message?: string | null
+          file_format?: string
+          file_path?: string | null
+          file_size_bytes?: number | null
+          generated_at?: string | null
+          generation_status?: string
+          id?: string
+          last_downloaded_at?: string | null
+          report_name: string
+          report_type?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string
+          created_by?: string | null
+          downloaded_count?: number | null
+          error_message?: string | null
+          file_format?: string
+          file_path?: string | null
+          file_size_bytes?: number | null
+          generated_at?: string | null
+          generation_status?: string
+          id?: string
+          last_downloaded_at?: string | null
+          report_name?: string
+          report_type?: string
+          tenant_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -5750,6 +5873,57 @@ export type Database = {
           validation_errors?: Json | null
           view_count?: number | null
           viewed_date?: string | null
+        }
+        Relationships: []
+      }
+      scheduled_assessments: {
+        Row: {
+          assigned_to: string | null
+          client_id: string
+          created_at: string
+          created_by: string | null
+          frequency: string | null
+          id: string
+          notes: string | null
+          notification_sent: boolean | null
+          reminder_days_before: number | null
+          scheduled_date: string
+          status: string
+          template_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          frequency?: string | null
+          id?: string
+          notes?: string | null
+          notification_sent?: boolean | null
+          reminder_days_before?: number | null
+          scheduled_date: string
+          status?: string
+          template_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          frequency?: string | null
+          id?: string
+          notes?: string | null
+          notification_sent?: boolean | null
+          reminder_days_before?: number | null
+          scheduled_date?: string
+          status?: string
+          template_id?: string
+          tenant_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
