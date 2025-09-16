@@ -14,6 +14,7 @@ import { AuthPage } from "./pages/AuthPage";
 import { ClientsPage } from "./pages/ClientsPage";
 import { UsersPage } from "./pages/UsersPage";
 import { TicketsPage } from "./pages/TicketsPage";
+import { TicketManagementPage } from "./pages/TicketManagementPage";
 import { ContractsPage } from "./pages/ContractsPage";
 import { AssessmentsPage } from "./pages/AssessmentsPage";
 import { ProposalsPage } from "./pages/ProposalsPage";
@@ -64,6 +65,7 @@ const App = () => {
                     <Route path="/clients" element={<ClientsPage />} />
                     <Route path="/users" element={<UsersPage />} />
                     <Route path="/tickets" element={<TicketsPage />} />
+                    <Route path="/tickets/management" element={<TicketManagementPage />} />
                     <Route path="/contracts" element={<ContractsPage />} />
                     <Route path="/assessments" element={<AssessmentsPage />} />
                     <Route path="/proposals" element={<ProposalsPage />} />

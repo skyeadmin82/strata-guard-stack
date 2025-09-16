@@ -322,7 +322,13 @@ export const TicketsTable: React.FC = () => {
           </Select>
         </div>
 
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => window.location.href = '/tickets/management'}>
+            <Edit className="h-4 w-4 mr-2" />
+            Manage
+          </Button>
+
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
@@ -398,6 +404,7 @@ export const TicketsTable: React.FC = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Tickets Table */}

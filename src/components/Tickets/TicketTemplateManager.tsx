@@ -433,33 +433,33 @@ export const TicketTemplateManager: React.FC = () => {
         {templates.map((template) => (
           <Card key={template.id} className={!template.is_active ? "opacity-60" : ""}>
             <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg">{template.name}</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{template.category}</Badge>
-                    <Badge variant={template.priority === 'critical' ? 'destructive' : 'secondary'}>
-                      {template.priority}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => startEdit(template)}
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteTemplate(template.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <CardTitle className="text-lg">{template.name}</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">{template.category}</Badge>
+                  <Badge variant={template.priority === 'critical' ? 'destructive' : 'secondary'}>
+                    {template.priority}
+                  </Badge>
                 </div>
               </div>
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => startEdit(template)}
+                >
+                  <Edit3 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteTemplate(template.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
             </CardHeader>
             <CardContent className="space-y-3">
               {template.description && (
