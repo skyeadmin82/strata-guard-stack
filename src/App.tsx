@@ -19,6 +19,7 @@ import TestingPage from "./pages/TestingPage";
 import { EmailMarketingPage } from "./pages/EmailMarketingPage";
 import { FieldServicePage } from "./pages/FieldServicePage";
 import { FinancialManagementPage } from "./pages/FinancialManagementPage";
+import IntegrationsPage from "./pages/IntegrationsPage";
 import LaunchPage from "./pages/LaunchPage";
 import NotFound from "./pages/NotFound";
 import { useMemo } from "react";
@@ -52,10 +53,10 @@ const App = () => {
                   <Route path="/tickets" element={<TicketsPage />} />
                   <Route path="/monitoring" element={<MonitoringPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/help" element={<HelpPage />} />
-          <Route path="/testing" element={<TestingPage />} />
-          <Route path="/launch" element={<LaunchPage />} />
-          <Route path="/testing" element={<TestingPage />} />
+                  <Route path="/help" element={<HelpPage />} />
+                  <Route path="/testing" element={<TestingPage />} />
+                  <Route path="/launch" element={<LaunchPage />} />
+                  <Route path="/integrations" element={<IntegrationsPage />} />
                   <Route path="/email" element={<EmailMarketingPage />} />
                   <Route path="/field-service" element={<FieldServicePage />} />
                   <Route path="/financial" element={<FinancialManagementPage />} />

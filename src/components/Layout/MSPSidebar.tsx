@@ -25,6 +25,7 @@ import {
   Mail,
   TestTube,
   Rocket,
+  Zap,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -75,6 +76,11 @@ const navigationItems = [
     title: 'Launch',
     url: '/launch',
     icon: Rocket,
+  },
+  {
+    title: 'Integrations',
+    url: '/integrations',
+    icon: Zap,
   },
   {
     title: 'Monitoring',

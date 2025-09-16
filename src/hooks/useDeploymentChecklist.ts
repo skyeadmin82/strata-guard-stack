@@ -272,7 +272,7 @@ export const useDeploymentChecklist = () => {
         type: 'development',
         status: 'unknown',
         config: {
-          supabase_url: import.meta.env.VITE_SUPABASE_URL || '',
+          supabase_url: 'https://ghczhzfywivhrcvncffl.supabase.co',
           environment: 'development'
         },
         healthChecks: [
@@ -292,7 +292,7 @@ export const useDeploymentChecklist = () => {
         type: 'staging',
         status: 'unknown',
         config: {
-          supabase_url: import.meta.env.VITE_SUPABASE_URL || '',
+          supabase_url: 'https://ghczhzfywivhrcvncffl.supabase.co',
           environment: 'staging'
         },
         healthChecks: [
@@ -312,7 +312,7 @@ export const useDeploymentChecklist = () => {
         type: 'production',
         status: 'unknown',
         config: {
-          supabase_url: import.meta.env.VITE_SUPABASE_URL || '',
+          supabase_url: 'https://ghczhzfywivhrcvncffl.supabase.co',
           environment: 'production'
         },
         healthChecks: [
