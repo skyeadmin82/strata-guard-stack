@@ -136,7 +136,7 @@ const Index = () => {
         },
         {
           title: 'Monthly Revenue',
-          value: mrr,
+          value: `$${Math.round(mrr).toLocaleString()}`,
           change: '+8.2%',
           trend: 'up',
           icon: DollarSign,
