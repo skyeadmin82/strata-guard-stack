@@ -4524,6 +4524,8 @@ export type Database = {
       }
       invoices: {
         Row: {
+          billing_period_end: string | null
+          billing_period_start: string | null
           client_id: string
           created_at: string
           created_by: string | null
@@ -4537,7 +4539,9 @@ export type Database = {
           notes: string | null
           payment_instructions: string | null
           payment_terms: string | null
+          recurring_schedule_id: string | null
           reminder_count: number | null
+          sent_date: string | null
           status: string
           subtotal: number
           tax_amount: number
@@ -4549,6 +4553,8 @@ export type Database = {
           validation_errors: Json | null
         }
         Insert: {
+          billing_period_end?: string | null
+          billing_period_start?: string | null
           client_id: string
           created_at?: string
           created_by?: string | null
@@ -4562,7 +4568,9 @@ export type Database = {
           notes?: string | null
           payment_instructions?: string | null
           payment_terms?: string | null
+          recurring_schedule_id?: string | null
           reminder_count?: number | null
+          sent_date?: string | null
           status?: string
           subtotal?: number
           tax_amount?: number
@@ -4574,6 +4582,8 @@ export type Database = {
           validation_errors?: Json | null
         }
         Update: {
+          billing_period_end?: string | null
+          billing_period_start?: string | null
           client_id?: string
           created_at?: string
           created_by?: string | null
@@ -4587,7 +4597,9 @@ export type Database = {
           notes?: string | null
           payment_instructions?: string | null
           payment_terms?: string | null
+          recurring_schedule_id?: string | null
           reminder_count?: number | null
+          sent_date?: string | null
           status?: string
           subtotal?: number
           tax_amount?: number
@@ -4611,6 +4623,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_recurring_schedule_id_fkey"
+            columns: ["recurring_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_invoice_schedules"
             referencedColumns: ["id"]
           },
         ]
