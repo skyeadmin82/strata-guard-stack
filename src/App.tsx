@@ -15,6 +15,7 @@ import { TicketsPage } from "./pages/TicketsPage";
 import { MonitoringPage } from "./pages/MonitoringPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { HelpPage } from "./pages/HelpPage";
+import { EmailMarketingPage } from "./pages/EmailMarketingPage";
 import NotFound from "./pages/NotFound";
 import { useMemo } from "react";
 
@@ -48,6 +49,7 @@ const App = () => {
                   <Route path="/monitoring" element={<MonitoringPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/help" element={<HelpPage />} />
+                  <Route path="/email" element={<EmailMarketingPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
