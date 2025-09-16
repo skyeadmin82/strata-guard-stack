@@ -543,12 +543,31 @@ export const EnhancedClientsTable: React.FC<EnhancedClientsTableProps> = ({
       <Dialog open={!!selectedClientForDetails} onOpenChange={(open) => !open && setSelectedClientForDetails(null)}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {selectedClientForDetails && clients.find(c => c.id === selectedClientForDetails)?.name}
-            </DialogTitle>
-            <DialogDescription>
-              Detailed client information, statistics, and activity timeline
-            </DialogDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle>
+                  {selectedClientForDetails && clients.find(c => c.id === selectedClientForDetails)?.name}
+                </DialogTitle>
+                <DialogDescription>
+                  Detailed client information, statistics, and activity timeline
+                </DialogDescription>
+              </div>
+              {selectedClientForDetails && (
+                <Button
+                  onClick={() => {
+                    const client = clients.find(c => c.id === selectedClientForDetails);
+                    if (client) {
+                      setSelectedClientForDetails(null);
+                      onEditClient(client);
+                    }
+                  }}
+                  className="shrink-0"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Client
+                </Button>
+              )}
+            </div>
           </DialogHeader>
           
           {selectedClientForDetails && (
