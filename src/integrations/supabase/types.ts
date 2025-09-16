@@ -1628,6 +1628,69 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_transactions: {
+        Row: {
+          agent_id: string | null
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          calculation_basis: string | null
+          commission_period_end: string | null
+          commission_period_start: string | null
+          created_at: string | null
+          deal_id: string | null
+          id: string
+          notes: string | null
+          payment_date: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          rate: number | null
+          status: string | null
+          tenant_id: string
+          transaction_type: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          calculation_basis?: string | null
+          commission_period_end?: string | null
+          commission_period_start?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          rate?: number | null
+          status?: string | null
+          tenant_id: string
+          transaction_type?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          calculation_basis?: string | null
+          commission_period_end?: string | null
+          commission_period_start?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          rate?: number | null
+          status?: string | null
+          tenant_id?: string
+          transaction_type?: string | null
+        }
+        Relationships: []
+      }
       company_settings: {
         Row: {
           category: string
@@ -4578,6 +4641,45 @@ export type Database = {
           },
         ]
       }
+      lead_distribution_rules: {
+        Row: {
+          assignment_settings: Json | null
+          conditions: Json | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          priority: number | null
+          rule_name: string
+          rule_type: string | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          assignment_settings?: Json | null
+          conditions?: Json | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          rule_name: string
+          rule_type?: string | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          assignment_settings?: Json | null
+          conditions?: Json | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          rule_name?: string
+          rule_type?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           attachments: Json | null
@@ -6718,6 +6820,420 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sales_activities: {
+        Row: {
+          activity_type: string
+          agent_id: string | null
+          attachments: Json | null
+          attendees: string[] | null
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          lead_id: string | null
+          location: string | null
+          next_action: string | null
+          next_action_date: string | null
+          outcome: string | null
+          subject: string | null
+          tenant_id: string
+        }
+        Insert: {
+          activity_type: string
+          agent_id?: string | null
+          attachments?: Json | null
+          attendees?: string[] | null
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          lead_id?: string | null
+          location?: string | null
+          next_action?: string | null
+          next_action_date?: string | null
+          outcome?: string | null
+          subject?: string | null
+          tenant_id: string
+        }
+        Update: {
+          activity_type?: string
+          agent_id?: string | null
+          attachments?: Json | null
+          attendees?: string[] | null
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          lead_id?: string | null
+          location?: string | null
+          next_action?: string | null
+          next_action_date?: string | null
+          outcome?: string | null
+          subject?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      sales_agents: {
+        Row: {
+          agent_code: string
+          agent_type: string | null
+          average_deal_size: number | null
+          commission_rate: number | null
+          commission_structure: Json | null
+          conversion_rate: number | null
+          created_at: string | null
+          deals_closed: number | null
+          email: string
+          first_name: string
+          id: string
+          last_activity_at: string | null
+          last_name: string
+          lead_assignment_enabled: boolean | null
+          max_active_leads: number | null
+          onboarded_at: string | null
+          phone: string | null
+          specializations: string[] | null
+          status: string | null
+          tenant_id: string
+          territory: string | null
+          tier: string | null
+          total_commission_earned: number | null
+          total_sales: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          agent_code: string
+          agent_type?: string | null
+          average_deal_size?: number | null
+          commission_rate?: number | null
+          commission_structure?: Json | null
+          conversion_rate?: number | null
+          created_at?: string | null
+          deals_closed?: number | null
+          email: string
+          first_name: string
+          id?: string
+          last_activity_at?: string | null
+          last_name: string
+          lead_assignment_enabled?: boolean | null
+          max_active_leads?: number | null
+          onboarded_at?: string | null
+          phone?: string | null
+          specializations?: string[] | null
+          status?: string | null
+          tenant_id: string
+          territory?: string | null
+          tier?: string | null
+          total_commission_earned?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          agent_code?: string
+          agent_type?: string | null
+          average_deal_size?: number | null
+          commission_rate?: number | null
+          commission_structure?: Json | null
+          conversion_rate?: number | null
+          created_at?: string | null
+          deals_closed?: number | null
+          email?: string
+          first_name?: string
+          id?: string
+          last_activity_at?: string | null
+          last_name?: string
+          lead_assignment_enabled?: boolean | null
+          max_active_leads?: number | null
+          onboarded_at?: string | null
+          phone?: string | null
+          specializations?: string[] | null
+          status?: string | null
+          tenant_id?: string
+          territory?: string | null
+          tier?: string | null
+          total_commission_earned?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      sales_deals: {
+        Row: {
+          actual_close_date: string | null
+          agent_id: string | null
+          client_id: string | null
+          commission_amount: number | null
+          commission_paid: boolean | null
+          commission_paid_date: string | null
+          commission_rate: number | null
+          competitive_notes: string | null
+          competitors: string[] | null
+          contract_length_months: number | null
+          created_at: string | null
+          deal_name: string
+          deal_type: string | null
+          deal_value: number
+          expected_close_date: string | null
+          id: string
+          lead_id: string | null
+          one_time_value: number | null
+          probability: number | null
+          recurring_value: number | null
+          stage: string | null
+          start_date: string | null
+          tenant_id: string
+          updated_at: string | null
+          weighted_value: number | null
+          win_loss_reason: string | null
+        }
+        Insert: {
+          actual_close_date?: string | null
+          agent_id?: string | null
+          client_id?: string | null
+          commission_amount?: number | null
+          commission_paid?: boolean | null
+          commission_paid_date?: string | null
+          commission_rate?: number | null
+          competitive_notes?: string | null
+          competitors?: string[] | null
+          contract_length_months?: number | null
+          created_at?: string | null
+          deal_name: string
+          deal_type?: string | null
+          deal_value: number
+          expected_close_date?: string | null
+          id?: string
+          lead_id?: string | null
+          one_time_value?: number | null
+          probability?: number | null
+          recurring_value?: number | null
+          stage?: string | null
+          start_date?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          weighted_value?: number | null
+          win_loss_reason?: string | null
+        }
+        Update: {
+          actual_close_date?: string | null
+          agent_id?: string | null
+          client_id?: string | null
+          commission_amount?: number | null
+          commission_paid?: boolean | null
+          commission_paid_date?: string | null
+          commission_rate?: number | null
+          competitive_notes?: string | null
+          competitors?: string[] | null
+          contract_length_months?: number | null
+          created_at?: string | null
+          deal_name?: string
+          deal_type?: string | null
+          deal_value?: number
+          expected_close_date?: string | null
+          id?: string
+          lead_id?: string | null
+          one_time_value?: number | null
+          probability?: number | null
+          recurring_value?: number | null
+          stage?: string | null
+          start_date?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          weighted_value?: number | null
+          win_loss_reason?: string | null
+        }
+        Relationships: []
+      }
+      sales_goals: {
+        Row: {
+          agent_id: string | null
+          created_at: string | null
+          current_value: number | null
+          goal_type: string | null
+          id: string
+          period_end: string
+          period_start: string
+          period_type: string | null
+          progress_percentage: number | null
+          status: string | null
+          target_value: number
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string | null
+          current_value?: number | null
+          goal_type?: string | null
+          id?: string
+          period_end: string
+          period_start: string
+          period_type?: string | null
+          progress_percentage?: number | null
+          status?: string | null
+          target_value: number
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string | null
+          current_value?: number | null
+          goal_type?: string | null
+          id?: string
+          period_end?: string
+          period_start?: string
+          period_type?: string | null
+          progress_percentage?: number | null
+          status?: string | null
+          target_value?: number
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sales_leads: {
+        Row: {
+          actual_value: number | null
+          annual_revenue: string | null
+          assigned_agent_id: string | null
+          assigned_at: string | null
+          budget_range: string | null
+          company_name: string
+          company_size: string | null
+          contact_name: string | null
+          converted_at: string | null
+          created_at: string | null
+          decision_timeline: string | null
+          email: string | null
+          estimated_value: number | null
+          first_contact_at: string | null
+          id: string
+          industry: string | null
+          interested_services: string[] | null
+          last_contact_at: string | null
+          lost_reason: string | null
+          pain_points: string[] | null
+          phone: string | null
+          score: number | null
+          source: string | null
+          status: string | null
+          temperature: string | null
+          tenant_id: string
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          actual_value?: number | null
+          annual_revenue?: string | null
+          assigned_agent_id?: string | null
+          assigned_at?: string | null
+          budget_range?: string | null
+          company_name: string
+          company_size?: string | null
+          contact_name?: string | null
+          converted_at?: string | null
+          created_at?: string | null
+          decision_timeline?: string | null
+          email?: string | null
+          estimated_value?: number | null
+          first_contact_at?: string | null
+          id?: string
+          industry?: string | null
+          interested_services?: string[] | null
+          last_contact_at?: string | null
+          lost_reason?: string | null
+          pain_points?: string[] | null
+          phone?: string | null
+          score?: number | null
+          source?: string | null
+          status?: string | null
+          temperature?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          actual_value?: number | null
+          annual_revenue?: string | null
+          assigned_agent_id?: string | null
+          assigned_at?: string | null
+          budget_range?: string | null
+          company_name?: string
+          company_size?: string | null
+          contact_name?: string | null
+          converted_at?: string | null
+          created_at?: string | null
+          decision_timeline?: string | null
+          email?: string | null
+          estimated_value?: number | null
+          first_contact_at?: string | null
+          id?: string
+          industry?: string | null
+          interested_services?: string[] | null
+          last_contact_at?: string | null
+          lost_reason?: string | null
+          pain_points?: string[] | null
+          phone?: string | null
+          score?: number | null
+          source?: string | null
+          status?: string | null
+          temperature?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      sales_report_templates: {
+        Row: {
+          configuration: Json | null
+          created_at: string | null
+          frequency: string | null
+          id: string
+          last_run_at: string | null
+          next_run_at: string | null
+          recipients: string[] | null
+          report_name: string
+          report_type: string | null
+          tenant_id: string
+        }
+        Insert: {
+          configuration?: Json | null
+          created_at?: string | null
+          frequency?: string | null
+          id?: string
+          last_run_at?: string | null
+          next_run_at?: string | null
+          recipients?: string[] | null
+          report_name: string
+          report_type?: string | null
+          tenant_id: string
+        }
+        Update: {
+          configuration?: Json | null
+          created_at?: string | null
+          frequency?: string | null
+          id?: string
+          last_run_at?: string | null
+          next_run_at?: string | null
+          recipients?: string[] | null
+          report_name?: string
+          report_type?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
       }
       scheduled_assessments: {
         Row: {

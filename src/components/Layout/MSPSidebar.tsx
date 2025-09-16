@@ -31,6 +31,7 @@ import {
   FileCheck,
   BarChart3,
   Package,
+  Target,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -96,6 +97,11 @@ const navigationItems = [
     title: 'Financial',
     url: '/financial',
     icon: DollarSign,
+  },
+  {
+    title: 'Sales',
+    url: '/sales',
+    icon: Target,
   },
   {
     title: 'Reports',

@@ -32,6 +32,7 @@ import Integrations from "./pages/Integrations";
 import LaunchPage from "./pages/LaunchPage";
 import DatabaseDiagnosticPage from "./pages/DatabaseDiagnosticPage";
 import NotFound from "./pages/NotFound";
+import SalesPage from "./pages/SalesPage";
 import { useMemo } from "react";
 
 const App = () => {
@@ -84,6 +85,7 @@ const App = () => {
                     <Route path="/email" element={<EmailMarketingPage />} />
                     <Route path="/field-service" element={<FieldServicePage />} />
                     <Route path="/financial" element={<FinancialManagementPage />} />
+                    <Route path="/sales" element={<SalesPage />} />
                     <Route path="/admin/database" element={<DatabaseDiagnosticPage />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
