@@ -17,6 +17,7 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { HelpPage } from "./pages/HelpPage";
 import { EmailMarketingPage } from "./pages/EmailMarketingPage";
 import { FieldServicePage } from "./pages/FieldServicePage";
+import { FinancialManagementPage } from "./pages/FinancialManagementPage";
 import NotFound from "./pages/NotFound";
 import { useMemo } from "react";
 
@@ -52,6 +53,7 @@ const App = () => {
                   <Route path="/help" element={<HelpPage />} />
                   <Route path="/email" element={<EmailMarketingPage />} />
                   <Route path="/field-service" element={<FieldServicePage />} />
+                  <Route path="/financial" element={<FinancialManagementPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
