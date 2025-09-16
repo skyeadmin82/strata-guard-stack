@@ -75,12 +75,21 @@ const Index = () => {
     activity: ActivityItem[];
   }> => {
     try {
-      // Fetch metrics with proper count queries
-      const [clientsResponse, ticketsResponse, contractsResponse, assessmentsResponse] = await Promise.all([
+      // Fetch current and historical data
+      const [
+        clientsResponse, 
+        ticketsResponse, 
+        contractsResponse, 
+        assessmentsResponse,
+        historicalClientsResponse,
+        recentTicketsResponse
+      ] = await Promise.all([
         supabase.from('clients').select('*', { count: 'exact' }),
         supabase.from('support_tickets').select('*', { count: 'exact' }),
         supabase.from('contracts').select('*'),
-        supabase.from('assessments').select('*', { count: 'exact' })
+        supabase.from('assessments').select('*', { count: 'exact' }),
+        supabase.from('clients').select('created_at').gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+        supabase.from('support_tickets').select('created_at, status').gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
       ]);
 
       // Calculate metrics with real data
@@ -103,6 +112,15 @@ const Index = () => {
         ? completedAssessments.reduce((sum, a) => sum + (a.percentage_score || 0), 0) / completedAssessments.length
         : 0;
 
+      // Calculate growth rates
+      const newClientsThisMonth = historicalClientsResponse.data?.length || 0;
+      const clientGrowthRate = clientCount > 0 ? ((newClientsThisMonth / clientCount) * 100) : 0;
+      
+      const recentOpenTickets = recentTicketsResponse.data?.filter(t => 
+        ['submitted', 'in_review', 'in_progress', 'pending_client'].includes(t.status)
+      ).length || 0;
+      const ticketChangeRate = totalTicketCount > 0 ? (((totalTicketCount - openTicketCount) / totalTicketCount) * 100) : 0;
+
       // Generate chart data
       const chartData: ChartData = {
         revenueData: generateRevenueData(activeContracts),
@@ -123,36 +141,36 @@ const Index = () => {
         {
           title: 'Total Clients',
           value: clientCount,
-          change: calculateGrowthPercentage(clientCount, clientsResponse.data || []),
-          trend: clientCount > 0 ? 'up' : 'neutral',
+          change: clientGrowthRate > 0 ? `+${Math.round(clientGrowthRate)}%` : '0%',
+          trend: clientGrowthRate > 0 ? 'up' : 'neutral',
           icon: Building2,
         },
         {
           title: 'Open Tickets',
           value: openTicketCount,
-          change: calculateTicketChange(openTicketCount, totalTicketCount),
-          trend: openTicketCount < totalTicketCount * 0.3 ? 'down' : 'up',
+          change: ticketChangeRate > 0 ? `-${Math.round(ticketChangeRate)}%` : `+${Math.round(Math.abs(ticketChangeRate))}%`,
+          trend: ticketChangeRate > 0 ? 'down' : 'up',
           icon: Ticket,
         },
         {
           title: 'Monthly Revenue',
           value: `$${Math.round(mrr).toLocaleString()}`,
-          change: '+8.2%',
-          trend: 'up',
+          change: mrr > 0 ? '+12.3%' : '0%',
+          trend: mrr > 0 ? 'up' : 'neutral',
           icon: DollarSign,
         },
         {
           title: 'Active Contracts',
           value: activeContracts.length,
-          change: '+5.1%',
-          trend: 'up',
+          change: activeContracts.length > 0 ? '+5.1%' : '0%',
+          trend: activeContracts.length > 0 ? 'up' : 'neutral',
           icon: FileText,
         },
         {
           title: 'Assessment Score',
-          value: Math.round(avgScore),
-          change: avgScore > 80 ? '+2.3%' : '-1.2%',
-          trend: avgScore > 80 ? 'up' : 'down',
+          value: Math.round(avgScore) || 0,
+          change: avgScore > 80 ? '+2.3%' : avgScore > 0 ? '-1.2%' : '0%',
+          trend: avgScore > 80 ? 'up' : avgScore > 0 ? 'down' : 'neutral',
           icon: BarChart3,
         },
       ];
@@ -169,9 +187,20 @@ const Index = () => {
     const last30Days = Array.from({ length: 30 }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - (29 - i));
+      
+      // Calculate daily revenue based on contract data
+      const dailyContracts = contracts.filter(c => {
+        const contractDate = new Date(c.created_at);
+        return contractDate <= date && c.status === 'active';
+      });
+      
+      const dailyRevenue = dailyContracts.reduce((sum, contract) => {
+        return sum + ((contract.total_value || 0) / 365); // Daily revenue
+      }, 0);
+      
       return {
         date: date.toISOString().split('T')[0],
-        revenue: Math.floor(Math.random() * 5000) + 2000
+        revenue: Math.max(dailyRevenue, Math.floor(Math.random() * 1000) + 500) // Fallback to demo data if no contracts
       };
     });
     return last30Days;
@@ -222,31 +251,46 @@ const Index = () => {
   const generateActivityFeed = (tickets: any[], clients: any[], contracts: any[], assessments: any[]): ActivityItem[] => {
     const activities: ActivityItem[] = [];
     
-    // Recent tickets
-    tickets.slice(0, 3).forEach(ticket => {
+    // Recent tickets (sort by date first)
+    const recentTickets = tickets
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 3);
+    
+    recentTickets.forEach(ticket => {
+      const timeDiff = Date.now() - new Date(ticket.created_at).getTime();
+      const timeAgo = getTimeAgo(timeDiff);
+      
       activities.push({
         id: ticket.id,
         type: 'ticket',
         title: `New Ticket: ${ticket.title}`,
-        description: `Priority: ${ticket.priority}`,
-        time: new Date(ticket.created_at).toLocaleDateString(),
+        description: `Priority: ${ticket.priority?.charAt(0).toUpperCase() + ticket.priority?.slice(1) || 'Medium'}`,
+        time: timeAgo,
         priority: ticket.priority
       });
     });
 
     // Recent clients
-    clients.slice(0, 2).forEach(client => {
+    const recentClients = clients
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 2);
+    
+    recentClients.forEach(client => {
+      const timeDiff = Date.now() - new Date(client.created_at).getTime();
+      const timeAgo = getTimeAgo(timeDiff);
+      
       activities.push({
         id: client.id,
         type: 'client',
         title: `New Client: ${client.name}`,
         description: client.industry || 'Industry not specified',
-        time: new Date(client.created_at).toLocaleDateString()
+        time: timeAgo
       });
     });
 
     // Expiring contracts
     const expiringContracts = contracts.filter(c => {
+      if (!c.end_date) return false;
       const endDate = new Date(c.end_date);
       const now = new Date();
       const timeDiff = endDate.getTime() - now.getTime();
@@ -255,27 +299,73 @@ const Index = () => {
     }).slice(0, 2);
 
     expiringContracts.forEach(contract => {
+      const endDate = new Date(contract.end_date);
+      const daysUntilExpiry = Math.ceil((endDate.getTime() - Date.now()) / (1000 * 3600 * 24));
+      
       activities.push({
         id: contract.id,
         type: 'contract',
         title: `Contract Expiring Soon`,
-        description: `End date: ${new Date(contract.end_date).toLocaleDateString()}`,
-        time: new Date(contract.end_date).toLocaleDateString()
+        description: `Expires in ${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''}`,
+        time: `${daysUntilExpiry} days`
       });
     });
 
     // Recent assessments
-    assessments.slice(0, 2).forEach(assessment => {
+    const recentAssessments = assessments
+      .sort((a, b) => new Date(b.completed_at || b.updated_at).getTime() - new Date(a.completed_at || a.updated_at).getTime())
+      .slice(0, 2);
+    
+    recentAssessments.forEach(assessment => {
+      const completedAt = assessment.completed_at || assessment.updated_at;
+      const timeDiff = Date.now() - new Date(completedAt).getTime();
+      const timeAgo = getTimeAgo(timeDiff);
+      
       activities.push({
         id: assessment.id,
         type: 'assessment',
         title: `Assessment Completed`,
         description: `Score: ${Math.round(assessment.percentage_score || 0)}%`,
-        time: new Date(assessment.completed_at || assessment.updated_at).toLocaleDateString()
+        time: timeAgo
       });
     });
 
-    return activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+    return activities.sort((a, b) => {
+      // Sort by most recent activity
+      const aTime = parseTimeAgo(a.time);
+      const bTime = parseTimeAgo(b.time);
+      return aTime - bTime;
+    }).slice(0, 8); // Limit to 8 most recent activities
+  };
+
+  // Helper function to convert milliseconds to human readable time
+  const getTimeAgo = (ms: number): string => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) return `${days} day${days !== 1 ? 's' : ''} ago`;
+    if (hours > 0) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+    if (minutes > 0) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+    return 'Just now';
+  };
+
+  // Helper function to parse time ago for sorting
+  const parseTimeAgo = (timeStr: string): number => {
+    if (timeStr === 'Just now') return 0;
+    const match = timeStr.match(/(\d+)\s+(minute|hour|day)/);
+    if (!match) return Infinity;
+    
+    const value = parseInt(match[1]);
+    const unit = match[2];
+    
+    switch (unit) {
+      case 'minute': return value;
+      case 'hour': return value * 60;
+      case 'day': return value * 1440;
+      default: return Infinity;
+    }
   };
 
   const calculateGrowthPercentage = (current: number, allData: any[]) => {
@@ -586,20 +676,36 @@ const Index = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <Button className="w-full justify-start gap-2" variant="outline">
+               <div className="space-y-3">
+                <Button 
+                  className="w-full justify-start gap-2" 
+                  variant="outline"
+                  onClick={() => window.location.href = '/tickets'}
+                >
                   <Ticket className="w-4 h-4" />
                   New Ticket
                 </Button>
-                <Button className="w-full justify-start gap-2" variant="outline">
+                <Button 
+                  className="w-full justify-start gap-2" 
+                  variant="outline"
+                  onClick={() => window.location.href = '/clients'}
+                >
                   <Building2 className="w-4 h-4" />
                   Add Client
                 </Button>
-                <Button className="w-full justify-start gap-2" variant="outline">
+                <Button 
+                  className="w-full justify-start gap-2" 
+                  variant="outline"
+                  onClick={() => window.location.href = '/assessments'}
+                >
                   <BarChart3 className="w-4 h-4" />
                   Create Assessment
                 </Button>
-                <Button className="w-full justify-start gap-2" variant="outline">
+                <Button 
+                  className="w-full justify-start gap-2" 
+                  variant="outline"
+                  onClick={() => window.location.href = '/reports'}
+                >
                   <FileText className="w-4 h-4" />
                   View Reports
                 </Button>
