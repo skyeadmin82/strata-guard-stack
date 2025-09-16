@@ -73,8 +73,8 @@ All colors MUST be HSL.
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 214.3 31.8% 85%; /* Darker for better contrast */
+    --input: 214.3 31.8% 85%; /* Darker for better contrast */
     --ring: 243 79% 57%; /* Match primary */
 
     --radius: var(--radius-enterprise);

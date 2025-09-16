@@ -10,6 +10,7 @@ import { useSystemIntegration } from '@/hooks/useSystemIntegration';
 import { useUXPolish } from '@/hooks/useUXPolish';
 import { useAdminTools } from '@/hooks/useAdminTools';
 import { useLaunchReadiness } from '@/hooks/useLaunchReadiness';
+import { LiveRegion, VisibleLiveRegion } from '@/components/ui/live-region';
 import {
   CheckCircle2,
   XCircle,
@@ -193,7 +194,15 @@ export const LaunchReadinessDashboard: React.FC = () => {
             value={overallReadinessScore} 
             className="mb-4" 
             aria-label={`Launch readiness progress: ${overallReadinessScore} percent complete`}
+            role="progressbar"
+            aria-valuenow={overallReadinessScore}
+            aria-valuemin={0}
+            aria-valuemax={100}
           />
+          
+          <LiveRegion>
+            Launch readiness is at {overallReadinessScore}%. {overallReadinessScore >= 90 ? 'Ready to launch!' : overallReadinessScore >= 75 ? 'Almost ready for launch.' : 'More work needed before launch.'}
+          </LiveRegion>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4" role="group" aria-label="Readiness metrics">
             <div className="text-center p-4 border rounded-lg" role="group" aria-labelledby="integration-metric">
@@ -218,7 +227,7 @@ export const LaunchReadinessDashboard: React.FC = () => {
             <Alert className="mt-4" role="alert" aria-live="polite">
               <AlertTriangle className="h-4 w-4" aria-hidden="true" />
               <AlertDescription>
-                <strong>Launch Blockers:</strong> {launchReport.blockers.join(', ')}
+                <strong>Launch Blockers ({launchReport.blockers.length}):</strong> {launchReport.blockers.join(', ')}
               </AlertDescription>
             </Alert>
           )}
@@ -691,7 +700,13 @@ export const LaunchReadinessDashboard: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Progress value={(launchReport.onboarding.completedSteps / launchReport.onboarding.totalSteps) * 100} className="mb-4" />
+                <Progress value={(launchReport.onboarding.completedSteps / launchReport.onboarding.totalSteps) * 100} className="mb-4" 
+                  aria-label={`Onboarding progress: ${launchReport.onboarding.completedSteps} of ${launchReport.onboarding.totalSteps} steps completed`}
+                  role="progressbar"
+                  aria-valuenow={Math.round((launchReport.onboarding.completedSteps / launchReport.onboarding.totalSteps) * 100)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                />
                 
                 <div className="space-y-3">
                   {onboardingSteps.map(step => (
@@ -725,7 +740,13 @@ export const LaunchReadinessDashboard: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Progress value={(launchReport.checklist.completedItems / launchReport.checklist.totalItems) * 100} className="mb-4" />
+                <Progress value={(launchReport.checklist.completedItems / launchReport.checklist.totalItems) * 100} className="mb-4"
+                  aria-label={`Go-live checklist progress: ${launchReport.checklist.completedItems} of ${launchReport.checklist.totalItems} items completed`}
+                  role="progressbar"
+                  aria-valuenow={Math.round((launchReport.checklist.completedItems / launchReport.checklist.totalItems) * 100)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                />
                 
                 <div className="space-y-3">
                   {goLiveChecklist.slice(0, 8).map(item => (
