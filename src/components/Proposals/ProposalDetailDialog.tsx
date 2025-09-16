@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ProposalESignature } from './ProposalESignature';
 import { ProposalTracking } from './ProposalTracking';
 import { ProposalPDFGenerator } from './ProposalPDFGenerator';
 import { ProposalApprovalWorkflow } from './ProposalApprovalWorkflow';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Edit, Download, Send, Eye, Calendar } from 'lucide-react';
+import { Edit, Download, Send, Eye, Calendar, Package, ShoppingCart } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Proposal {
@@ -37,6 +38,27 @@ interface Proposal {
   payment_terms?: string;
 }
 
+interface ProposalItem {
+  id: string;
+  item_order: number;
+  item_type: string;
+  category: string;
+  name: string;
+  description: string;
+  sku?: string;
+  quantity: number;
+  unit_price: number;
+  discount_percent: number;
+  discount_amount: number;
+  tax_percent: number;
+  total_price: number;
+  billing_cycle?: string;
+  setup_fee?: number;
+  renewal_price?: number;
+  vendor?: string;
+  margin_percent?: number;
+}
+
 interface ProposalDetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -51,7 +73,60 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
   onEdit
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [proposalItems, setProposalItems] = useState<ProposalItem[]>([]);
+  const [loadingItems, setLoadingItems] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (proposal?.id) {
+      fetchProposalItems();
+    }
+  }, [proposal?.id]);
+
+  const fetchProposalItems = async () => {
+    if (!proposal?.id) return;
+    
+    try {
+      setLoadingItems(true);
+      const { data, error } = await supabase
+        .from('proposal_items')
+        .select('*')
+        .eq('proposal_id', proposal.id)
+        .order('item_order', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching proposal items:', error);
+        return;
+      }
+
+      const items: ProposalItem[] = (data || []).map(item => ({
+        id: item.id,
+        item_order: item.item_order || 1,
+        item_type: item.item_type || 'product',
+        category: (item.metadata as any)?.category || '',
+        name: item.name || '',
+        description: item.description || '',
+        sku: (item.metadata as any)?.sku || undefined,
+        quantity: item.quantity || 1,
+        unit_price: parseFloat(String(item.unit_price || 0)),
+        discount_percent: parseFloat(String(item.discount_percent || 0)),
+        discount_amount: (item.metadata as any)?.discount_amount ? parseFloat(String((item.metadata as any).discount_amount)) : 0,
+        tax_percent: parseFloat(String(item.tax_percent || 0)),
+        total_price: parseFloat(String(item.total_price || 0)),
+        billing_cycle: (item.metadata as any)?.billing_cycle,
+        setup_fee: (item.metadata as any)?.setup_fee ? parseFloat(String((item.metadata as any).setup_fee)) : undefined,
+        renewal_price: (item.metadata as any)?.renewal_price ? parseFloat(String((item.metadata as any).renewal_price)) : undefined,
+        vendor: (item.metadata as any)?.vendor || undefined,
+        margin_percent: (item.metadata as any)?.margin_percent ? parseFloat(String((item.metadata as any).margin_percent)) : undefined
+      }));
+
+      setProposalItems(items);
+    } catch (error) {
+      console.error('Error fetching proposal items:', error);
+    } finally {
+      setLoadingItems(false);
+    }
+  };
 
   if (!proposal) return null;
 
@@ -249,6 +324,87 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
                 </CardContent>
               </Card>
             </div>
+            
+            {/* Proposal Items - NEW ENHANCED FEATURE */}
+            {proposalItems.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    Proposal Items
+                    <Badge variant="secondary" className="ml-2">
+                      {proposalItems.length} item{proposalItems.length !== 1 ? 's' : ''}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Item</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead className="text-right">Qty</TableHead>
+                          <TableHead className="text-right">Unit Price</TableHead>
+                          <TableHead className="text-right">Total</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {proposalItems.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{item.name}</div>
+                                {item.description && (
+                                  <div className="text-sm text-muted-foreground">{item.description}</div>
+                                )}
+                                {item.sku && (
+                                  <div className="text-xs text-muted-foreground">SKU: {item.sku}</div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                item.item_type === 'subscription' ? 'outline' :
+                                item.item_type === 'service' ? 'secondary' :
+                                item.item_type === 'one-time' ? 'destructive' : 'default'
+                              }>
+                                {item.item_type}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">{item.quantity}</TableCell>
+                            <TableCell className="text-right">
+                              {formatCurrency(item.unit_price, proposal.currency)}
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatCurrency(item.total_price, proposal.currency)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {proposalItems.length === 0 && !loadingItems && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ShoppingCart className="w-5 h-5" />
+                    Proposal Items
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No line items found for this proposal</p>
+                    <p className="text-sm">Items may have been added as a single total amount</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Engagement Stats */}
             <Card>
