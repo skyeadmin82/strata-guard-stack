@@ -251,16 +251,18 @@ export const useBusinessIntelligence = () => {
     try {
       const result = await generateReport(reportId);
       
-      if (result.success && result.data) {
-        // Here you would implement actual export logic
-        const exportData = formatDataForExport(result.data, format);
-        
-        toast({
-          title: "Export Successful",
-          description: `Report exported as ${format.toUpperCase()}`,
-        });
-        
-        return { success: true, data: exportData };
+      if (result.success) {
+        const data = (result as any).data;
+        if (data) {
+          const exportData = formatDataForExport(data, format);
+          
+          toast({
+            title: "Export Successful",
+            description: `Report exported as ${format.toUpperCase()}`,
+          });
+          
+          return { success: true, data: exportData };
+        }
       }
 
       return { success: false, error: 'Failed to generate data for export' };

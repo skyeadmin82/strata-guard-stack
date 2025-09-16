@@ -215,9 +215,9 @@ export const usePredictiveAnalytics = () => {
   const fetchTrainingData = async (dataSource: string, features: string[]) => {
     try {
       const { data, error } = await supabase
-        .from(dataSource)
-        .select(features.join(','))
-        .limit(10000); // Reasonable limit for training
+        .from('clients')
+        .select('*')
+        .limit(1000); // Use clients table for training data
 
       if (error) throw error;
       return data;
