@@ -112,7 +112,18 @@ export const ClientForm: React.FC<ClientFormProps> = ({
     }
 
     try {
-      await onSubmit(formData as any);
+      // Transform form data to match database constraints
+      const submissionData = {
+        ...formData,
+        // Convert empty strings to null for fields with database constraints
+        company_size: formData.company_size || null,
+        industry: formData.industry || null,
+        website: formData.website || null,
+        phone: formData.phone || null,
+        notes: formData.notes || null,
+      };
+      
+      await onSubmit(submissionData as any);
       
       // Clear draft on successful submission
       if (!client) {
