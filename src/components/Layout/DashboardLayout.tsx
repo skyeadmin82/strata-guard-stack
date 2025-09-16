@@ -4,6 +4,8 @@ import { MSPSidebar } from './MSPSidebar';
 import { EnvironmentBanner } from '@/components/EnvironmentBanner';
 import { EnvironmentSwitcher } from '@/components/EnvironmentSwitcher';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { NotificationCenter } from '@/components/Notifications/NotificationCenter';
+import { OnboardingTour, useOnboarding } from '@/components/Help/OnboardingTour';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface DashboardLayoutProps {
@@ -12,6 +14,7 @@ interface DashboardLayoutProps {
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { profile } = useAuth();
+  const { showTour, closeTour } = useOnboarding();
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,6 +33,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               </div>
               <div className="flex items-center gap-4">
                 <EnvironmentSwitcher />
+                <div data-tour="notifications">
+                  <NotificationCenter />
+                </div>
                 {profile && (
                   <div className="text-sm text-muted-foreground">
                     Welcome, {profile.first_name || profile.email}
@@ -47,6 +53,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </div>
         </div>
       </SidebarProvider>
+      
+      {/* Onboarding Tour */}
+      <OnboardingTour isOpen={showTour} onClose={closeTour} />
     </div>
   );
 };
