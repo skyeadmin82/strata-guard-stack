@@ -103,7 +103,7 @@ export const useSettings = () => {
       // Merge settings by category
       const settings: Partial<UserSettings> = {};
       data?.forEach(setting => {
-        settings[setting.category as keyof UserSettings] = setting.settings;
+        settings[setting.category as keyof UserSettings] = setting.settings as any;
       });
 
       // Set defaults for missing categories
@@ -143,12 +143,13 @@ export const useSettings = () => {
   }, [profile?.id]);
 
   const saveUserSettings = useCallback(async (category: keyof UserSettings, settings: any) => {
-    if (!profile?.id) return;
+    if (!profile?.id || !profile?.tenant_id) return;
 
     try {
       const { error } = await supabase
         .from('user_settings')
         .upsert({
+          tenant_id: profile.tenant_id,
           user_id: profile.id,
           category,
           settings,
@@ -173,7 +174,7 @@ export const useSettings = () => {
         variant: "destructive",
       });
     }
-  }, [profile?.id]);
+  }, [profile?.id, profile?.tenant_id]);
 
   const loadCompanySettings = useCallback(async () => {
     if (!profile?.tenant_id) return;
@@ -190,7 +191,7 @@ export const useSettings = () => {
       // Merge settings by category
       const settings: Partial<CompanySettings> = {};
       data?.forEach(setting => {
-        settings[setting.category as keyof CompanySettings] = setting.settings;
+        settings[setting.category as keyof CompanySettings] = setting.settings as any;
       });
 
       // Set defaults for missing categories

@@ -161,6 +161,12 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ isOpen, onClose 
   const handleComplete = async () => {
     // Mark onboarding as completed
     await saveUserSettings('preferences', {
+      theme: 'system' as const,
+      language: 'en',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      date_format: 'MM/dd/yyyy',
+      time_format: '12h' as const,
+      dashboard_layout: 'comfortable' as const,
       onboarding_completed: true,
       onboarding_completed_at: new Date().toISOString(),
     });
@@ -243,24 +249,24 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ isOpen, onClose 
         </CardContent>
       </Card>
 
-      {/* Custom styles for highlighting */}
-      <style jsx global>{`
+      {/* Custom styles injected via className */}
+      <style>{`
         .tour-highlight {
-          position: relative;
-          z-index: 51;
-          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), 0 0 0 8px rgba(59, 130, 246, 0.2);
-          border-radius: 8px;
-          transition: all 0.3s ease;
+          position: relative !important;
+          z-index: 51 !important;
+          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), 0 0 0 8px rgba(59, 130, 246, 0.2) !important;
+          border-radius: 8px !important;
+          transition: all 0.3s ease !important;
         }
         
         .tour-highlight::before {
-          content: '';
-          position: absolute;
-          inset: -4px;
-          background: transparent;
-          border: 2px solid rgb(59, 130, 246);
-          border-radius: 8px;
-          animation: pulse 2s infinite;
+          content: '' !important;
+          position: absolute !important;
+          inset: -4px !important;
+          background: transparent !important;
+          border: 2px solid rgb(59, 130, 246) !important;
+          border-radius: 8px !important;
+          animation: pulse 2s infinite !important;
         }
         
         @keyframes pulse {
@@ -283,7 +289,7 @@ export const useOnboarding = () => {
 
   useEffect(() => {
     // Show tour for new users who haven't completed onboarding
-    if (userSettings?.preferences && !userSettings.preferences.onboarding_completed) {
+    if (userSettings?.preferences && !(userSettings.preferences as any).onboarding_completed) {
       // Delay showing tour to allow page to load
       const timer = setTimeout(() => {
         setShowTour(true);

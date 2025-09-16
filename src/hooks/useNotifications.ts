@@ -67,7 +67,7 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      setNotifications(data || []);
+      setNotifications((data || []) as Notification[]);
       
       // Count unread notifications
       const unread = (data || []).filter(n => !n.read_at).length;
@@ -171,15 +171,23 @@ export const useNotifications = () => {
     metadata?: any;
     expires_at?: string;
   }) => {
+    if (!profile?.tenant_id) return;
+
     try {
       const { error } = await supabase
         .from('notifications')
         .insert({
-          ...notification,
+          tenant_id: profile.tenant_id,
+          title: notification.title,
+          message: notification.message,
           type: notification.type || 'info',
           category: notification.category || 'general',
           priority: notification.priority || 'normal',
+          user_id: notification.user_id,
+          action_url: notification.action_url,
+          action_label: notification.action_label,
           metadata: notification.metadata || {},
+          expires_at: notification.expires_at,
         });
 
       if (error) throw error;
@@ -190,7 +198,7 @@ export const useNotifications = () => {
     } catch (error: any) {
       console.error('Failed to create notification:', error);
     }
-  }, [fetchNotifications]);
+  }, [fetchNotifications, profile?.tenant_id]);
 
   // Set up real-time subscription
   useEffect(() => {
