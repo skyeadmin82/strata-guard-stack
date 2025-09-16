@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ProposalItemsManager } from './ProposalItemsManager';
+import { EnhancedProposalItemsManager } from './EnhancedProposalItemsManager';
 
 interface ProposalCreateDialogProps {
   open: boolean;
@@ -122,8 +123,11 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
         .single();
 
       const totalAmount = parseFloat(formData.total_amount) || 0;
-      const taxAmount = parseFloat(formData.tax_amount) || 0;
+      const taxRate = parseFloat(formData.tax_amount) || 0; // This is now percentage
       const discountAmount = parseFloat(formData.discount_amount) || 0;
+      
+      // Calculate tax amount from percentage
+      const taxAmount = totalAmount * (taxRate / 100);
       const finalAmount = totalAmount + taxAmount - discountAmount;
 
       const proposalData = {
@@ -299,14 +303,16 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
             </div>
             
             <div>
-              <Label htmlFor="tax_amount">Tax Amount</Label>
+              <Label htmlFor="tax_rate">Tax Rate (%)</Label>
               <Input
-                id="tax_amount"
+                id="tax_rate"
                 type="number"
-                step="0.01"
+                step="0.1"
+                min="0"
+                max="100"
                 value={formData.tax_amount}
                 onChange={(e) => setFormData({ ...formData, tax_amount: e.target.value })}
-                placeholder="0.00"
+                placeholder="0.0"
               />
             </div>
             
@@ -346,16 +352,27 @@ export const ProposalCreateDialog: React.FC<ProposalCreateDialogProps> = ({
 
           <div>
             <Label htmlFor="payment_terms">Payment Terms</Label>
-            <Input
-              id="payment_terms"
-              value={formData.payment_terms}
-              onChange={(e) => setFormData({ ...formData, payment_terms: e.target.value })}
-              placeholder="e.g., Net 30 days"
-            />
+            <Select value={formData.payment_terms} onValueChange={(value) => setFormData({ ...formData, payment_terms: value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select payment terms" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="due_on_receipt">Due on Receipt</SelectItem>
+                <SelectItem value="net_15">Net 15 Days</SelectItem>
+                <SelectItem value="net_30">Net 30 Days</SelectItem>
+                <SelectItem value="net_45">Net 45 Days</SelectItem>
+                <SelectItem value="net_60">Net 60 Days</SelectItem>
+                <SelectItem value="net_90">Net 90 Days</SelectItem>
+                <SelectItem value="50_50_split">50% Upfront, 50% on Completion</SelectItem>
+                <SelectItem value="monthly">Monthly Payments</SelectItem>
+                <SelectItem value="quarterly">Quarterly Payments</SelectItem>
+                <SelectItem value="custom">Custom Terms</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Proposal Items */}
-          <ProposalItemsManager
+          <EnhancedProposalItemsManager
             items={proposalItems}
             onItemsChange={setProposalItems}
             currency={formData.currency}

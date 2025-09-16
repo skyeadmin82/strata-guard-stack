@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProposalESignature } from './ProposalESignature';
 import { ProposalTracking } from './ProposalTracking';
 import { ProposalPDFGenerator } from './ProposalPDFGenerator';
+import { ProposalApprovalWorkflow } from './ProposalApprovalWorkflow';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Edit, Download, Send, Eye, Calendar } from 'lucide-react';
@@ -118,7 +119,7 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -149,15 +150,16 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
           </div>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
+          <TabsList className="grid w-full grid-cols-5 shrink-0">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="tracking">Tracking</TabsTrigger>
+            <TabsTrigger value="approvals">Approvals</TabsTrigger>
             <TabsTrigger value="signatures">Signatures</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value="overview" className="space-y-6 flex-1 overflow-y-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Proposal Details */}
               <Card className="md:col-span-2">
@@ -294,14 +296,21 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
             </Card>
           </TabsContent>
 
-          <TabsContent value="tracking">
+          <TabsContent value="tracking" className="flex-1 overflow-y-auto">
             <ProposalTracking
               proposalId={proposal.id}
               proposalTitle={proposal.title}
             />
           </TabsContent>
 
-          <TabsContent value="signatures">
+          <TabsContent value="approvals" className="flex-1 overflow-y-auto">
+            <ProposalApprovalWorkflow
+              proposalId={proposal.id}
+              proposalTitle={proposal.title}
+            />
+          </TabsContent>
+
+          <TabsContent value="signatures" className="flex-1 overflow-y-auto">
             <ProposalESignature
               proposalId={proposal.id}
               proposalTitle={proposal.title}
@@ -309,8 +318,8 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
             />
           </TabsContent>
 
-          <TabsContent value="activity">
-            <Card>
+          <TabsContent value="activity" className="flex-1 overflow-y-auto">
+            <Card className="h-full">
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
               </CardHeader>
