@@ -155,20 +155,40 @@ const IntegrationsPage = () => {
 
       if (!userProfile?.tenant_id) throw new Error('User tenant not found');
 
-      const { error } = await supabase
+      // Check if record exists first
+      const { data: existingRecord } = await supabase
         .from('company_settings')
-        .upsert({
-          category: 'integrations',
-          tenant_id: userProfile.tenant_id,
-          settings: {
-            quickbooks: {
-              ...qboConfig,
-              updated_at: new Date().toISOString()
-            }
-          } as any
-        }, {
-          onConflict: 'category'
-        });
+        .select('id')
+        .eq('category', 'integrations')
+        .eq('tenant_id', userProfile.tenant_id)
+        .single();
+
+      const settingsData = {
+        category: 'integrations',
+        tenant_id: userProfile.tenant_id,
+        settings: {
+          quickbooks: {
+            ...qboConfig,
+            updated_at: new Date().toISOString()
+          }
+        } as any
+      };
+
+      let error;
+      if (existingRecord) {
+        // Update existing record
+        const result = await supabase
+          .from('company_settings')
+          .update(settingsData)
+          .eq('id', existingRecord.id);
+        error = result.error;
+      } else {
+        // Insert new record
+        const result = await supabase
+          .from('company_settings')
+          .insert(settingsData);
+        error = result.error;
+      }
 
       if (error) throw error;
 
