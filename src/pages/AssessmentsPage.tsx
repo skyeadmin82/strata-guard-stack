@@ -70,7 +70,8 @@ export const AssessmentsPage = () => {
         const client = clientsResult.data?.find(client => client.id === assessment.client_id);
         const template = templatesResult.data?.find(template => template.id === assessment.template_id);
         
-        return {
+        // Create the joined assessment with proper typing
+        const joinedAssessment = {
           ...assessment,
           clients: client || null,
           assessment_templates: template || null,
@@ -86,7 +87,9 @@ export const AssessmentsPage = () => {
           overall_score: assessment.total_score || 0,
           findings: [], // TODO: Load from assessment_responses
           recommendations: [] // TODO: Load from assessment_opportunities
-        };
+        } as AssessmentWithRelations;
+        
+        return joinedAssessment;
       }) || [];
 
       setAssessments(assessmentsWithRelations as AssessmentWithRelations[]);
