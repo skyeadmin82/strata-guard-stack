@@ -2,24 +2,19 @@ import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { TicketKanbanBoard } from '@/components/Tickets/TicketKanbanBoard';
-import { TimeTrackingPanel } from '@/components/Tickets/TimeTrackingPanel';
 import { useEnhancedTicketManagement } from '@/hooks/useEnhancedTicketManagement';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { TicketsTable } from '@/components/Tables/TicketsTable';
 import { 
   LayoutGrid, 
   List, 
-  Timer,
-  RefreshCw,
-  Settings
+  RefreshCw
 } from 'lucide-react';
 
 export const TicketsPage: React.FC = () => {
   const [activeView, setActiveView] = useState<'table' | 'kanban'>('table');
-  const [selectedTicketForTracking, setSelectedTicketForTracking] = useState<string | null>(null);
   
   const {
     tickets,
@@ -125,32 +120,6 @@ export const TicketsPage: React.FC = () => {
               />
             )}
           </ErrorBoundary>
-
-          {/* Time Tracking Sidebar */}
-          {selectedTicketForTracking && (
-            <div className="fixed right-0 top-0 h-full w-96 bg-background border-l shadow-lg z-50 overflow-y-auto">
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Timer className="h-5 w-5" />
-                    Time Tracking
-                  </h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedTicketForTracking(null)}
-                  >
-                    ✕
-                  </Button>
-                </div>
-                
-                <TimeTrackingPanel
-                  ticketId={selectedTicketForTracking}
-                  ticketTitle={tickets.find(t => t.id === selectedTicketForTracking)?.title || ''}
-                />
-              </div>
-            </div>
-          )}
         </div>
       </DashboardLayout>
     </ProtectedRoute>

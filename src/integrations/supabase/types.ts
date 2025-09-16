@@ -914,6 +914,63 @@ export type Database = {
           },
         ]
       }
+      auto_assignment_rules: {
+        Row: {
+          assigned_team: string | null
+          assigned_user_id: string | null
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          rule_order: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_team?: string | null
+          assigned_user_id?: string | null
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          rule_order?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_team?: string | null
+          assigned_user_id?: string | null
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          rule_order?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_assignment_rules_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_assignment_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       automation_workflows: {
         Row: {
           average_duration_ms: number | null
@@ -6147,12 +6204,64 @@ export type Database = {
           },
         ]
       }
+      sla_rules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          escalation_rules: Json | null
+          id: string
+          is_active: boolean | null
+          name: string
+          priority: string
+          resolution_time_hours: number
+          response_time_hours: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          escalation_rules?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          priority: string
+          resolution_time_hours?: number
+          response_time_hours?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          escalation_rules?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          priority?: string
+          resolution_time_hours?: number
+          response_time_hours?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sla_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_tickets: {
         Row: {
+          actual_hours: number | null
           approval_required: boolean | null
           approved_at: string | null
           approved_by: string | null
           assigned_to: string | null
+          auto_assigned: boolean | null
           category: string | null
           client_id: string
           client_satisfaction_rating: number | null
@@ -6162,6 +6271,7 @@ export type Database = {
           created_by: string | null
           custom_fields: Json | null
           description: string
+          estimated_hours: number | null
           first_response_at: string | null
           id: string
           internal_notes: string | null
@@ -6170,21 +6280,26 @@ export type Database = {
           required_fields_completed: boolean | null
           resolution_target: string | null
           resolved_at: string | null
+          sla_breached: boolean | null
           sla_due_date: string | null
           status: Database["public"]["Enums"]["ticket_status"] | null
           subcategory: string | null
           tags: string[] | null
+          template_id: string | null
           tenant_id: string
           ticket_number: string
+          time_tracking_enabled: boolean | null
           title: string
           updated_at: string | null
           validation_errors: Json | null
         }
         Insert: {
+          actual_hours?: number | null
           approval_required?: boolean | null
           approved_at?: string | null
           approved_by?: string | null
           assigned_to?: string | null
+          auto_assigned?: boolean | null
           category?: string | null
           client_id: string
           client_satisfaction_rating?: number | null
@@ -6194,6 +6309,7 @@ export type Database = {
           created_by?: string | null
           custom_fields?: Json | null
           description: string
+          estimated_hours?: number | null
           first_response_at?: string | null
           id?: string
           internal_notes?: string | null
@@ -6202,21 +6318,26 @@ export type Database = {
           required_fields_completed?: boolean | null
           resolution_target?: string | null
           resolved_at?: string | null
+          sla_breached?: boolean | null
           sla_due_date?: string | null
           status?: Database["public"]["Enums"]["ticket_status"] | null
           subcategory?: string | null
           tags?: string[] | null
+          template_id?: string | null
           tenant_id: string
           ticket_number: string
+          time_tracking_enabled?: boolean | null
           title: string
           updated_at?: string | null
           validation_errors?: Json | null
         }
         Update: {
+          actual_hours?: number | null
           approval_required?: boolean | null
           approved_at?: string | null
           approved_by?: string | null
           assigned_to?: string | null
+          auto_assigned?: boolean | null
           category?: string | null
           client_id?: string
           client_satisfaction_rating?: number | null
@@ -6226,6 +6347,7 @@ export type Database = {
           created_by?: string | null
           custom_fields?: Json | null
           description?: string
+          estimated_hours?: number | null
           first_response_at?: string | null
           id?: string
           internal_notes?: string | null
@@ -6234,17 +6356,27 @@ export type Database = {
           required_fields_completed?: boolean | null
           resolution_target?: string | null
           resolved_at?: string | null
+          sla_breached?: boolean | null
           sla_due_date?: string | null
           status?: Database["public"]["Enums"]["ticket_status"] | null
           subcategory?: string | null
           tags?: string[] | null
+          template_id?: string | null
           tenant_id?: string
           ticket_number?: string
+          time_tracking_enabled?: boolean | null
           title?: string
           updated_at?: string | null
           validation_errors?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_support_tickets_template"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_templates"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "support_tickets_approved_by_fkey"
             columns: ["approved_by"]
@@ -6575,6 +6707,78 @@ export type Database = {
         }
         Relationships: []
       }
+      ticket_templates: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string | null
+          custom_fields: Json | null
+          default_assignee_id: string | null
+          description: string | null
+          description_template: string
+          estimated_hours: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          priority: string
+          tenant_id: string
+          title_template: string
+          updated_at: string
+          usage_count: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          custom_fields?: Json | null
+          default_assignee_id?: string | null
+          description?: string | null
+          description_template: string
+          estimated_hours?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          priority?: string
+          tenant_id: string
+          title_template: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          custom_fields?: Json | null
+          default_assignee_id?: string | null
+          description?: string | null
+          description_template?: string
+          estimated_hours?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          priority?: string
+          tenant_id?: string
+          title_template?: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_templates_default_assignee_id_fkey"
+            columns: ["default_assignee_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       time_entries: {
         Row: {
           billable: boolean | null
@@ -6634,6 +6838,63 @@ export type Database = {
           work_order_id?: string | null
         }
         Relationships: []
+      }
+      time_tracking_entries: {
+        Row: {
+          billable: boolean | null
+          created_at: string
+          description: string | null
+          ended_at: string | null
+          hours_worked: number
+          id: string
+          started_at: string | null
+          tenant_id: string
+          ticket_id: string
+          user_id: string | null
+          work_type: string | null
+        }
+        Insert: {
+          billable?: boolean | null
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          hours_worked?: number
+          id?: string
+          started_at?: string | null
+          tenant_id: string
+          ticket_id: string
+          user_id?: string | null
+          work_type?: string | null
+        }
+        Update: {
+          billable?: boolean | null
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          hours_worked?: number
+          id?: string
+          started_at?: string | null
+          tenant_id?: string
+          ticket_id?: string
+          user_id?: string | null
+          work_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_tracking_entries_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_tracking_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transaction_line_items: {
         Row: {
@@ -7240,9 +7501,17 @@ export type Database = {
       }
     }
     Functions: {
+      auto_assign_ticket: {
+        Args: { ticket_uuid: string }
+        Returns: string
+      }
       calculate_client_health_score: {
         Args: { client_uuid: string }
         Returns: number
+      }
+      calculate_sla_due_date: {
+        Args: { tenant_uuid: string; ticket_priority: string }
+        Returns: string
       }
       get_current_user_tenant_id: {
         Args: Record<PropertyKey, never>
