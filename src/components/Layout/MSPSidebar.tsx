@@ -20,6 +20,9 @@ import {
   Settings,
   HelpCircle,
   Building2,
+  Wrench,
+  DollarSign,
+  Mail,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -45,6 +48,21 @@ const navigationItems = [
     title: 'Tickets',
     url: '/tickets',
     icon: Ticket,
+  },
+  {
+    title: 'Email Marketing',
+    url: '/email',
+    icon: Mail,
+  },
+  {
+    title: 'Field Service',
+    url: '/field-service',
+    icon: Wrench,
+  },
+  {
+    title: 'Financial',
+    url: '/financial',
+    icon: DollarSign,
   },
   {
     title: 'Monitoring',
