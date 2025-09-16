@@ -198,8 +198,8 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col overflow-hidden">
+        <DialogHeader className="shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-xl">{proposal.title}</DialogTitle>
@@ -229,7 +229,7 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
           </div>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
           <TabsList className="grid w-full grid-cols-5 shrink-0">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="tracking">Tracking</TabsTrigger>
@@ -241,9 +241,10 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6 flex-1 overflow-y-auto">
+          <TabsContent value="overview" className="flex-1 overflow-y-auto p-4 space-y-6"
+            style={{ maxHeight: 'calc(90vh - 200px)' }}>
             {/* NEW FEATURES INDICATOR */}
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3 mb-4">
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-sm font-semibold text-green-800">✨ Enhanced Proposal Features Active</span>
@@ -482,14 +483,16 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
             </Card>
           </TabsContent>
 
-          <TabsContent value="tracking" className="flex-1 overflow-y-auto">
+          <TabsContent value="tracking" className="flex-1 overflow-y-auto p-4"
+            style={{ maxHeight: 'calc(90vh - 200px)' }}>
             <ProposalTracking
               proposalId={proposal.id}
               proposalTitle={proposal.title}
             />
           </TabsContent>
 
-          <TabsContent value="approvals" className="flex-1 overflow-y-auto">
+          <TabsContent value="approvals" className="flex-1 overflow-y-auto p-4"
+            style={{ maxHeight: 'calc(90vh - 200px)' }}>
             <div className="mb-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-3">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
@@ -505,7 +508,8 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
             />
           </TabsContent>
 
-          <TabsContent value="signatures" className="flex-1 overflow-y-auto">
+          <TabsContent value="signatures" className="flex-1 overflow-y-auto p-4"
+            style={{ maxHeight: 'calc(90vh - 200px)' }}>
             <ProposalESignature
               proposalId={proposal.id}
               proposalTitle={proposal.title}
@@ -513,7 +517,8 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
             />
           </TabsContent>
 
-          <TabsContent value="activity" className="flex-1 overflow-y-auto">
+          <TabsContent value="activity" className="flex-1 overflow-y-auto p-4"
+            style={{ maxHeight: 'calc(90vh - 200px)' }}>
             <Card className="h-full">
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
