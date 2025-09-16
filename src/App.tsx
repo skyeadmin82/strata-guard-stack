@@ -35,6 +35,7 @@ import NotFound from "./pages/NotFound";
 import SalesPage from "./pages/SalesPage";
 import SalesDashboard from '@/pages/Sales/SalesDashboard';
 import AgentManagement from '@/pages/Sales/AgentManagement';
+import LeadDistribution from '@/pages/Sales/LeadDistribution';
 import { useMemo } from "react";
 
 const App = () => {
@@ -89,6 +90,7 @@ const App = () => {
                     <Route path="/financial" element={<FinancialManagementPage />} />
                     <Route path="/sales" element={<SalesDashboard />} />
                     <Route path="/sales/agents" element={<AgentManagement />} />
+                    <Route path="/sales/distribution" element={<LeadDistribution />} />
                     <Route path="/admin/database" element={<DatabaseDiagnosticPage />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />

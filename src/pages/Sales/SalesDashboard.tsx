@@ -17,7 +17,8 @@ import {
   BarChart3,
   PieChart,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Settings
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -407,14 +408,14 @@ export default function SalesDashboard() {
                   <BarChart3 className="mr-2 h-4 w-4" />
                   Commission Report
                 </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => navigate('/sales/goals')}
-                >
-                  <Target className="mr-2 h-4 w-4" />
-                  Set Goals
-                </Button>
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate('/sales/distribution')}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                Distribution Rules
+              </Button>
               </div>
             </CardContent>
           </Card>
