@@ -108,17 +108,17 @@ export const LaunchReadinessDashboard: React.FC = () => {
     switch (status) {
       case 'completed':
       case 'passed':
-        return 'text-green-600';
+        return 'text-success';
       case 'failed':
       case 'error':
-        return 'text-red-600';
+        return 'text-destructive';
       case 'running':
       case 'in_progress':
-        return 'text-blue-600';
+        return 'text-primary';
       case 'pending':
-        return 'text-gray-600';
+        return 'text-muted-foreground';
       default:
-        return 'text-gray-600';
+        return 'text-muted-foreground';
     }
   };
 
@@ -143,15 +143,15 @@ export const LaunchReadinessDashboard: React.FC = () => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical':
-        return 'text-red-600 bg-red-50';
+        return 'text-destructive bg-destructive/10';
       case 'high':
-        return 'text-orange-600 bg-orange-50';
+        return 'text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-950/20';
       case 'medium':
-        return 'text-yellow-600 bg-yellow-50';
+        return 'text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-950/20';
       case 'low':
-        return 'text-green-600 bg-green-50';
+        return 'text-success bg-success/10';
       default:
-        return 'text-gray-600 bg-gray-50';
+        return 'text-muted-foreground bg-muted/50';
     }
   };
 
@@ -197,20 +197,20 @@ export const LaunchReadinessDashboard: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4" role="group" aria-label="Readiness metrics">
             <div className="text-center p-4 border rounded-lg" role="group" aria-labelledby="integration-metric">
-              <div className="text-2xl font-bold text-blue-600" aria-label={`System integration: ${integrationReport.readinessScore} percent`}>{integrationReport.readinessScore}%</div>
-              <div id="integration-metric" className="text-sm text-foreground">System Integration</div>
+              <div className="text-2xl font-bold text-primary" aria-label={`System integration: ${integrationReport.readinessScore} percent`}>{integrationReport.readinessScore}%</div>
+              <div id="integration-metric" className="text-sm text-muted-foreground">System Integration</div>
             </div>
             <div className="text-center p-4 border rounded-lg" role="group" aria-labelledby="ux-metric">
-              <div className="text-2xl font-bold text-purple-600" aria-label={`UX polish: ${uxReport.overallUXScore} percent`}>{uxReport.overallUXScore}%</div>
-              <div id="ux-metric" className="text-sm text-foreground">UX Polish</div>
+              <div className="text-2xl font-bold text-secondary-foreground" aria-label={`UX polish: ${uxReport.overallUXScore} percent`}>{uxReport.overallUXScore}%</div>
+              <div id="ux-metric" className="text-sm text-muted-foreground">UX Polish</div>
             </div>
             <div className="text-center p-4 border rounded-lg" role="group" aria-labelledby="launch-metric">
-              <div className="text-2xl font-bold text-green-600" aria-label={`Launch preparation: ${launchReport.overallScore} percent`}>{launchReport.overallScore}%</div>
-              <div id="launch-metric" className="text-sm text-foreground">Launch Preparation</div>
+              <div className="text-2xl font-bold text-success" aria-label={`Launch preparation: ${launchReport.overallScore} percent`}>{launchReport.overallScore}%</div>
+              <div id="launch-metric" className="text-sm text-muted-foreground">Launch Preparation</div>
             </div>
             <div className="text-center p-4 border rounded-lg" role="group" aria-labelledby="configs-metric">
-              <div className="text-2xl font-bold text-orange-600" aria-label={`System configurations: ${systemConfigs.length} total`}>{systemConfigs.length}</div>
-              <div id="configs-metric" className="text-sm text-foreground">System Configs</div>
+              <div className="text-2xl font-bold text-accent-foreground" aria-label={`System configurations: ${systemConfigs.length} total`}>{systemConfigs.length}%</div>
+              <div id="configs-metric" className="text-sm text-muted-foreground">System Configs</div>
             </div>
           </div>
 
@@ -485,9 +485,9 @@ export const LaunchReadinessDashboard: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">{metric.metric}</span>
                       <div className={`px-2 py-1 rounded text-xs ${
-                        metric.status === 'good' ? 'bg-green-100 text-green-800' :
-                        metric.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
+                        metric.status === 'good' ? 'bg-success/10 text-success' :
+                        metric.status === 'warning' ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' :
+                        'bg-destructive/10 text-destructive'
                       }`}>
                         {metric.status}
                       </div>
@@ -830,26 +830,26 @@ export const LaunchReadinessDashboard: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {integrationReport.testSummary.successRate >= 90 && (
-                  <div className="flex items-center gap-2 text-green-600">
+                 {integrationReport.testSummary.successRate >= 90 && (
+                  <div className="flex items-center gap-2 text-success">
                     <CheckCircle2 className="h-4 w-4" />
                     <span>Integration tests passing</span>
                   </div>
                 )}
                 {uxReport.accessibility.complianceScore >= 80 && (
-                  <div className="flex items-center gap-2 text-green-600">
+                  <div className="flex items-center gap-2 text-success">
                     <CheckCircle2 className="h-4 w-4" />
                     <span>Accessibility compliance</span>
                   </div>
                 )}
                 {launchReport.onboarding.completedRequiredSteps === launchReport.onboarding.requiredSteps && (
-                  <div className="flex items-center gap-2 text-green-600">
+                  <div className="flex items-center gap-2 text-success">
                     <CheckCircle2 className="h-4 w-4" />
                     <span>Required onboarding complete</span>
                   </div>
                 )}
                 {launchReport.checklist.completedCriticalItems === launchReport.checklist.criticalItems && (
-                  <div className="flex items-center gap-2 text-green-600">
+                  <div className="flex items-center gap-2 text-success">
                     <CheckCircle2 className="h-4 w-4" />
                     <span>Critical checklist items complete</span>
                   </div>
@@ -867,13 +867,13 @@ export const LaunchReadinessDashboard: React.FC = () => {
               <CardContent className="space-y-2">
                 {launchReport.blockers.length > 0 ? (
                   launchReport.blockers.map((blocker, index) => (
-                    <div key={index} className="flex items-center gap-2 text-red-600">
+                    <div key={index} className="flex items-center gap-2 text-destructive">
                       <XCircle className="h-4 w-4" />
                       <span>{blocker}</span>
                     </div>
                   ))
                 ) : (
-                  <div className="flex items-center gap-2 text-green-600">
+                  <div className="flex items-center gap-2 text-success">
                     <CheckCircle2 className="h-4 w-4" />
                     <span>No blocking issues found!</span>
                   </div>
@@ -883,13 +883,13 @@ export const LaunchReadinessDashboard: React.FC = () => {
           </div>
 
           {/* Launch Button */}
-          <Card className="border-green-200 bg-green-50">
+          <Card className="border-success/20 bg-success/5">
             <CardContent className="flex items-center justify-between p-6">
               <div>
-                <h3 className="text-xl font-bold text-green-800">
+                <h3 className="text-xl font-bold text-success">
                   {launchReport.readyToLaunch ? 'System Ready for Launch! 🚀' : 'Launch Preparation In Progress'}
                 </h3>
-                <p className="text-green-600">
+                <p className="text-success/80">
                   {launchReport.readyToLaunch 
                     ? 'All critical requirements have been met. You can proceed with the launch.'
                     : `Complete ${launchReport.blockers.length} remaining items before launching.`
@@ -899,7 +899,7 @@ export const LaunchReadinessDashboard: React.FC = () => {
               <Button 
                 size="lg"
                 disabled={!launchReport.readyToLaunch}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-success hover:bg-success/90 text-success-foreground"
               >
                 <Rocket className="mr-2 h-5 w-5" />
                 {launchReport.readyToLaunch ? 'Launch System' : 'Not Ready'}
