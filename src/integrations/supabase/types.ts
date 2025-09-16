@@ -8531,6 +8531,16 @@ export type Database = {
         Args: { client_uuid: string; email_address: string }
         Returns: boolean
       }
+      sync_proposal_item_with_catalog: {
+        Args: {
+          p_category?: string
+          p_description: string
+          p_item_name: string
+          p_tenant_id: string
+          p_unit_price: number
+        }
+        Returns: string
+      }
       trigger_recurring_invoice_generation: {
         Args: Record<PropertyKey, never>
         Returns: {

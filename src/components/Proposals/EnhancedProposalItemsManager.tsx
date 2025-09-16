@@ -87,61 +87,28 @@ export const EnhancedProposalItemsManager: React.FC<EnhancedProposalItemsManager
 
   const fetchCatalogItems = async () => {
     try {
+      // Get current user tenant info
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('auth_user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (userError || !userData?.tenant_id) {
+        console.error('Error getting user tenant:', userError);
+        throw new Error('Unable to fetch user tenant information');
+      }
+
       const { data, error } = await supabase
         .from('proposal_catalog')
         .select('*')
+        .eq('tenant_id', userData.tenant_id)
         .eq('is_active', true)
         .order('name', { ascending: true });
 
       if (error) {
         console.error('Error fetching catalog items:', error);
-        // Fallback to sample data if no catalog items exist
-        const sampleCatalog: CatalogItem[] = [
-          {
-            id: 'sample-1',
-            name: 'Microsoft 365 Business Premium',
-            description: 'Complete productivity suite with advanced security features',
-            category: 'Software',
-            sku: 'MS365-BP-001',
-            unit_price: 22.00,
-            item_type: 'subscription',
-            margin_percent: 25,
-            vendor: 'Microsoft'
-          },
-          {
-            id: 'sample-2',
-            name: 'IT Support Services - Level 1',
-            description: 'Basic help desk support and troubleshooting',
-            category: 'Services',
-            sku: 'ITS-L1-001',
-            unit_price: 150.00,
-            item_type: 'service',
-            margin_percent: 40
-          },
-          {
-            id: 'sample-3',
-            name: 'Network Security Assessment',
-            description: 'Comprehensive security audit and vulnerability assessment',
-            category: 'Professional Services',
-            sku: 'NSA-001',
-            unit_price: 2500.00,
-            item_type: 'one-time',
-            margin_percent: 60
-          },
-          {
-            id: 'sample-4',
-            name: 'Managed Firewall Service',
-            description: 'Enterprise firewall management and monitoring',
-            category: 'Security',
-            sku: 'MFS-001',
-            unit_price: 299.00,
-            item_type: 'subscription',
-            margin_percent: 35,
-            vendor: 'SonicWall'
-          }
-        ];
-        setCatalogItems(sampleCatalog);
-        return;
+        throw error;
       }
 
       const catalogItems: CatalogItem[] = (data || []).map(item => ({
@@ -157,8 +124,62 @@ export const EnhancedProposalItemsManager: React.FC<EnhancedProposalItemsManager
       }));
       
       setCatalogItems(catalogItems);
+
+      if (catalogItems.length === 0) {
+        toast({
+          title: 'No Catalog Items',
+          description: 'No items found in your catalog. Add items in the Products & Services page.',
+          variant: 'default',
+        });
+      }
     } catch (error) {
       console.error('Error fetching catalog items:', error);
+      // Fallback to sample data if no catalog items exist
+      const sampleCatalog: CatalogItem[] = [
+        {
+          id: 'sample-1',
+          name: 'Microsoft 365 Business Premium',
+          description: 'Complete productivity suite with advanced security features',
+          category: 'Software',
+          sku: 'MS365-BP-001',
+          unit_price: 22.00,
+          item_type: 'subscription',
+          margin_percent: 25,
+          vendor: 'Microsoft'
+        },
+        {
+          id: 'sample-2',
+          name: 'IT Support Services - Level 1',
+          description: 'Basic help desk support and troubleshooting',
+          category: 'Services',
+          sku: 'ITS-L1-001',
+          unit_price: 150.00,
+          item_type: 'service',
+          margin_percent: 40
+        },
+        {
+          id: 'sample-3',
+          name: 'Network Security Assessment',
+          description: 'Comprehensive security audit and vulnerability assessment',
+          category: 'Professional Services',
+          sku: 'NSA-001',
+          unit_price: 2500.00,
+          item_type: 'one-time',
+          margin_percent: 60
+        },
+        {
+          id: 'sample-4',
+          name: 'Managed Firewall Service',
+          description: 'Enterprise firewall management and monitoring',
+          category: 'Security',
+          sku: 'MFS-001',
+          unit_price: 299.00,
+          item_type: 'subscription',
+          margin_percent: 35,
+          vendor: 'SonicWall'
+        }
+      ];
+      setCatalogItems(sampleCatalog);
       toast({
         title: 'Warning',
         description: 'Using sample catalog data. Add items to your catalog for real products.',
