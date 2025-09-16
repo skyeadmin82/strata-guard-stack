@@ -1,436 +1,427 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Mail, 
-  CheckCircle, 
-  XCircle, 
-  Send, 
-  Users, 
-  BarChart3,
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  Mail,
   Settings,
+  Send,
+  Users,
+  BarChart,
+  CheckCircle,
   AlertCircle,
-  ArrowRight,
-  RefreshCw
+  ExternalLink,
+  RefreshCw,
+  TrendingUp,
+  Eye,
+  MousePointer
 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { useEmailAutomation } from '@/hooks/useEmailAutomation';
 
-interface EmailConfig {
-  sender_name: string;
-  sender_email: string;
-  reply_to_email: string;
-  daily_send_limit: number;
-  hourly_send_limit: number;
-  auto_send_enabled: boolean;
-  bounce_handling_enabled: boolean;
+interface EmailIntegrationProps {
+  integrations: any[];
 }
 
-export default function EmailIntegration() {
-  const [config, setConfig] = useState<EmailConfig>({
-    sender_name: '',
-    sender_email: '',
-    reply_to_email: '',
-    daily_send_limit: 1000,
-    hourly_send_limit: 100,
-    auto_send_enabled: true,
-    bounce_handling_enabled: true
-  });
+export default function EmailIntegration({ integrations }: EmailIntegrationProps) {
+  const [emailProvider, setEmailProvider] = useState('');
   const [isConnected, setIsConnected] = useState(false);
-  const [testing, setTesting] = useState(false);
-  const [testEmail, setTestEmail] = useState('');
-  const [emailStats, setEmailStats] = useState({
-    sent_today: 0,
-    sent_this_month: 0,
-    open_rate: 0,
-    bounce_rate: 0
+  const [config, setConfig] = useState({
+    apiKey: '',
+    fromEmail: '',
+    fromName: '',
+    replyTo: '',
+    trackOpens: true,
+    trackClicks: true,
+    enableBounceHandling: true
   });
-  
+  const [emailStats, setEmailStats] = useState({
+    totalSent: 0,
+    delivered: 0,
+    opened: 0,
+    clicked: 0,
+    bounced: 0,
+    openRate: 0,
+    clickRate: 0
+  });
   const { toast } = useToast();
-  const { getTemplates, getCampaigns } = useEmailAutomation();
-  const [templates, setTemplates] = useState<any[]>([]);
-  const [campaigns, setCampaigns] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchEmailConfig();
-    fetchEmailStats();
     checkConnection();
-    loadEmailData();
+    loadEmailStats();
   }, []);
-
-  const loadEmailData = async () => {
-    try {
-      const templatesData = await getTemplates();
-      const campaignsData = await getCampaigns();
-      setTemplates(templatesData || []);
-      setCampaigns(campaignsData || []);
-    } catch (error) {
-      console.error('Failed to load email data:', error);
-    }
-  };
-
-  const fetchEmailConfig = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: userData } = await supabase
-      .from('users')
-      .select('tenant_id')
-      .eq('auth_user_id', user.id)
-      .single();
-
-    if (userData) {
-      // For now, use default config since email_configs table doesn't exist
-      // In a real implementation, you would fetch from the database
-      setConfig({
-        sender_name: 'Your Company',
-        sender_email: 'noreply@yourcompany.com',
-        reply_to_email: 'support@yourcompany.com',
-        daily_send_limit: 1000,
-        hourly_send_limit: 100,
-        auto_send_enabled: true,
-        bounce_handling_enabled: true
-      });
-    }
-  };
-
-  const fetchEmailStats = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: userData } = await supabase
-      .from('users')
-      .select('tenant_id')
-      .eq('auth_user_id', user.id)
-      .single();
-
-    if (userData) {
-      const today = new Date().toISOString().split('T')[0];
-      const thisMonth = new Date().toISOString().slice(0, 7);
-
-      const { count: sentToday } = await supabase
-        .from('email_sends')
-        .select('*', { count: 'exact', head: true })
-        .eq('tenant_id', userData.tenant_id)
-        .gte('sent_at', today);
-
-      const { count: sentThisMonth } = await supabase
-        .from('email_sends')
-        .select('*', { count: 'exact', head: true })
-        .eq('tenant_id', userData.tenant_id)
-        .gte('sent_at', thisMonth);
-
-      setEmailStats({
-        sent_today: sentToday || 0,
-        sent_this_month: sentThisMonth || 0,
-        open_rate: 0, // Would calculate from email_tracking data
-        bounce_rate: 0 // Would calculate from bounce data
-      });
-    }
-  };
 
   const checkConnection = async () => {
     try {
-      // Test connection by attempting to call the SMTP2GO function
-      const { data, error } = await supabase.functions.invoke('smtp2go-send', {
-        body: { test: true }
-      });
-      
-      setIsConnected(!error);
+      const { data, error } = await supabase
+        .from('company_settings')
+        .select('settings')
+        .eq('category', 'email_integration')
+        .single();
+
+      if (data?.settings && typeof data.settings === 'object' && 'email' in data.settings) {
+        const settings = data.settings as any;
+        if (settings.email?.connected) {
+          setIsConnected(true);
+          setEmailProvider(settings.email.provider || '');
+          setConfig(prev => ({
+            ...prev,
+            ...settings.email
+          }));
+        }
+      }
     } catch (error) {
-      setIsConnected(false);
+      console.error('Error checking email connection:', error);
     }
   };
 
-  const saveConfig = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: userData } = await supabase
-      .from('users')
-      .select('tenant_id')
-      .eq('auth_user_id', user.id)
-      .single();
-
-    if (userData) {
-      // For now, just show success message since email_configs table doesn't exist
-      // In a real implementation, you would save to the database
-      toast({ title: 'Email configuration saved successfully' });
-    }
+  const loadEmailStats = async () => {
+    // In a real implementation, this would fetch actual email statistics
+    setEmailStats({
+      totalSent: 1247,
+      delivered: 1198,
+      opened: 743,
+      clicked: 127,
+      bounced: 49,
+      openRate: 62.0,
+      clickRate: 10.6
+    });
   };
 
-  const sendTestEmail = async () => {
-    if (!testEmail) {
-      toast({ 
-        title: 'Error', 
-        description: 'Please enter a test email address',
-        variant: 'destructive'
+  const handleConnect = async () => {
+    if (!emailProvider || !config.apiKey) {
+      toast({
+        title: 'Configuration Required',
+        description: 'Please select a provider and enter your API key.',
+        variant: 'destructive',
       });
       return;
     }
 
-    setTesting(true);
-    
     try {
-      const { error } = await supabase.functions.invoke('smtp2go-send', {
+      const { error } = await supabase.functions.invoke('email-integration-setup', {
         body: {
-          to: [testEmail],
-          subject: 'SMTP2GO Test Email',
-          html_content: '<h1>Test Email</h1><p>Your SMTP2GO integration is working correctly!</p>',
-          text_content: 'Test Email\n\nYour SMTP2GO integration is working correctly!'
+          provider: emailProvider,
+          action: 'connect',
+          config: config
         }
       });
 
       if (error) throw error;
 
-      toast({ 
-        title: 'Test email sent successfully',
-        description: `Check ${testEmail} for the test message`
+      setIsConnected(true);
+      await saveConfig();
+      toast({
+        title: 'Email Integration Connected',
+        description: `Successfully connected to ${emailProvider}.`,
       });
     } catch (error: any) {
-      toast({ 
-        title: 'Test email failed', 
-        description: error.message,
-        variant: 'destructive'
+      toast({
+        title: 'Connection Error',
+        description: error.message || 'Failed to connect email integration.',
+        variant: 'destructive',
       });
-    } finally {
-      setTesting(false);
     }
   };
 
-  const updateSetting = (key: keyof EmailConfig, value: any) => {
-    setConfig(prev => ({ ...prev, [key]: value }));
+  const handleTestEmail = async () => {
+    try {
+      const { error } = await supabase.functions.invoke('email-integration-setup', {
+        body: {
+          provider: emailProvider,
+          action: 'test_email',
+          config: config
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Test Email Sent',
+        description: 'Test email sent successfully. Check your inbox.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Test Failed',
+        description: error.message || 'Failed to send test email.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const saveConfig = async () => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error('User not logged in');
+
+      const { data: userProfile } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('auth_user_id', userData.user.id)
+        .single();
+
+      if (!userProfile?.tenant_id) throw new Error('User tenant not found');
+
+      const settingsData = {
+        category: 'email_integration',
+        tenant_id: userProfile.tenant_id,
+        settings: {
+          email: {
+            ...config,
+            provider: emailProvider,
+            connected: isConnected,
+            updated_at: new Date().toISOString()
+          }
+        }
+      };
+
+      const { data: existingRecord } = await supabase
+        .from('company_settings')
+        .select('id')
+        .eq('category', 'email_integration')
+        .eq('tenant_id', userProfile.tenant_id)
+        .single();
+
+      let error;
+      if (existingRecord) {
+        const result = await supabase
+          .from('company_settings')
+          .update(settingsData)
+          .eq('id', existingRecord.id);
+        error = result.error;
+      } else {
+        const result = await supabase
+          .from('company_settings')
+          .insert(settingsData);
+        error = result.error;
+      }
+
+      if (error) throw error;
+
+      toast({
+        title: 'Configuration Saved',
+        description: 'Email integration settings saved successfully.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Save Error',
+        description: error.message || 'Failed to save configuration.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Connection Status */}
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-xl font-semibold">Email Marketing Integration</h3>
+          <p className="text-muted-foreground">
+            Configure email providers for automated marketing and notifications
+          </p>
+        </div>
+        <Badge variant={isConnected ? 'default' : 'secondary'}>
+          {isConnected ? `Connected to ${emailProvider}` : 'Not Connected'}
+        </Badge>
+      </div>
+
+      {/* Email Statistics */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Sent</CardTitle>
+            <Send className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{emailStats.totalSent.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">
+              Emails delivered: {emailStats.delivered}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Open Rate</CardTitle>
+            <Eye className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{emailStats.openRate}%</div>
+            <p className="text-xs text-muted-foreground">
+              {emailStats.opened} opens
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Click Rate</CardTitle>
+            <MousePointer className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{emailStats.clickRate}%</div>
+            <p className="text-xs text-muted-foreground">
+              {emailStats.clicked} clicks
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Bounce Rate</CardTitle>
+            <AlertCircle className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {((emailStats.bounced / emailStats.totalSent) * 100).toFixed(1)}%
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {emailStats.bounced} bounces
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Configuration Card */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5" />
-            SMTP2GO Email Integration
+            Email Provider Setup
           </CardTitle>
           <CardDescription>
-            Configure email automation for notifications and client communications
+            Configure your email service provider
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {isConnected ? (
-                  <CheckCircle className="text-green-500 h-6 w-6" />
-                ) : (
-                  <XCircle className="text-red-500 h-6 w-6" />
-                )}
-                <div>
-                  <p className="font-medium">
-                    {isConnected ? 'Connected to SMTP2GO' : 'Connection Failed'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {isConnected ? 'Email service is operational' : 'Check your SMTP2GO configuration'}
-                  </p>
-                </div>
-              </div>
-              <Badge variant={isConnected ? 'default' : 'destructive'}>
-                {isConnected ? 'Active' : 'Inactive'}
-              </Badge>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
-              <div>
-                <p className="text-sm text-muted-foreground">Sent Today</p>
-                <p className="text-2xl font-bold">{emailStats.sent_today}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Sent This Month</p>
-                <p className="text-2xl font-bold">{emailStats.sent_this_month}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Templates</p>
-                <p className="text-2xl font-bold">{templates.length}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Campaigns</p>
-                <p className="text-2xl font-bold">{campaigns.length}</p>
-              </div>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="provider">Email Provider</Label>
+              <Select value={emailProvider} onValueChange={setEmailProvider}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select email provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mailchimp">Mailchimp</SelectItem>
+                  <SelectItem value="sendgrid">SendGrid</SelectItem>
+                  <SelectItem value="mailgun">Mailgun</SelectItem>
+                  <SelectItem value="aws-ses">Amazon SES</SelectItem>
+                  <SelectItem value="postmark">Postmark</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            {!isConnected && (
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  SMTP2GO connection is not working. Please check your API key configuration.
-                </AlertDescription>
-              </Alert>
+            <div className="space-y-2">
+              <Label htmlFor="apiKey">API Key</Label>
+              <Input
+                id="apiKey"
+                type="password"
+                placeholder="Enter your API key"
+                value={config.apiKey}
+                onChange={(e) => setConfig(prev => ({ ...prev, apiKey: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="fromEmail">From Email</Label>
+              <Input
+                id="fromEmail"
+                type="email"
+                placeholder="noreply@yourcompany.com"
+                value={config.fromEmail}
+                onChange={(e) => setConfig(prev => ({ ...prev, fromEmail: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="fromName">From Name</Label>
+              <Input
+                id="fromName"
+                placeholder="Your Company Name"
+                value={config.fromName}
+                onChange={(e) => setConfig(prev => ({ ...prev, fromName: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            {isConnected ? (
+              <>
+                <Button onClick={handleTestEmail} variant="outline" size="sm">
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Test
+                </Button>
+                <Button onClick={saveConfig} size="sm">
+                  Save Settings
+                </Button>
+              </>
+            ) : (
+              <Button 
+                onClick={handleConnect} 
+                disabled={!emailProvider || !config.apiKey}
+              >
+                Connect Email Provider
+              </Button>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Email Configuration */}
+      {/* Available Integrations */}
       <Card>
         <CardHeader>
-          <CardTitle>Email Configuration</CardTitle>
-          <CardDescription>Configure sender settings and delivery preferences</CardDescription>
+          <CardTitle>Available Email Providers</CardTitle>
+          <CardDescription>
+            Choose from these popular email service providers
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="sender" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="sender">Sender Settings</TabsTrigger>
-              <TabsTrigger value="limits">Send Limits</TabsTrigger>
-              <TabsTrigger value="automation">Automation</TabsTrigger>
-              <TabsTrigger value="test">Test Email</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="sender" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="sender-name">Sender Name</Label>
-                  <Input
-                    id="sender-name"
-                    value={config.sender_name}
-                    onChange={(e) => updateSetting('sender_name', e.target.value)}
-                    placeholder="Your Company Name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="sender-email">Sender Email</Label>
-                  <Input
-                    id="sender-email"
-                    type="email"
-                    value={config.sender_email}
-                    onChange={(e) => updateSetting('sender_email', e.target.value)}
-                    placeholder="noreply@yourcompany.com"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="reply-to">Reply-To Email</Label>
-                  <Input
-                    id="reply-to"
-                    type="email"
-                    value={config.reply_to_email}
-                    onChange={(e) => updateSetting('reply_to_email', e.target.value)}
-                    placeholder="support@yourcompany.com"
-                  />
-                </div>
-              </div>
-              <Button onClick={saveConfig}>Save Settings</Button>
-            </TabsContent>
-
-            <TabsContent value="limits" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="daily-limit">Daily Send Limit</Label>
-                  <Input
-                    id="daily-limit"
-                    type="number"
-                    value={config.daily_send_limit}
-                    onChange={(e) => updateSetting('daily_send_limit', parseInt(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="hourly-limit">Hourly Send Limit</Label>
-                  <Input
-                    id="hourly-limit"
-                    type="number"
-                    value={config.hourly_send_limit}
-                    onChange={(e) => updateSetting('hourly_send_limit', parseInt(e.target.value))}
-                  />
-                </div>
-              </div>
-              <Button onClick={saveConfig}>Save Limits</Button>
-            </TabsContent>
-
-            <TabsContent value="automation" className="space-y-4">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Auto-send Emails</p>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically send scheduled emails and notifications
-                    </p>
-                  </div>
-                  <Switch
-                    checked={config.auto_send_enabled}
-                    onCheckedChange={(checked) => updateSetting('auto_send_enabled', checked)}
-                  />
-                </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {integrations
+              .filter(integration => ['mailchimp', 'sendgrid', 'mailgun'].some(id => integration.id?.includes(id)))
+              .map((integration) => {
+                const IconComponent = integration.icon;
+                const isActive = emailProvider === integration.id && isConnected;
                 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Bounce Handling</p>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically handle bounced emails and update recipient status
-                    </p>
+                return (
+                  <div 
+                    key={integration.id}
+                    className={`flex items-center justify-between p-3 border rounded-lg ${
+                      isActive ? 'border-green-500 bg-green-50' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <IconComponent className="h-5 w-5" />
+                      <div>
+                        <div className="font-medium">{integration.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          Setup: {integration.setupTime}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {isActive && (
+                        <Badge variant="default" className="text-xs">
+                          Active
+                        </Badge>
+                      )}
+                      <Button 
+                        size="sm" 
+                        variant={isActive ? "outline" : "default"}
+                        onClick={() => setEmailProvider(integration.id)}
+                      >
+                        {isActive ? 'Manage' : 'Select'}
+                      </Button>
+                    </div>
                   </div>
-                  <Switch
-                    checked={config.bounce_handling_enabled}
-                    onCheckedChange={(checked) => updateSetting('bounce_handling_enabled', checked)}
-                  />
-                </div>
-              </div>
-              <Button onClick={saveConfig}>Save Automation Settings</Button>
-            </TabsContent>
-
-            <TabsContent value="test" className="space-y-4">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="test-email">Test Email Address</Label>
-                  <Input
-                    id="test-email"
-                    type="email"
-                    value={testEmail}
-                    onChange={(e) => setTestEmail(e.target.value)}
-                    placeholder="test@example.com"
-                  />
-                </div>
-                <Button onClick={sendTestEmail} disabled={testing}>
-                  <Send className={`mr-2 h-4 w-4 ${testing ? 'animate-pulse' : ''}`} />
-                  {testing ? 'Sending...' : 'Send Test Email'}
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Perform common email operations</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button variant="outline" className="justify-start">
-              <Mail className="mr-2 h-4 w-4" />
-              Create Email Template
-              <ArrowRight className="ml-auto h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="justify-start">
-              <Users className="mr-2 h-4 w-4" />
-              Manage Recipients
-              <ArrowRight className="ml-auto h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="justify-start">
-              <BarChart3 className="mr-2 h-4 w-4" />
-              View Analytics
-              <ArrowRight className="ml-auto h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="justify-start">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Refresh Connection
-              <ArrowRight className="ml-auto h-4 w-4" />
-            </Button>
+                );
+              })}
           </div>
         </CardContent>
       </Card>

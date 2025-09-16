@@ -420,7 +420,7 @@ export default function Integrations() {
               </div>
             </TabsContent>
 
-            {/* Migration Tab */}
+            {/* PSA Migration Tab */}
             <TabsContent value="migration" className="space-y-6">
               <PSAMigration integrations={getCategoryIntegrations('migration')} />
             </TabsContent>

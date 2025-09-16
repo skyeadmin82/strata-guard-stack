@@ -55,11 +55,14 @@ export default function RMMIntegration({ integrations }: RMMIntegrationProps) {
         .eq('category', 'rmm_integration')
         .single();
 
-      if (data?.settings?.rmm) {
-        setConnections(prev => ({
-          ...prev,
-          ...data.settings.rmm
-        }));
+      if (data?.settings && typeof data.settings === 'object' && 'rmm' in data.settings) {
+        const settings = data.settings as any;
+        if (settings.rmm) {
+          setConnections(prev => ({
+            ...prev,
+            ...settings.rmm
+          }));
+        }
       }
     } catch (error) {
       console.error('Error checking RMM connections:', error);

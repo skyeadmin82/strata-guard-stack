@@ -63,8 +63,11 @@ export default function PCBancardIntegration({ integrations }: PCBancardIntegrat
         .eq('category', 'payment_gateways')
         .single();
 
-      if (data?.settings?.pcbancard?.connected) {
-        setIsConnected(true);
+      if (data?.settings && typeof data.settings === 'object' && 'pcbancard' in data.settings) {
+        const settings = data.settings as any;
+        if (settings.pcbancard?.connected) {
+          setIsConnected(true);
+        }
       }
     } catch (error) {
       console.error('Error checking PCBancard connection:', error);
@@ -79,11 +82,14 @@ export default function PCBancardIntegration({ integrations }: PCBancardIntegrat
         .eq('category', 'payment_gateways')
         .single();
 
-      if (data?.settings?.pcbancard) {
-        setConfig(prev => ({
-          ...prev,
-          ...data.settings.pcbancard
-        }));
+      if (data?.settings && typeof data.settings === 'object' && 'pcbancard' in data.settings) {
+        const settings = data.settings as any;
+        if (settings.pcbancard) {
+          setConfig(prev => ({
+            ...prev,
+            ...settings.pcbancard
+          }));
+        }
       }
     } catch (error) {
       console.error('Error loading PCBancard config:', error);

@@ -53,11 +53,14 @@ export default function SecurityIntegration({ integrations }: SecurityIntegratio
         .eq('category', 'security_integration')
         .single();
 
-      if (data?.settings?.security) {
-        setConnections(prev => ({
-          ...prev,
-          ...data.settings.security
-        }));
+      if (data?.settings && typeof data.settings === 'object' && 'security' in data.settings) {
+        const settings = data.settings as any;
+        if (settings.security) {
+          setConnections(prev => ({
+            ...prev,
+            ...settings.security
+          }));
+        }
       }
     } catch (error) {
       console.error('Error checking security connections:', error);

@@ -22,7 +22,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export default function QBOIntegration() {
+export default function QBOIntegration({ integrations }: { integrations?: any[] }) {
   const [connection, setConnection] = useState<any>(null);
   const [settings, setSettings] = useState({
     sync_enabled: true,
