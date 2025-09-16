@@ -34,205 +34,55 @@ import { useIntegrations } from '@/hooks/useIntegrations';
 export default function Integrations() {
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
-  const { integrations: dbIntegrations, loading, connectIntegration, disconnectIntegration } = useIntegrations();
+  const { integrations, loading, connectIntegration, disconnectIntegration } = useIntegrations();
 
-  const staticIntegrations = [
-    // PSA Migration Tools
-    {
-      id: 'connectwise',
-      name: 'ConnectWise PSA',
-      description: 'Migrate tickets, clients, and invoices from ConnectWise',
-      icon: ArrowRightLeft,
-      status: 'available',
-      category: 'migration',
-      badge: 'Migration Tool'
-    },
-    {
-      id: 'kaseya',
-      name: 'Kaseya BMS',
-      description: 'Import data from Kaseya Business Management Suite',
-      icon: Database,
-      status: 'available',
-      category: 'migration',
-      badge: 'Migration Tool'
-    },
-    {
-      id: 'syncro',
-      name: 'SyncroMSP',
-      description: 'Migrate from SyncroMSP with full data transfer',
-      icon: CloudDownload,
-      status: 'available',
-      category: 'migration',
-      badge: 'Migration Tool'
-    },
-    {
-      id: 'atera',
-      name: 'Atera',
-      description: 'Import clients, tickets, and contracts from Atera',
-      icon: Database,
-      status: 'available',
-      category: 'migration',
-      badge: 'Migration Tool'
-    },
-    
-    // Financial Integrations
-    {
-      id: 'qbo',
-      name: 'QuickBooks Online',
-      description: 'Sync invoices, payments, and financial data',
-      icon: DollarSign,
-      status: 'available',
-      category: 'financial',
-      badge: 'Popular'
-    },
-    {
-      id: 'pcbancard',
-      name: 'PCBancard',
-      description: 'Accept payments with dual pricing and platform billing',
-      icon: CreditCard,
-      status: 'available',
-      category: 'financial',
-      badge: 'Recommended'
-    },
-    
-    // Communication Tools
-    {
-      id: 'smtp2go',
-      name: 'SMTP2GO',
-      description: 'Email automation and transactional emails',
-      icon: Mail,
-      status: 'available',
-      category: 'communication'
-    },
-    {
-      id: 'teams',
-      name: 'Microsoft Teams',
-      description: 'Team collaboration and ticket notifications',
-      icon: MessageSquare,
-      status: 'available',
-      category: 'communication'
-    },
-    {
-      id: 'slack',
-      name: 'Slack',
-      description: 'Real-time notifications and team updates',
-      icon: MessageSquare,
-      status: 'available',
-      category: 'communication'
-    },
-    {
-      id: 'twilio',
-      name: 'Twilio',
-      description: 'SMS notifications and phone integration',
-      icon: Phone,
-      status: 'coming_soon',
-      category: 'communication'
-    },
-    
-    // Microsoft Suite
-    {
-      id: 'azure_ad',
-      name: 'Azure Active Directory',
-      description: 'Single sign-on and user management',
-      icon: Shield,
-      status: 'available',
-      category: 'microsoft'
-    },
-    {
-      id: 'office365',
-      name: 'Microsoft 365',
-      description: 'Calendar sync, contacts, and document management',
-      icon: Calendar,
-      status: 'available',
-      category: 'microsoft'
-    },
-    {
-      id: 'sharepoint',
-      name: 'SharePoint',
-      description: 'Document storage and collaboration',
-      icon: FileText,
-      status: 'coming_soon',
-      category: 'microsoft'
-    },
-    
-    // RMM Tools
-    {
-      id: 'ninja_rmm',
-      name: 'NinjaOne RMM',
-      description: 'Remote monitoring and management integration',
-      icon: Activity,
-      status: 'available',
-      category: 'rmm'
-    },
-    {
-      id: 'connectwise_automate',
-      name: 'ConnectWise Automate',
-      description: 'Automate ticket creation from RMM alerts',
-      icon: Zap,
-      status: 'available',
-      category: 'rmm'
-    },
-    {
-      id: 'datto_rmm',
-      name: 'Datto RMM',
-      description: 'Sync device information and alerts',
-      icon: Activity,
-      status: 'coming_soon',
-      category: 'rmm'
-    },
-    
-    // Security & Compliance
-    {
-      id: 'duo',
-      name: 'Duo Security',
-      description: 'Two-factor authentication for enhanced security',
-      icon: Lock,
-      status: 'available',
-      category: 'security'
-    },
-    {
-      id: 'knowbe4',
-      name: 'KnowBe4',
-      description: 'Security training and phishing simulation',
-      icon: Shield,
-      status: 'coming_soon',
-      category: 'security'
-    },
-    {
-      id: 'huntress',
-      name: 'Huntress',
-      description: 'Managed threat detection and response',
-      icon: Shield,
-      status: 'coming_soon',
-      category: 'security'
-    },
-    
-    // Vendor Management
-    {
-      id: 'ingram',
-      name: 'Ingram Micro',
-      description: 'Order management and product catalog',
-      icon: Package,
-      status: 'coming_soon',
-      category: 'vendors'
-    },
-    {
-      id: 'td_synnex',
-      name: 'TD SYNNEX',
-      description: 'Distributor integration for ordering',
-      icon: Package,
-      status: 'coming_soon',
-      category: 'vendors'
-    },
-    {
-      id: 'pax8',
-      name: 'Pax8',
-      description: 'Cloud marketplace and licensing',
-      icon: CloudDownload,
-      status: 'coming_soon',
-      category: 'vendors'
-    }
-  ];
+  // Map integrations from hook to include UI-specific properties
+  const staticIntegrations = integrations.map(integration => ({
+    ...integration,
+    icon: getIconForIntegration(integration.id),
+    badge: getBadgeForIntegration(integration.id)
+  }));
+
+  // Helper functions for UI properties
+  function getIconForIntegration(id: string) {
+    const iconMap: Record<string, any> = {
+      'connectwise': ArrowRightLeft,
+      'kaseya': Database,
+      'syncro': CloudDownload,
+      'atera': Database,
+      'qbo': DollarSign,
+      'pcbancard': CreditCard,
+      'smtp2go': Mail,
+      'teams': MessageSquare,
+      'slack': MessageSquare,
+      'twilio': Phone,
+      'azure_ad': Shield,
+      'office365': Calendar,
+      'sharepoint': FileText,
+      'ninja_rmm': Activity,
+      'connectwise_automate': Zap,
+      'datto_rmm': Activity,
+      'duo': Lock,
+      'knowbe4': Shield,
+      'huntress': Shield,
+      'ingram': Package,
+      'td_synnex': Package,
+      'pax8': CloudDownload
+    };
+    return iconMap[id] || Settings;
+  }
+
+  function getBadgeForIntegration(id: string) {
+    const badgeMap: Record<string, string> = {
+      'connectwise': 'Migration Tool',
+      'kaseya': 'Migration Tool',
+      'syncro': 'Migration Tool',
+      'atera': 'Migration Tool',
+      'qbo': 'Popular',
+      'pcbancard': 'Recommended'
+    };
+    return badgeMap[id];
+  }
 
   const filteredIntegrations = staticIntegrations.filter(integration =>
     integration.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
