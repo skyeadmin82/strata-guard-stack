@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ProposalDetailDialog } from '@/components/Proposals/ProposalDetailDialog';
 import { ProposalEditDialog } from '@/components/Proposals/ProposalEditDialog';
+import { ProposalCreateDialog } from '@/components/Proposals/ProposalCreateDialog';
 import { ProposalTemplateManager } from '@/components/Proposals/ProposalTemplateManager';
 import { ProposalAnalytics } from '@/components/Proposals/ProposalAnalytics';
 import { WinLossTracker } from '@/components/Proposals/WinLossTracker';
@@ -32,9 +33,17 @@ interface Proposal {
   sent_date?: string;
   viewed_date?: string;
   view_count?: number;
+  last_viewed_at?: string;
   client_id: string;
-  clients?: { name: string } | null;
+  clients?: { name: string; email?: string } | null;
   created_at: string;
+  updated_at?: string;
+  terms_and_conditions?: string;
+  payment_terms?: string;
+  created_date?: string;
+  accepted_date?: string;
+  template_id?: string;
+  tracking_pixel_id?: string;
 }
 
 export const ProposalsPage = () => {
@@ -46,6 +55,7 @@ export const ProposalsPage = () => {
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const { toast } = useToast();
 
   const fetchProposals = async () => {
@@ -141,7 +151,7 @@ export const ProposalsPage = () => {
             <h1 className="text-3xl font-bold">Proposals</h1>
             <p className="text-muted-foreground">Manage client proposals and track performance</p>
           </div>
-          <Button>
+          <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             New Proposal
           </Button>
@@ -338,7 +348,7 @@ export const ProposalsPage = () => {
                     : 'Get started by creating your first proposal'
                   }
                 </p>
-                <Button>
+                <Button onClick={() => setShowCreateDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Create Proposal
                 </Button>
@@ -361,7 +371,15 @@ export const ProposalsPage = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Dialogs */}
+        <ProposalCreateDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+          onSave={() => {
+            fetchProposals();
+            setShowCreateDialog(false);
+          }}
+        />
+
         <ProposalDetailDialog
           open={showDetailDialog}
           onOpenChange={setShowDetailDialog}

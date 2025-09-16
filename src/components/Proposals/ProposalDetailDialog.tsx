@@ -9,11 +9,35 @@ import { ProposalTracking } from './ProposalTracking';
 import { Edit, Download, Send, Eye, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 
+interface Proposal {
+  id: string;
+  proposal_number: string;
+  title: string;
+  description?: string;
+  status: string;
+  total_amount?: number;
+  currency: string;
+  tax_amount?: number;
+  discount_amount?: number;
+  final_amount?: number;
+  valid_until?: string;
+  sent_date?: string;
+  viewed_date?: string;
+  view_count?: number;
+  last_viewed_at?: string;
+  client_id: string;
+  clients?: { name: string; email?: string } | null;
+  created_at: string;
+  updated_at?: string;
+  terms_and_conditions?: string;
+  payment_terms?: string;
+}
+
 interface ProposalDetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  proposal: any;
-  onEdit?: (proposal: any) => void;
+  proposal: Proposal | null;
+  onEdit?: (proposal: Proposal) => void;
 }
 
 export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
@@ -48,6 +72,16 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
     }).format(amount);
   };
 
+  const handleDownload = async () => {
+    // TODO: Implement PDF generation and download
+    console.log('Download proposal:', proposal.id);
+  };
+
+  const handleSend = async () => {
+    // TODO: Implement email sending
+    console.log('Send proposal:', proposal.id);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -69,11 +103,11 @@ export const ProposalDetailDialog: React.FC<ProposalDetailDialogProps> = ({
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleDownload}>
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleSend}>
                 <Send className="w-4 h-4 mr-2" />
                 Send
               </Button>
