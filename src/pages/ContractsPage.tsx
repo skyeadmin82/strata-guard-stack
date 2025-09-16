@@ -28,6 +28,7 @@ export const ContractsPage = () => {
     stats,
     loading,
     selectedContracts,
+    fetchContracts,
     bulkRenewalAction,
     toggleContractSelection,
     selectAllContracts,
@@ -51,6 +52,15 @@ export const ContractsPage = () => {
     setSelectedContract(contract);
     setDialogMode('view');
     setDialogOpen(true);
+  };
+
+  const handleEditContract = () => {
+    setDialogMode('edit');
+  };
+
+  const handleSaveContract = async () => {
+    // Refresh contracts after save
+    await fetchContracts();
   };
 
   const handleCreateContract = () => {
@@ -277,33 +287,30 @@ export const ContractsPage = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredContracts.map((contract) => (
-                      <TableRow key={contract.id} className="hover:bg-muted/50">
-                        <TableCell>
-                          <Checkbox
-                            checked={selectedContracts.includes(contract.id)}
-                            onCheckedChange={() => toggleContractSelection(contract.id)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </TableCell>
-                        <TableCell 
-                          className="font-medium cursor-pointer"
-                          onClick={() => handleViewContract(contract)}
-                        >
-                          {contract.contract_number}
-                        </TableCell>
-                        <TableCell 
-                          className="cursor-pointer"
-                          onClick={() => handleViewContract(contract)}
-                        >
-                          <div>
-                            <div className="font-medium">{contract.title}</div>
-                            {contract.description && (
-                              <div className="text-sm text-muted-foreground truncate max-w-xs">
-                                {contract.description}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
+                       <TableRow 
+                         key={contract.id} 
+                         className="hover:bg-muted/50 cursor-pointer"
+                         onClick={() => handleViewContract(contract)}
+                       >
+                         <TableCell onClick={(e) => e.stopPropagation()}>
+                           <Checkbox
+                             checked={selectedContracts.includes(contract.id)}
+                             onCheckedChange={() => toggleContractSelection(contract.id)}
+                           />
+                         </TableCell>
+                         <TableCell className="font-medium">
+                           {contract.contract_number}
+                         </TableCell>
+                         <TableCell>
+                           <div>
+                             <div className="font-medium">{contract.title}</div>
+                             {contract.description && (
+                               <div className="text-sm text-muted-foreground truncate max-w-xs">
+                                 {contract.description}
+                               </div>
+                             )}
+                           </div>
+                         </TableCell>
                         <TableCell>
                           <div className="flex items-center">
                             <Building2 className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -384,6 +391,8 @@ export const ContractsPage = () => {
         onOpenChange={setDialogOpen}
         contract={selectedContract}
         mode={dialogMode}
+        onModeChange={setDialogMode}
+        onSave={handleSaveContract}
       />
     </DashboardLayout>
   );

@@ -16,9 +16,11 @@ interface ContractDialogProps {
   onOpenChange: (open: boolean) => void;
   contract?: EnhancedContract | null;
   mode: 'view' | 'edit' | 'create';
+  onModeChange?: (mode: 'view' | 'edit' | 'create') => void;
+  onSave?: () => void;
 }
 
-export const ContractDialog = ({ open, onOpenChange, contract, mode }: ContractDialogProps) => {
+export const ContractDialog = ({ open, onOpenChange, contract, mode, onModeChange, onSave }: ContractDialogProps) => {
   const [formData, setFormData] = useState({
     title: contract?.title || '',
     description: contract?.description || '',
@@ -46,6 +48,25 @@ export const ContractDialog = ({ open, onOpenChange, contract, mode }: ContractD
       case 'medium': return 'secondary';
       case 'low': return 'default';
       default: return 'outline';
+    }
+  };
+
+  const handleEditContract = () => {
+    if (onModeChange) {
+      onModeChange('edit');
+    }
+  };
+
+  const handleSaveContract = async () => {
+    try {
+      // Here you would implement the actual save logic
+      // For now, we'll just call the onSave callback
+      if (onSave) {
+        onSave();
+      }
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error saving contract:', error);
     }
   };
 
@@ -249,12 +270,12 @@ export const ContractDialog = ({ open, onOpenChange, contract, mode }: ContractD
             Cancel
           </Button>
           {!isViewMode && (
-            <Button>
+            <Button onClick={handleSaveContract}>
               {isCreateMode ? 'Create Contract' : 'Save Changes'}
             </Button>
           )}
           {isViewMode && (
-            <Button onClick={() => {}}>
+            <Button onClick={() => handleEditContract()}>
               Edit Contract
             </Button>
           )}
