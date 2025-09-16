@@ -155,7 +155,7 @@ const Index = () => {
 
       // Generate chart data
       const chartData: ChartData = {
-        revenueData: generateRevenueData(contractsResponse.data || []),
+        revenueData: await generateRevenueData(),
         ticketData: generateTicketVolumeData(ticketsResponse.data || []),
         clientGrowthData: generateClientGrowthData(clientsResponse.data || []),
         topClientsData: generateTopClientsData(contractsResponse.data || [], clientsResponse.data || [])
@@ -215,27 +215,66 @@ const Index = () => {
   };
 
   // Helper functions for data generation
-  const generateRevenueData = (contracts: any[]) => {
-    const last30Days = Array.from({ length: 30 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (29 - i));
+  const generateRevenueData = async () => {
+    try {
+      // Get actual payments data for the last 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
-      // Calculate daily revenue based on contract data
-      const dailyContracts = contracts.filter(c => {
-        const contractDate = new Date(c.created_at);
-        return contractDate <= date && c.status === 'active';
+      const { data: payments } = await supabase
+        .from('payments')
+        .select('payment_date, amount')
+        .eq('status', 'completed')
+        .gte('payment_date', thirtyDaysAgo.toISOString().split('T')[0]);
+
+      // Get contract payments
+      const { data: contractPayments } = await supabase
+        .from('contract_payments')
+        .select('paid_at, amount_paid')
+        .eq('payment_status', 'completed')
+        .gte('paid_at', thirtyDaysAgo.toISOString().split('T')[0]);
+
+      const last30Days = Array.from({ length: 30 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (29 - i));
+        const dateStr = date.toISOString().split('T')[0];
+        
+        // Calculate actual revenue from payments for this date
+        let dailyRevenue = 0;
+        
+        // Add regular payments
+        if (payments) {
+          dailyRevenue += payments
+            .filter(p => p.payment_date === dateStr)
+            .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        }
+        
+        // Add contract payments
+        if (contractPayments) {
+          dailyRevenue += contractPayments
+            .filter(cp => cp.paid_at?.split('T')[0] === dateStr)
+            .reduce((sum, cp) => sum + Number(cp.amount_paid || 0), 0);
+        }
+        
+        return {
+          date: dateStr,
+          revenue: dailyRevenue
+        };
       });
       
-      const dailyRevenue = dailyContracts.reduce((sum, contract) => {
-        return sum + ((contract.total_value || 0) / 365); // Daily revenue
-      }, 0);
-      
-      return {
-        date: date.toISOString().split('T')[0],
-        revenue: dailyRevenue // Show actual revenue, including zero when no contracts
-      };
-    });
-    return last30Days;
+      return last30Days;
+    } catch (error) {
+      console.error('Error generating revenue data:', error);
+      // Fallback to empty data
+      return Array.from({ length: 30 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (29 - i));
+        return {
+          date: date.toISOString().split('T')[0],
+          revenue: 0
+        };
+      });
+    }
   };
 
   const generateTicketVolumeData = (tickets: any[]) => {
