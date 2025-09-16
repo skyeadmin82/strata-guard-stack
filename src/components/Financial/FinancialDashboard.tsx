@@ -77,6 +77,7 @@ export const FinancialDashboard: React.FC = () => {
     invoices,
     payments,
     anomalies,
+    transactions,
     isLoading,
     loadFinancialData,
     detectAnomalies
@@ -102,7 +103,7 @@ export const FinancialDashboard: React.FC = () => {
   const [selectedTimeframe, setSelectedTimeframe] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Calculate metrics from data
+  // Calculate metrics from REAL data
   const calculateMetrics = () => {
     const now = new Date();
     const timeframeMs = {
@@ -121,13 +122,18 @@ export const FinancialDashboard: React.FC = () => {
     const recentPayments = payments.filter(pay => 
       new Date(pay.created_at) >= cutoffDate
     );
+    const recentTransactions = transactions.filter(tx => 
+      new Date(tx.transaction_date) >= cutoffDate
+    );
 
-    // Calculate basic metrics
+    // Calculate REAL metrics
     const totalRevenue = recentInvoices
       .filter(inv => inv.status === 'paid')
       .reduce((sum, inv) => sum + Number(inv.total_amount), 0);
 
-    const totalExpenses = totalRevenue * 0.65; // Simplified calculation
+    const expenseTransactions = recentTransactions.filter(tx => tx.transaction_type === 'expense');
+    const totalExpenses = expenseTransactions.reduce((sum, tx) => sum + Number(tx.total_amount), 0);
+    
     const netProfit = totalRevenue - totalExpenses;
     const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
@@ -143,11 +149,22 @@ export const FinancialDashboard: React.FC = () => {
       .filter(pay => pay.status === 'completed')
       .reduce((sum, pay) => sum + Number(pay.amount), 0);
 
-    // Generate mock data for charts
-    const cashFlow = generateMockCashFlowData();
-    const revenueByMonth = generateMockRevenueData();
-    const expenseBreakdown = generateMockExpenseBreakdown();
-    const anomalyTrends = generateMockAnomalyTrends();
+    // Calculate average payment time from real data
+    const paidInvoices = invoices.filter(inv => inv.status === 'paid' && inv.due_date);
+    const avgPaymentDays = paidInvoices.length > 0 
+      ? paidInvoices.reduce((sum, inv) => {
+          const dueDate = new Date(inv.due_date!);
+          const paidDate = new Date(inv.updated_at);
+          const daysDiff = Math.max(0, Math.floor((paidDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24)));
+          return sum + daysDiff;
+        }, 0) / paidInvoices.length
+      : 0;
+
+    // Generate REAL data for charts
+    const cashFlow = generateRealCashFlowData(recentTransactions, recentPayments);
+    const revenueByMonth = generateRealRevenueData(recentInvoices);
+    const expenseBreakdown = generateRealExpenseBreakdown(expenseTransactions);
+    const anomalyTrends = generateRealAnomalyTrends();
 
     setMetrics({
       totalRevenue,
@@ -157,7 +174,7 @@ export const FinancialDashboard: React.FC = () => {
       outstandingInvoices,
       overdueInvoices,
       totalPayments,
-      avgPaymentTime: 12, // Mock average days
+      avgPaymentTime: Math.round(avgPaymentDays) || 0,
       cashFlow,
       revenueByMonth,
       expenseBreakdown,
@@ -165,45 +182,134 @@ export const FinancialDashboard: React.FC = () => {
     });
   };
 
-  // Generate mock data for demonstration
-  const generateMockCashFlowData = () => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    return months.map(month => ({
-      month,
-      inflow: Math.floor(Math.random() * 50000) + 20000,
-      outflow: Math.floor(Math.random() * 40000) + 15000,
-      net: Math.floor(Math.random() * 20000) - 5000
-    }));
+  // Generate REAL data for charts
+  const generateRealCashFlowData = (transactions: any[], payments_data: any[]) => {
+    const monthlyData = new Map();
+    const now = new Date();
+    
+    // Initialize last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = date.toLocaleDateString('en-US', { month: 'short' });
+      monthlyData.set(monthKey, { month: monthKey, inflow: 0, outflow: 0, net: 0 });
+    }
+
+    // Process payments (inflows)
+    payments_data.forEach(payment => {
+      if (payment.status === 'completed') {
+        const date = new Date(payment.payment_date || payment.created_at);
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short' });
+        if (monthlyData.has(monthKey)) {
+          monthlyData.get(monthKey).inflow += Number(payment.amount);
+        }
+      }
+    });
+
+    // Process expense transactions (outflows)
+    transactions.forEach(tx => {
+      if (tx.transaction_type === 'expense') {
+        const date = new Date(tx.transaction_date);
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short' });
+        if (monthlyData.has(monthKey)) {
+          monthlyData.get(monthKey).outflow += Number(tx.total_amount);
+        }
+      }
+    });
+
+    // Calculate net for each month
+    Array.from(monthlyData.values()).forEach(month => {
+      month.net = month.inflow - month.outflow;
+    });
+
+    return Array.from(monthlyData.values());
   };
 
-  const generateMockRevenueData = () => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    return months.map(month => ({
-      month,
-      revenue: Math.floor(Math.random() * 60000) + 30000,
-      target: 50000
-    }));
+  const generateRealRevenueData = (invoices_data: any[]) => {
+    const monthlyRevenue = new Map();
+    const now = new Date();
+    
+    // Initialize last 6 months with targets
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = date.toLocaleDateString('en-US', { month: 'short' });
+      monthlyRevenue.set(monthKey, { month: monthKey, revenue: 0, target: 50000 });
+    }
+
+    // Process paid invoices
+    invoices_data.forEach(invoice => {
+      if (invoice.status === 'paid') {
+        const date = new Date(invoice.updated_at || invoice.created_at);
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short' });
+        if (monthlyRevenue.has(monthKey)) {
+          monthlyRevenue.get(monthKey).revenue += Number(invoice.total_amount);
+        }
+      }
+    });
+
+    return Array.from(monthlyRevenue.values());
   };
 
-  const generateMockExpenseBreakdown = () => [
-    { category: 'Salaries', amount: 25000, color: '#8884d8' },
-    { category: 'Operations', amount: 15000, color: '#82ca9d' },
-    { category: 'Marketing', amount: 8000, color: '#ffc658' },
-    { category: 'Technology', amount: 5000, color: '#ff7300' },
-    { category: 'Other', amount: 3000, color: '#00c7be' }
-  ];
+  const generateRealExpenseBreakdown = (expense_transactions: any[]) => {
+    const categories = new Map();
+    const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00c7be', '#8dd1e1', '#d084d0'];
+    
+    expense_transactions.forEach(tx => {
+      const category = tx.description || 'Other';
+      const amount = Number(tx.total_amount);
+      
+      if (categories.has(category)) {
+        categories.set(category, categories.get(category) + amount);
+      } else {
+        categories.set(category, amount);
+      }
+    });
 
-  const generateMockAnomalyTrends = () => {
+    const result = Array.from(categories.entries())
+      .map(([category, amount], index) => ({
+        category,
+        amount,
+        color: colors[index % colors.length]
+      }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 7); // Top 7 categories
+
+    return result.length > 0 ? result : [
+      { category: 'No Expenses', amount: 0, color: '#8884d8' }
+    ];
+  };
+
+  const generateRealAnomalyTrends = () => {
     const dates = [];
+    const groupedAnomalies = new Map();
+    
+    // Group anomalies by date
+    anomalies.forEach(anomaly => {
+      const date = new Date(anomaly.created_at).toISOString().split('T')[0];
+      if (!groupedAnomalies.has(date)) {
+        groupedAnomalies.set(date, { count: 0, severities: [] });
+      }
+      groupedAnomalies.get(date).count++;
+      groupedAnomalies.get(date).severities.push(anomaly.severity);
+    });
+
+    // Generate last 7 days
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const anomalyData = groupedAnomalies.get(dateStr) || { count: 0, severities: [] };
+      const highestSeverity = anomalyData.severities.includes('critical') ? 'critical' :
+                             anomalyData.severities.includes('high') ? 'high' :
+                             anomalyData.severities.includes('medium') ? 'medium' : 'low';
+      
       dates.push({
-        date: date.toISOString().split('T')[0],
-        count: Math.floor(Math.random() * 5),
-        severity: ['low', 'medium', 'high', 'critical'][Math.floor(Math.random() * 4)] as any
+        date: dateStr,
+        count: anomalyData.count,
+        severity: highestSeverity
       });
     }
+    
     return dates;
   };
 
@@ -226,7 +332,7 @@ export const FinancialDashboard: React.FC = () => {
 
   useEffect(() => {
     calculateMetrics();
-  }, [invoices, payments, selectedTimeframe]);
+  }, [invoices, payments, transactions, anomalies, selectedTimeframe]);
 
   useEffect(() => {
     loadFinancialData();
