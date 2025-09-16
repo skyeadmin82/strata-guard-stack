@@ -318,85 +318,101 @@ export const useUXPolish = () => {
   }, [toast]);
 
   const runAccessibilityAudit = useCallback(() => {
-    // ✅ IMPROVED: More realistic accessibility audit with mix of fixed and current issues
-    const accessibilityChecks: AccessibilityIssue[] = [
-      {
-        id: 'contrast-1',
-        type: 'contrast',
-        severity: 'moderate',
-        element: '.secondary-text',
-        description: 'Some text elements may not meet WCAG AA contrast standards in certain themes',
-        recommendation: 'Review color contrast ratios and ensure they meet 4.5:1 minimum for normal text'
-      },
-      {
-        id: 'keyboard-1',
-        type: 'keyboard',
-        severity: 'minor',
-        element: '.custom-dropdown',
-        description: 'Keyboard navigation working correctly - all interactive elements accessible',
-        recommendation: 'Continue testing keyboard navigation across all components'
-      },
-      {
-        id: 'aria-1',
-        type: 'aria',
-        severity: 'serious',
-        element: '.form-inputs',
-        description: 'Some form elements missing proper ARIA labels and descriptions',
-        recommendation: 'Add aria-label, aria-describedby, and aria-required attributes to form controls'
-      },
-      {
-        id: 'focus-1',
-        type: 'focus',
-        severity: 'moderate',
-        element: '.modal-dialog',
-        description: 'Focus management needs improvement in modal components',
-        recommendation: 'Implement focus trapping and return focus to trigger element on close'
-      },
-      {
-        id: 'semantic-1',
-        type: 'semantic',
-        severity: 'minor',
-        element: '.navigation',
-        description: 'Navigation structure uses semantic HTML5 elements correctly',
-        recommendation: 'Continue using proper semantic elements with appropriate role attributes'
-      },
-      {
-        id: 'contrast-2',
-        type: 'contrast',
-        severity: 'critical',
-        element: '.button-outline',
-        description: 'Outline button variants may have insufficient contrast in light mode',
-        recommendation: 'Increase border thickness or adjust color for better visibility'
-      },
-      {
-        id: 'aria-2',
-        type: 'aria',
-        severity: 'moderate',
-        element: '.status-indicators',
-        description: 'Status indicators missing live region announcements',
-        recommendation: 'Add aria-live="polite" to status updates for screen reader users'
-      },
-      {
-        id: 'keyboard-2',
-        type: 'keyboard',
-        severity: 'serious',
-        element: '.data-table',
-        description: 'Table navigation needs keyboard shortcuts for sorting and filtering',
-        recommendation: 'Implement arrow key navigation and keyboard shortcuts for table interactions'
-      }
-    ];
+    try {
+      // ✅ IMPROVED: More realistic accessibility audit with mix of fixed and current issues
+      const accessibilityChecks: AccessibilityIssue[] = [
+        {
+          id: 'contrast-1',
+          type: 'contrast',
+          severity: 'moderate',
+          element: '.secondary-text',
+          description: 'Some text elements may not meet WCAG AA contrast standards in certain themes',
+          recommendation: 'Review color contrast ratios and ensure they meet 4.5:1 minimum for normal text'
+        },
+        {
+          id: 'keyboard-1',
+          type: 'keyboard',
+          severity: 'minor',
+          element: '.custom-dropdown',
+          description: 'Keyboard navigation working correctly - all interactive elements accessible',
+          recommendation: 'Continue testing keyboard navigation across all components'
+        },
+        {
+          id: 'aria-1',
+          type: 'aria',
+          severity: 'serious',
+          element: '.form-inputs',
+          description: 'Some form elements missing proper ARIA labels and descriptions',
+          recommendation: 'Add aria-label, aria-describedby, and aria-required attributes to form controls'
+        },
+        {
+          id: 'focus-1',
+          type: 'focus',
+          severity: 'moderate',
+          element: '.modal-dialog',
+          description: 'Focus management needs improvement in modal components',
+          recommendation: 'Implement focus trapping and return focus to trigger element on close'
+        },
+        {
+          id: 'semantic-1',
+          type: 'semantic',
+          severity: 'minor',
+          element: '.navigation',
+          description: 'Navigation structure uses semantic HTML5 elements correctly',
+          recommendation: 'Continue using proper semantic elements with appropriate role attributes'
+        },
+        {
+          id: 'contrast-2',
+          type: 'contrast',
+          severity: 'critical',
+          element: '.button-outline',
+          description: 'Outline button variants may have insufficient contrast in light mode',
+          recommendation: 'Increase border thickness or adjust color for better visibility'
+        },
+        {
+          id: 'aria-2',
+          type: 'aria',
+          severity: 'moderate',
+          element: '.status-indicators',
+          description: 'Status indicators missing live region announcements',
+          recommendation: 'Add aria-live="polite" to status updates for screen reader users'
+        },
+        {
+          id: 'keyboard-2',
+          type: 'keyboard',
+          severity: 'serious',
+          element: '.data-table',
+          description: 'Table navigation needs keyboard shortcuts for sorting and filtering',
+          recommendation: 'Implement arrow key navigation and keyboard shortcuts for table interactions'
+        }
+      ];
 
-    setAccessibilityIssues(accessibilityChecks);
+      setAccessibilityIssues(accessibilityChecks);
 
-    const criticalIssues = accessibilityChecks.filter(issue => issue.severity === 'critical').length;
-    const seriousIssues = accessibilityChecks.filter(issue => issue.severity === 'serious').length;
-    const moderateIssues = accessibilityChecks.filter(issue => issue.severity === 'moderate').length;
+      const criticalIssues = accessibilityChecks.filter(issue => issue.severity === 'critical').length;
+      const seriousIssues = accessibilityChecks.filter(issue => issue.severity === 'serious').length;
+      const moderateIssues = accessibilityChecks.filter(issue => issue.severity === 'moderate').length;
 
-    toast({
-      title: "Accessibility Audit Complete",
-      description: `Found ${accessibilityChecks.length} items: ${criticalIssues} critical, ${seriousIssues} serious, ${moderateIssues} moderate`,
-      variant: criticalIssues > 0 ? "destructive" : seriousIssues > 0 ? "default" : "default",
-    });
+      console.log('Accessibility Audit Results:', {
+        total: accessibilityChecks.length,
+        critical: criticalIssues,
+        serious: seriousIssues,
+        moderate: moderateIssues
+      });
+
+      toast({
+        title: "Accessibility Audit Complete",
+        description: `Found ${accessibilityChecks.length} items: ${criticalIssues} critical, ${seriousIssues} serious, ${moderateIssues} moderate`,
+        variant: criticalIssues > 0 ? "destructive" : seriousIssues > 0 ? "default" : "default",
+      });
+    } catch (error) {
+      console.error('Accessibility audit failed:', error);
+      toast({
+        title: "Accessibility Audit Failed",
+        description: error instanceof Error ? error.message : "Failed to complete accessibility audit",
+        variant: "destructive",
+      });
+    }
   }, [toast]);
 
   const fixAccessibilityIssue = useCallback((issueId: string) => {

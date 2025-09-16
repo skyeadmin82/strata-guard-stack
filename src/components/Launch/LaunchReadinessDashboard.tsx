@@ -568,7 +568,7 @@ export const LaunchReadinessDashboard: React.FC = () => {
                         <Badge variant="outline">{issue.type}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">{issue.description}</p>
-                      <p className="text-sm text-blue-600">{issue.recommendation}</p>
+                      <p className="text-sm text-primary">{issue.recommendation}</p>
                     </div>
                   ))}
                 </div>
