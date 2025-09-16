@@ -85,8 +85,7 @@ export const TicketsTable: React.FC = () => {
         .from('support_tickets')
         .select(`
           *,
-          clients:client_id(name),
-          contacts:contact_id(first_name, last_name)
+          clients!client_id(name)
         `)
         .order('created_at', { ascending: false });
 
@@ -134,8 +133,7 @@ export const TicketsTable: React.FC = () => {
         })
         .select(`
           *,
-          clients:client_id(name),
-          contacts:contact_id(first_name, last_name)
+          clients!client_id(name)
         `)
         .single();
 

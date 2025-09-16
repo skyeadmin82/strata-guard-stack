@@ -165,8 +165,7 @@ export const TicketDetailDialog: React.FC<TicketDetailDialogProps> = ({
         .eq('id', ticket.id)
         .select(`
           *,
-          clients:client_id(name),
-          contacts:contact_id(first_name, last_name)
+          clients:client_id(name)
         `)
         .single();
 

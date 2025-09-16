@@ -88,49 +88,37 @@ export const UsersTable: React.FC = () => {
 
   const handleAddUser = async () => {
     try {
-      // Create invitation for new user in Supabase Auth
-      const { data: authResult, error: authError } = await supabase.auth.admin.inviteUserByEmail(
-        newUser.email,
-        {
-          data: {
-            first_name: newUser.first_name,
-            last_name: newUser.last_name,
-            role: newUser.role
-          }
+      // Call the edge function to invite the user
+      const { data, error } = await supabase.functions.invoke('invite-user', {
+        body: {
+          email: newUser.email,
+          first_name: newUser.first_name,
+          last_name: newUser.last_name,
+          role: newUser.role
         }
-      );
-
-      if (authError) throw authError;
-
-      const authUserId = authResult.user?.id;
-      if (!authUserId) throw new Error('Failed to create auth user');
-      
-      const { data, error } = await supabase
-        .from('users')
-        .insert({
-          ...newUser,
-          auth_user_id: authUserId,
-          tenant_id: profile?.tenant_id,
-          is_active: true
-        })
-        .select()
-        .single();
+      });
 
       if (error) throw error;
 
-      setUsers([data, ...users]);
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to invite user');
+      }
+
+      // Add the new user to the local state
+      setUsers([data.user, ...users]);
       setIsAddDialogOpen(false);
       setNewUser({ email: '', first_name: '', last_name: '', role: 'technician' });
       
       toast({
         title: "Success",
-        description: "User invited successfully. They will receive an email to set up their account.",
+        description: data.message || "User invited successfully. They will receive an email to set up their account.",
       });
     } catch (error) {
       console.error('Error adding user:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add user';
       toast({
         title: "Error",
-        description: "Failed to add user",
+        description: errorMessage,
         variant: "destructive",
       });
     }
