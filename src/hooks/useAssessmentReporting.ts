@@ -366,26 +366,72 @@ export const useAssessmentReporting = () => {
 
   const exportPDF = useCallback(async (reportData: ReportData): Promise<ExportResult> => {
     try {
-      // For now, fallback to HTML if PDF generation fails
+      const { jsPDF } = await import('jspdf');
+      const html2canvas = await import('html2canvas');
+      
+      // Create HTML content
+      const htmlContent = generateHTMLReport(reportData);
+      
+      // Create a temporary div to render HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlContent;
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.width = '800px';
+      document.body.appendChild(tempDiv);
+      
+      try {
+        // Convert HTML to canvas
+        const canvas = await html2canvas.default(tempDiv, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true
+        });
+        
+        // Create PDF
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgData = canvas.toDataURL('image/png');
+        
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+        const imgX = (pdfWidth - imgWidth * ratio) / 2;
+        const imgY = 30;
+        
+        pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+        
+        // Convert to blob
+        const pdfBlob = pdf.output('blob');
+        
+        return {
+          success: true,
+          data: pdfBlob,
+          filename: `assessment-report-${Date.now()}.pdf`
+        };
+      } finally {
+        // Clean up
+        document.body.removeChild(tempDiv);
+      }
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      // Fallback to HTML
       const htmlResult = await exportHTML(reportData);
       
       if (htmlResult.success) {
-        // In a real implementation, you would use a PDF library here
-        // For now, return HTML with PDF filename
         return {
           ...htmlResult,
-          filename: `assessment-report-${Date.now()}.pdf`
+          filename: `assessment-report-${Date.now()}.html`
         };
       }
       
-      return htmlResult;
-    } catch (error) {
       return {
         success: false,
         error: `PDF export failed: ${error.message}`
       };
     }
-  }, [exportHTML]);
+  }, [exportHTML, generateHTMLReport]);
 
   const exportCSV = useCallback(async (reportData: ReportData): Promise<ExportResult> => {
     try {
