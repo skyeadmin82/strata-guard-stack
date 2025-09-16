@@ -73,14 +73,28 @@ export const TicketTemplateManager: React.FC = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('ticket_templates')
-        .select(`
-          *,
-          users:default_assignee_id(first_name, last_name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTemplates((data || []) as unknown as TicketTemplate[]);
+      
+      // Fetch user details separately to avoid join errors
+      const templatesWithUsers = await Promise.all(
+        (data || []).map(async (template) => {
+          if (template.default_assignee_id) {
+            const { data: userData } = await supabase
+              .from('users')
+              .select('first_name, last_name')
+              .eq('id', template.default_assignee_id)
+              .single();
+            
+            return { ...template, users: userData };
+          }
+          return { ...template, users: null };
+        })
+      );
+      
+      setTemplates(templatesWithUsers);
     } catch (error) {
       console.error('Error fetching templates:', error);
       toast({
@@ -136,15 +150,24 @@ export const TicketTemplateManager: React.FC = () => {
           estimated_hours: Number(newTemplate.estimated_hours),
           default_assignee_id: newTemplate.default_assignee_id || null
         })
-        .select(`
-          *,
-          users:default_assignee_id(first_name, last_name)
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
 
-      setTemplates([data as unknown as TicketTemplate, ...templates]);
+      // Fetch user details if assigned
+      let templateWithUser = { ...data, users: null };
+      if (data.default_assignee_id) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('first_name, last_name')
+          .eq('id', data.default_assignee_id)
+          .single();
+        
+        templateWithUser.users = userData;
+      }
+
+      setTemplates([templateWithUser, ...templates]);
       setIsAddDialogOpen(false);
       setNewTemplate({
         name: '',
@@ -184,15 +207,24 @@ export const TicketTemplateManager: React.FC = () => {
           default_assignee_id: editTemplate.default_assignee_id || null
         })
         .eq('id', editingTemplate.id)
-        .select(`
-          *,
-          users:default_assignee_id(first_name, last_name)
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
 
-      setTemplates(templates.map(t => t.id === editingTemplate.id ? data as unknown as TicketTemplate : t));
+      // Fetch user details if assigned
+      let templateWithUser = { ...data, users: null };
+      if (data.default_assignee_id) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('first_name, last_name')
+          .eq('id', data.default_assignee_id)
+          .single();
+        
+        templateWithUser.users = userData;
+      }
+
+      setTemplates(templates.map(t => t.id === editingTemplate.id ? templateWithUser : t));
       setEditingTemplate(null);
 
       toast({
