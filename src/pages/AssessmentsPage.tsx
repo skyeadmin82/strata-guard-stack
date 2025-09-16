@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -51,6 +52,7 @@ export const AssessmentsPage = () => {
   const [templates, setTemplates] = useState<Array<{id: string, name: string, category?: string}>>([]);
   const [activeTab, setActiveTab] = useState('overview');
   
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { generateReport, exportReport, isGenerating, isExporting } = useAssessmentReporting();
 
@@ -377,15 +379,23 @@ export const AssessmentsPage = () => {
                               }
                             </TableCell>
                             <TableCell onClick={(e) => e.stopPropagation()}>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleGeneratePDFReport(assessment.id)}
-                                disabled={isGenerating || isExporting}
-                              >
-                                <FileText className="w-4 h-4 mr-1" />
-                                PDF
-                              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/assessments/${assessment.id}/execute`)}
+                className="mr-2"
+              >
+                {assessment.status === 'completed' ? 'Review' : 'Continue'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleGeneratePDFReport(assessment.id)}
+                disabled={isGenerating || isExporting}
+              >
+                <FileText className="w-4 h-4 mr-1" />
+                PDF
+              </Button>
                             </TableCell>
                           </TableRow>
                         ))}

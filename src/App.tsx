@@ -17,6 +17,7 @@ import { TicketsPage } from "./pages/TicketsPage";
 import { TicketManagementPage } from "./pages/TicketManagementPage";
 import { ContractsPage } from "./pages/ContractsPage";
 import { AssessmentsPage } from "./pages/AssessmentsPage";
+import { AssessmentExecutionPage } from "./pages/AssessmentExecutionPage";
 import { ProposalsPage } from "./pages/ProposalsPage";
 import { MonitoringPage } from "./pages/MonitoringPage";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -68,6 +69,7 @@ const App = () => {
                     <Route path="/tickets/management" element={<TicketManagementPage />} />
                     <Route path="/contracts" element={<ContractsPage />} />
                     <Route path="/assessments" element={<AssessmentsPage />} />
+                    <Route path="/assessments/:assessmentId/execute" element={<AssessmentExecutionPage />} />
                     <Route path="/proposals" element={<ProposalsPage />} />
                     <Route path="/monitoring" element={<MonitoringPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
