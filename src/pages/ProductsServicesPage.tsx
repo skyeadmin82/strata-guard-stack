@@ -68,7 +68,6 @@ const ProductsServicesPage = () => {
   const [typeFilter, setTypeFilter] = useState('all');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<ProductService | null>(null);
-  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'complete' | 'error'>('idle');
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -263,37 +262,6 @@ const ProductsServicesPage = () => {
     }
   };
 
-  const handleQBOSync = async () => {
-    try {
-      setSyncStatus('syncing');
-      
-      const { data, error } = await supabase.functions.invoke('quickbooks-integration', {
-        body: {
-          action: 'sync_items',
-          type: 'full_sync'
-        }
-      });
-
-      if (error) throw error;
-
-      setSyncStatus('complete');
-      toast({
-        title: 'Success',
-        description: 'QuickBooks sync completed successfully',
-      });
-
-      // Refresh the items to show updated sync status
-      fetchItems();
-    } catch (error) {
-      console.error('Error syncing with QuickBooks:', error);
-      setSyncStatus('error');
-      toast({
-        title: 'Error',
-        description: 'Failed to sync with QuickBooks Online',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const startEdit = (item: ProductService) => {
     setEditingItem(item);
@@ -372,22 +340,10 @@ const ProductsServicesPage = () => {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Products & Services</h1>
             <p className="text-muted-foreground">
-              Manage your product catalog and service offerings with QuickBooks integration
+              Manage your product catalog and service offerings. Use the Integrations page to sync with QuickBooks.
             </p>
           </div>
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={handleQBOSync}
-              disabled={syncStatus === 'syncing'}
-            >
-              {syncStatus === 'syncing' ? (
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <RotateCcw className="w-4 h-4 mr-2" />
-              )}
-              Sync QuickBooks
-            </Button>
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
               <DialogTrigger asChild>
                 <Button onClick={resetForm}>
@@ -613,168 +569,176 @@ const ProductsServicesPage = () => {
         </Card>
 
         {/* Create/Edit Dialog */}
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingItem ? 'Edit Item' : 'Create New Item'}
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Enter item name"
-                />
-              </div>
-              <div>
-                <Label htmlFor="sku">SKU</Label>
-                <Input
-                  id="sku"
-                  value={formData.sku}
-                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                  placeholder="Enter SKU"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Enter item description"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="category">Category *</Label>
-                <Input
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="Enter category"
-                />
-              </div>
-              <div>
-                <Label htmlFor="item_type">Type *</Label>
-                <Select value={formData.item_type} onValueChange={(value: any) => setFormData({ ...formData, item_type: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="product">Product</SelectItem>
-                    <SelectItem value="service">Service</SelectItem>
-                    <SelectItem value="subscription">Subscription</SelectItem>
-                    <SelectItem value="bundle">Bundle</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="unit_price">Unit Price *</Label>
-                <Input
-                  id="unit_price"
-                  type="number"
-                  step="0.01"
-                  value={formData.unit_price}
-                  onChange={(e) => setFormData({ ...formData, unit_price: e.target.value })}
-                  placeholder="0.00"
-                />
-              </div>
-              <div>
-                <Label htmlFor="cost_price">Cost Price</Label>
-                <Input
-                  id="cost_price"
-                  type="number"
-                  step="0.01"
-                  value={formData.cost_price}
-                  onChange={(e) => setFormData({ ...formData, cost_price: e.target.value })}
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="vendor">Vendor</Label>
-                <Input
-                  id="vendor"
-                  value={formData.vendor}
-                  onChange={(e) => setFormData({ ...formData, vendor: e.target.value })}
-                  placeholder="Enter vendor name"
-                />
-              </div>
-              <div>
-                <Label htmlFor="tax_code">Tax Code</Label>
-                <Input
-                  id="tax_code"
-                  value={formData.tax_code}
-                  onChange={(e) => setFormData({ ...formData, tax_code: e.target.value })}
-                  placeholder="Enter tax code"
-                />
-              </div>
-            </div>
-
-            {formData.item_type === 'product' && (
+        <Dialog open={showCreateDialog || editingItem !== null} onOpenChange={(open) => {
+          if (!open) {
+            setShowCreateDialog(false);
+            setEditingItem(null);
+            resetForm();
+          }
+        }}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingItem ? 'Edit Item' : 'Create New Item'}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="inventory_qty">Inventory Quantity</Label>
+                  <Label htmlFor="name">Name *</Label>
                   <Input
-                    id="inventory_qty"
-                    type="number"
-                    value={formData.inventory_qty}
-                    onChange={(e) => setFormData({ ...formData, inventory_qty: e.target.value })}
-                    placeholder="0"
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Enter item name"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="min_stock_level">Min Stock Level</Label>
+                  <Label htmlFor="sku">SKU</Label>
                   <Input
-                    id="min_stock_level"
-                    type="number"
-                    value={formData.min_stock_level}
-                    onChange={(e) => setFormData({ ...formData, min_stock_level: e.target.value })}
-                    placeholder="0"
+                    id="sku"
+                    value={formData.sku}
+                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                    placeholder="Enter SKU"
                   />
                 </div>
               </div>
-            )}
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="is_active"
-                checked={formData.is_active}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-              />
-              <Label htmlFor="is_active">Active</Label>
-            </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Enter item description"
+                />
+              </div>
 
-            <div className="flex gap-2 pt-4">
-              <Button onClick={editingItem ? handleUpdateItem : handleCreateItem} className="flex-1">
-                {editingItem ? 'Update Item' : 'Create Item'}
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setEditingItem(null);
-                  setShowCreateDialog(false);
-                  resetForm();
-                }}
-              >
-                Cancel
-              </Button>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="category">Category *</Label>
+                  <Input
+                    id="category"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    placeholder="Enter category"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="item_type">Type *</Label>
+                  <Select value={formData.item_type} onValueChange={(value: any) => setFormData({ ...formData, item_type: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="product">Product</SelectItem>
+                      <SelectItem value="service">Service</SelectItem>
+                      <SelectItem value="subscription">Subscription</SelectItem>
+                      <SelectItem value="bundle">Bundle</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="unit_price">Unit Price *</Label>
+                  <Input
+                    id="unit_price"
+                    type="number"
+                    step="0.01"
+                    value={formData.unit_price}
+                    onChange={(e) => setFormData({ ...formData, unit_price: e.target.value })}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cost_price">Cost Price</Label>
+                  <Input
+                    id="cost_price"
+                    type="number"
+                    step="0.01"
+                    value={formData.cost_price}
+                    onChange={(e) => setFormData({ ...formData, cost_price: e.target.value })}
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="vendor">Vendor</Label>
+                  <Input
+                    id="vendor"
+                    value={formData.vendor}
+                    onChange={(e) => setFormData({ ...formData, vendor: e.target.value })}
+                    placeholder="Enter vendor name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="tax_code">Tax Code</Label>
+                  <Input
+                    id="tax_code"
+                    value={formData.tax_code}
+                    onChange={(e) => setFormData({ ...formData, tax_code: e.target.value })}
+                    placeholder="Enter tax code"
+                  />
+                </div>
+              </div>
+
+              {formData.item_type === 'product' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="inventory_qty">Inventory Quantity</Label>
+                    <Input
+                      id="inventory_qty"
+                      type="number"
+                      value={formData.inventory_qty}
+                      onChange={(e) => setFormData({ ...formData, inventory_qty: e.target.value })}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="min_stock_level">Min Stock Level</Label>
+                    <Input
+                      id="min_stock_level"
+                      type="number"
+                      value={formData.min_stock_level}
+                      onChange={(e) => setFormData({ ...formData, min_stock_level: e.target.value })}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_active"
+                  checked={formData.is_active}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                />
+                <Label htmlFor="is_active">Active</Label>
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button onClick={editingItem ? handleUpdateItem : handleCreateItem} className="flex-1">
+                  {editingItem ? 'Update Item' : 'Create Item'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setEditingItem(null);
+                    setShowCreateDialog(false);
+                    resetForm();
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
-          </div>
-        </DialogContent>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
