@@ -368,14 +368,14 @@ export const useAutomationEngine = () => {
     switch (action) {
       case 'create_record':
         return await supabase
-          .from(params.table)
+          .from('clients' as any)
           .insert(replaceVariables(params.data, context))
           .select()
           .single();
 
       case 'update_record':
         return await supabase
-          .from(params.table)
+          .from('clients' as any)
           .update(replaceVariables(params.data, context))
           .eq(params.id_field, replaceVariables(params.id_value, context))
           .select();
@@ -519,7 +519,7 @@ export const useAutomationEngine = () => {
         .from('workflow_executions')
         .update({
           rollback_completed: true,
-          execution_log: executionLog
+          execution_log: JSON.stringify(executionLog)
         })
         .eq('id', executionId);
 
@@ -530,15 +530,24 @@ export const useAutomationEngine = () => {
 
   const updateWorkflowStats = async (workflowId: string, success: boolean): Promise<void> => {
     try {
+      // Get current stats first
+      const { data: current } = await supabase
+        .from('automation_workflows')
+        .select('execution_count, success_count, failure_count')
+        .eq('id', workflowId)
+        .single();
+
+      if (!current) return;
+
       const updates: any = {
-        execution_count: supabase.rpc('increment', { x: 1 }),
+        execution_count: (current.execution_count || 0) + 1,
         last_executed_at: new Date().toISOString()
       };
 
       if (success) {
-        updates.success_count = supabase.rpc('increment', { x: 1 });
+        updates.success_count = (current.success_count || 0) + 1;
       } else {
-        updates.failure_count = supabase.rpc('increment', { x: 1 });
+        updates.failure_count = (current.failure_count || 0) + 1;
       }
 
       await supabase
@@ -548,6 +557,7 @@ export const useAutomationEngine = () => {
     } catch (error) {
       console.error('Failed to update workflow stats:', error);
     }
+  };
   };
 
   const replaceVariables = (template: any, context: any): any => {

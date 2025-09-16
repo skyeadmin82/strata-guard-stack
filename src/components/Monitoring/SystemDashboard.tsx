@@ -23,8 +23,7 @@ const SystemDashboard: React.FC = () => {
   const { toast } = useToast();
   const { 
     dashboard, 
-    alerts, 
-    runMonitorChecks, 
+    runSystemCheck, 
     acknowledgeAlert, 
     resolveAlert,
     isMonitoring 
@@ -52,7 +51,7 @@ const SystemDashboard: React.FC = () => {
   };
 
   const handleAcknowledgeAlert = async (alertId: string) => {
-    const result = await acknowledgeAlert(alertId, 'Acknowledged by user');
+    const result = await acknowledgeAlert(alertId);
     if (result.success) {
       setSelectedAlert(null);
     }
@@ -170,7 +169,7 @@ const SystemDashboard: React.FC = () => {
           </TabsList>
           
           <Button 
-            onClick={() => runMonitorChecks()} 
+            onClick={() => runSystemCheck()} 
             disabled={isMonitoring}
             className="flex items-center gap-2"
           >
@@ -341,7 +340,7 @@ const SystemDashboard: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Button 
                   variant="outline" 
-                  onClick={() => runMonitorChecks()}
+                  onClick={() => runSystemCheck()}
                   disabled={isMonitoring}
                   className="h-20 flex flex-col items-center justify-center gap-2"
                 >

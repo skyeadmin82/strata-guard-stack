@@ -164,10 +164,10 @@ export const usePredictiveAnalytics = () => {
           .insert({
             tenant_id: tenantId,
             model_id: modelId,
+            prediction_type: model.model_type || 'time_series',
             predicted_value: predictionResult.value,
             confidence_score: predictionResult.confidence,
-            input_data: inputFeatures,
-            fallback_used: predictionResult.fallbackUsed || false
+            input_data: inputFeatures
           })
           .select()
           .single();
